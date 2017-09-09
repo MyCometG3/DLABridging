@@ -1,0 +1,491 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		164C828A1F514632001208BD /* DLABridging.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82881F514632001208BD /* DLABridging.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82C81F514687001208BD /* DeckLinkAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82A41F514687001208BD /* DeckLinkAPI.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82C91F514687001208BD /* DeckLinkAPIConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82A51F514687001208BD /* DeckLinkAPIConfiguration.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82CA1F514687001208BD /* DeckLinkAPIDeckControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82A61F514687001208BD /* DeckLinkAPIDeckControl.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82CB1F514687001208BD /* DeckLinkAPIDiscovery.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82A71F514687001208BD /* DeckLinkAPIDiscovery.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82CC1F514687001208BD /* DeckLinkAPIDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 164C82A81F514687001208BD /* DeckLinkAPIDispatch.cpp */; };
+		164C82CD1F514687001208BD /* DeckLinkAPIModes.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82A91F514687001208BD /* DeckLinkAPIModes.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82CE1F514687001208BD /* DeckLinkAPIStreaming.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AA1F514687001208BD /* DeckLinkAPIStreaming.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82CF1F514687001208BD /* DeckLinkAPITypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AB1F514687001208BD /* DeckLinkAPITypes.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82D01F514687001208BD /* DeckLinkAPIVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AC1F514687001208BD /* DeckLinkAPIVersion.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		164C82D11F514687001208BD /* DLABAudioSetting+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */; };
+		164C82D21F514687001208BD /* DLABAudioSetting.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AF1F514687001208BD /* DLABAudioSetting.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82D31F514687001208BD /* DLABAudioSetting.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82B01F514687001208BD /* DLABAudioSetting.mm */; };
+		164C82D41F514687001208BD /* DLABBrowser+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82B11F514687001208BD /* DLABBrowser+Internal.h */; };
+		164C82D51F514687001208BD /* DLABBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82B21F514687001208BD /* DLABBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82D61F514687001208BD /* DLABBrowser.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82B31F514687001208BD /* DLABBrowser.mm */; };
+		164C82D71F514687001208BD /* DLABConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82B41F514687001208BD /* DLABConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82D81F514687001208BD /* DLABDevice+Input.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82B51F514687001208BD /* DLABDevice+Input.mm */; };
+		164C82D91F514687001208BD /* DLABDevice+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82B61F514687001208BD /* DLABDevice+Internal.h */; };
+		164C82DA1F514687001208BD /* DLABDevice+Output.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82B71F514687001208BD /* DLABDevice+Output.mm */; };
+		164C82DB1F514687001208BD /* DLABDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82B81F514687001208BD /* DLABDevice.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82DC1F514687001208BD /* DLABDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82B91F514687001208BD /* DLABDevice.mm */; };
+		164C82DD1F514687001208BD /* DLABDeviceNotificationCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82BA1F514687001208BD /* DLABDeviceNotificationCallback.h */; };
+		164C82DE1F514687001208BD /* DLABDeviceNotificationCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82BB1F514687001208BD /* DLABDeviceNotificationCallback.mm */; };
+		164C82DF1F514687001208BD /* DLABInputCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82BC1F514687001208BD /* DLABInputCallback.h */; };
+		164C82E01F514687001208BD /* DLABInputCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82BD1F514687001208BD /* DLABInputCallback.mm */; };
+		164C82E11F514687001208BD /* DLABNotificationCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82BE1F514687001208BD /* DLABNotificationCallback.h */; };
+		164C82E21F514687001208BD /* DLABNotificationCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82BF1F514687001208BD /* DLABNotificationCallback.mm */; };
+		164C82E31F514687001208BD /* DLABOutputCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82C01F514687001208BD /* DLABOutputCallback.h */; };
+		164C82E41F514687001208BD /* DLABOutputCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82C11F514687001208BD /* DLABOutputCallback.mm */; };
+		164C82E51F514687001208BD /* DLABTimecodeSetting+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82C21F514687001208BD /* DLABTimecodeSetting+Internal.h */; };
+		164C82E61F514687001208BD /* DLABTimecodeSetting.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82C31F514687001208BD /* DLABTimecodeSetting.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82E71F514687001208BD /* DLABTimecodeSetting.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82C41F514687001208BD /* DLABTimecodeSetting.mm */; };
+		164C82E81F514687001208BD /* DLABVideoSetting+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82C51F514687001208BD /* DLABVideoSetting+Internal.h */; };
+		164C82E91F514687001208BD /* DLABVideoSetting.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82C61F514687001208BD /* DLABVideoSetting.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164C82EA1F514687001208BD /* DLABVideoSetting.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164C82C71F514687001208BD /* DLABVideoSetting.mm */; };
+		164C82EE1F51488A001208BD /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 164C82ED1F51488A001208BD /* CoreVideo.framework */; };
+		164C82F01F514898001208BD /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 164C82EF1F514898001208BD /* CoreMedia.framework */; };
+		164C82F21F5148E3001208BD /* DeckLinkAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 164C82F11F5148E3001208BD /* DeckLinkAPI.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		164C82851F514632001208BD /* DLABridging.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DLABridging.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		164C82881F514632001208BD /* DLABridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABridging.h; sourceTree = "<group>"; };
+		164C82891F514632001208BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		164C82A41F514687001208BD /* DeckLinkAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPI.h; sourceTree = "<group>"; };
+		164C82A51F514687001208BD /* DeckLinkAPIConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIConfiguration.h; sourceTree = "<group>"; };
+		164C82A61F514687001208BD /* DeckLinkAPIDeckControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIDeckControl.h; sourceTree = "<group>"; };
+		164C82A71F514687001208BD /* DeckLinkAPIDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIDiscovery.h; sourceTree = "<group>"; };
+		164C82A81F514687001208BD /* DeckLinkAPIDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeckLinkAPIDispatch.cpp; sourceTree = "<group>"; };
+		164C82A91F514687001208BD /* DeckLinkAPIModes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIModes.h; sourceTree = "<group>"; };
+		164C82AA1F514687001208BD /* DeckLinkAPIStreaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIStreaming.h; sourceTree = "<group>"; };
+		164C82AB1F514687001208BD /* DeckLinkAPITypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPITypes.h; sourceTree = "<group>"; };
+		164C82AC1F514687001208BD /* DeckLinkAPIVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVersion.h; sourceTree = "<group>"; };
+		164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLABAudioSetting+Internal.h"; sourceTree = "<group>"; };
+		164C82AF1F514687001208BD /* DLABAudioSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABAudioSetting.h; sourceTree = "<group>"; };
+		164C82B01F514687001208BD /* DLABAudioSetting.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = DLABAudioSetting.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B11F514687001208BD /* DLABBrowser+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "DLABBrowser+Internal.h"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B21F514687001208BD /* DLABBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = DLABBrowser.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B31F514687001208BD /* DLABBrowser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = DLABBrowser.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B41F514687001208BD /* DLABConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = DLABConstants.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B51F514687001208BD /* DLABDevice+Input.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = "DLABDevice+Input.mm"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B61F514687001208BD /* DLABDevice+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "DLABDevice+Internal.h"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B71F514687001208BD /* DLABDevice+Output.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = "DLABDevice+Output.mm"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B81F514687001208BD /* DLABDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = DLABDevice.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82B91F514687001208BD /* DLABDevice.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = DLABDevice.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82BA1F514687001208BD /* DLABDeviceNotificationCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABDeviceNotificationCallback.h; sourceTree = "<group>"; };
+		164C82BB1F514687001208BD /* DLABDeviceNotificationCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABDeviceNotificationCallback.mm; sourceTree = "<group>"; };
+		164C82BC1F514687001208BD /* DLABInputCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABInputCallback.h; sourceTree = "<group>"; };
+		164C82BD1F514687001208BD /* DLABInputCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABInputCallback.mm; sourceTree = "<group>"; };
+		164C82BE1F514687001208BD /* DLABNotificationCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABNotificationCallback.h; sourceTree = "<group>"; };
+		164C82BF1F514687001208BD /* DLABNotificationCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABNotificationCallback.mm; sourceTree = "<group>"; };
+		164C82C01F514687001208BD /* DLABOutputCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABOutputCallback.h; sourceTree = "<group>"; };
+		164C82C11F514687001208BD /* DLABOutputCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABOutputCallback.mm; sourceTree = "<group>"; };
+		164C82C21F514687001208BD /* DLABTimecodeSetting+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLABTimecodeSetting+Internal.h"; sourceTree = "<group>"; };
+		164C82C31F514687001208BD /* DLABTimecodeSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABTimecodeSetting.h; sourceTree = "<group>"; };
+		164C82C41F514687001208BD /* DLABTimecodeSetting.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABTimecodeSetting.mm; sourceTree = "<group>"; };
+		164C82C51F514687001208BD /* DLABVideoSetting+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "DLABVideoSetting+Internal.h"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82C61F514687001208BD /* DLABVideoSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = DLABVideoSetting.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82C71F514687001208BD /* DLABVideoSetting.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = DLABVideoSetting.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		164C82ED1F51488A001208BD /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		164C82EF1F514898001208BD /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		164C82F11F5148E3001208BD /* DeckLinkAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeckLinkAPI.framework; path = ../../../../../../Library/Frameworks/DeckLinkAPI.framework; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		164C82811F514632001208BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				164C82F21F5148E3001208BD /* DeckLinkAPI.framework in Frameworks */,
+				164C82F01F514898001208BD /* CoreMedia.framework in Frameworks */,
+				164C82EE1F51488A001208BD /* CoreVideo.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		164C827B1F514632001208BD = {
+			isa = PBXGroup;
+			children = (
+				164C82A31F514687001208BD /* DeckLink API */,
+				164C82AD1F514687001208BD /* DeckLink API Bridging */,
+				164C82871F514632001208BD /* DLABridging */,
+				164C82861F514632001208BD /* Products */,
+				164C82EC1F51488A001208BD /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		164C82861F514632001208BD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				164C82851F514632001208BD /* DLABridging.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		164C82871F514632001208BD /* DLABridging */ = {
+			isa = PBXGroup;
+			children = (
+				164C82881F514632001208BD /* DLABridging.h */,
+				164C82891F514632001208BD /* Info.plist */,
+			);
+			path = DLABridging;
+			sourceTree = "<group>";
+		};
+		164C82A31F514687001208BD /* DeckLink API */ = {
+			isa = PBXGroup;
+			children = (
+				164C82A41F514687001208BD /* DeckLinkAPI.h */,
+				164C82A51F514687001208BD /* DeckLinkAPIConfiguration.h */,
+				164C82A61F514687001208BD /* DeckLinkAPIDeckControl.h */,
+				164C82A71F514687001208BD /* DeckLinkAPIDiscovery.h */,
+				164C82A81F514687001208BD /* DeckLinkAPIDispatch.cpp */,
+				164C82A91F514687001208BD /* DeckLinkAPIModes.h */,
+				164C82AA1F514687001208BD /* DeckLinkAPIStreaming.h */,
+				164C82AB1F514687001208BD /* DeckLinkAPITypes.h */,
+				164C82AC1F514687001208BD /* DeckLinkAPIVersion.h */,
+			);
+			path = "DeckLink API";
+			sourceTree = "<group>";
+		};
+		164C82AD1F514687001208BD /* DeckLink API Bridging */ = {
+			isa = PBXGroup;
+			children = (
+				164C82AF1F514687001208BD /* DLABAudioSetting.h */,
+				164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */,
+				164C82B01F514687001208BD /* DLABAudioSetting.mm */,
+				164C82B21F514687001208BD /* DLABBrowser.h */,
+				164C82B11F514687001208BD /* DLABBrowser+Internal.h */,
+				164C82B31F514687001208BD /* DLABBrowser.mm */,
+				164C82B41F514687001208BD /* DLABConstants.h */,
+				164C82B81F514687001208BD /* DLABDevice.h */,
+				164C82B61F514687001208BD /* DLABDevice+Internal.h */,
+				164C82B91F514687001208BD /* DLABDevice.mm */,
+				164C82B51F514687001208BD /* DLABDevice+Input.mm */,
+				164C82B71F514687001208BD /* DLABDevice+Output.mm */,
+				164C82C31F514687001208BD /* DLABTimecodeSetting.h */,
+				164C82C21F514687001208BD /* DLABTimecodeSetting+Internal.h */,
+				164C82C41F514687001208BD /* DLABTimecodeSetting.mm */,
+				164C82C61F514687001208BD /* DLABVideoSetting.h */,
+				164C82C51F514687001208BD /* DLABVideoSetting+Internal.h */,
+				164C82C71F514687001208BD /* DLABVideoSetting.mm */,
+				164C82EB1F5146ED001208BD /* C++ class */,
+			);
+			path = "DeckLink API Bridging";
+			sourceTree = "<group>";
+		};
+		164C82EB1F5146ED001208BD /* C++ class */ = {
+			isa = PBXGroup;
+			children = (
+				164C82BA1F514687001208BD /* DLABDeviceNotificationCallback.h */,
+				164C82BB1F514687001208BD /* DLABDeviceNotificationCallback.mm */,
+				164C82BC1F514687001208BD /* DLABInputCallback.h */,
+				164C82BD1F514687001208BD /* DLABInputCallback.mm */,
+				164C82BE1F514687001208BD /* DLABNotificationCallback.h */,
+				164C82BF1F514687001208BD /* DLABNotificationCallback.mm */,
+				164C82C01F514687001208BD /* DLABOutputCallback.h */,
+				164C82C11F514687001208BD /* DLABOutputCallback.mm */,
+			);
+			name = "C++ class";
+			sourceTree = "<group>";
+		};
+		164C82EC1F51488A001208BD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				164C82F11F5148E3001208BD /* DeckLinkAPI.framework */,
+				164C82EF1F514898001208BD /* CoreMedia.framework */,
+				164C82ED1F51488A001208BD /* CoreVideo.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		164C82821F514632001208BD /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				164C828A1F514632001208BD /* DLABridging.h in Headers */,
+				164C82D51F514687001208BD /* DLABBrowser.h in Headers */,
+				164C82D71F514687001208BD /* DLABConstants.h in Headers */,
+				164C82DB1F514687001208BD /* DLABDevice.h in Headers */,
+				164C82D21F514687001208BD /* DLABAudioSetting.h in Headers */,
+				164C82E61F514687001208BD /* DLABTimecodeSetting.h in Headers */,
+				164C82E91F514687001208BD /* DLABVideoSetting.h in Headers */,
+				164C82C81F514687001208BD /* DeckLinkAPI.h in Headers */,
+				164C82C91F514687001208BD /* DeckLinkAPIConfiguration.h in Headers */,
+				164C82CA1F514687001208BD /* DeckLinkAPIDeckControl.h in Headers */,
+				164C82CB1F514687001208BD /* DeckLinkAPIDiscovery.h in Headers */,
+				164C82CD1F514687001208BD /* DeckLinkAPIModes.h in Headers */,
+				164C82CE1F514687001208BD /* DeckLinkAPIStreaming.h in Headers */,
+				164C82CF1F514687001208BD /* DeckLinkAPITypes.h in Headers */,
+				164C82D01F514687001208BD /* DeckLinkAPIVersion.h in Headers */,
+				164C82D11F514687001208BD /* DLABAudioSetting+Internal.h in Headers */,
+				164C82D41F514687001208BD /* DLABBrowser+Internal.h in Headers */,
+				164C82E51F514687001208BD /* DLABTimecodeSetting+Internal.h in Headers */,
+				164C82E81F514687001208BD /* DLABVideoSetting+Internal.h in Headers */,
+				164C82D91F514687001208BD /* DLABDevice+Internal.h in Headers */,
+				164C82DD1F514687001208BD /* DLABDeviceNotificationCallback.h in Headers */,
+				164C82DF1F514687001208BD /* DLABInputCallback.h in Headers */,
+				164C82E11F514687001208BD /* DLABNotificationCallback.h in Headers */,
+				164C82E31F514687001208BD /* DLABOutputCallback.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		164C82841F514632001208BD /* DLABridging */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 164C828D1F514632001208BD /* Build configuration list for PBXNativeTarget "DLABridging" */;
+			buildPhases = (
+				164C82801F514632001208BD /* Sources */,
+				164C82811F514632001208BD /* Frameworks */,
+				164C82821F514632001208BD /* Headers */,
+				164C82831F514632001208BD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DLABridging;
+			productName = DLABridging;
+			productReference = 164C82851F514632001208BD /* DLABridging.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		164C827C1F514632001208BD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0830;
+				ORGANIZATIONNAME = MyCometG3;
+				TargetAttributes = {
+					164C82841F514632001208BD = {
+						CreatedOnToolsVersion = 8.3.3;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 164C827F1F514632001208BD /* Build configuration list for PBXProject "DLABridging" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 164C827B1F514632001208BD;
+			productRefGroup = 164C82861F514632001208BD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				164C82841F514632001208BD /* DLABridging */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		164C82831F514632001208BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		164C82801F514632001208BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				164C82D31F514687001208BD /* DLABAudioSetting.mm in Sources */,
+				164C82E21F514687001208BD /* DLABNotificationCallback.mm in Sources */,
+				164C82DA1F514687001208BD /* DLABDevice+Output.mm in Sources */,
+				164C82EA1F514687001208BD /* DLABVideoSetting.mm in Sources */,
+				164C82DC1F514687001208BD /* DLABDevice.mm in Sources */,
+				164C82E41F514687001208BD /* DLABOutputCallback.mm in Sources */,
+				164C82D81F514687001208BD /* DLABDevice+Input.mm in Sources */,
+				164C82E01F514687001208BD /* DLABInputCallback.mm in Sources */,
+				164C82DE1F514687001208BD /* DLABDeviceNotificationCallback.mm in Sources */,
+				164C82CC1F514687001208BD /* DeckLinkAPIDispatch.cpp in Sources */,
+				164C82D61F514687001208BD /* DLABBrowser.mm in Sources */,
+				164C82E71F514687001208BD /* DLABTimecodeSetting.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		164C828B1F514632001208BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		164C828C1F514632001208BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		164C828E1F514632001208BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = DLABridging/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.DLABridging;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		164C828F1F514632001208BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = DLABridging/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mycometg3.DLABridging;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		164C827F1F514632001208BD /* Build configuration list for PBXProject "DLABridging" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				164C828B1F514632001208BD /* Debug */,
+				164C828C1F514632001208BD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		164C828D1F514632001208BD /* Build configuration list for PBXNativeTarget "DLABridging" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				164C828E1F514632001208BD /* Debug */,
+				164C828F1F514632001208BD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 164C827C1F514632001208BD /* Project object */;
+}
