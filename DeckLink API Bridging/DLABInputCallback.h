@@ -43,6 +43,6 @@ public:
     ULONG Release();
     
 private:
-    id<DLABInputCallbackDelegate> delegate;
+    __weak id<DLABInputCallbackDelegate> delegate;
     int32_t refCount;
 };

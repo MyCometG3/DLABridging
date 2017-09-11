@@ -48,6 +48,6 @@ public:
     ULONG Release();
     
 private:
-    id<DLABOutputCallbackDelegate> delegate;
+    __weak id<DLABOutputCallbackDelegate> delegate;
     int32_t refCount;
 };

@@ -43,6 +43,6 @@ public:
     ULONG Release();
     
 private:
-    id<DLABDeviceNotificationCallbackDelegate> delegate;
+    __weak id<DLABDeviceNotificationCallbackDelegate> delegate;
     int32_t refCount;
 };
