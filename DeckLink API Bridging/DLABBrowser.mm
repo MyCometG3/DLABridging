@@ -195,21 +195,27 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     if (iterator) {
         IDeckLink* newDeckLink = NULL;
         while (iterator->Next(&newDeckLink) == S_OK) {
-            // Avoid duplication
-            if ([self deviceWithDeckLink:newDeckLink])
-                continue;
+            DLABDevice* newDevice = nil;
             
-            DLABDevice* newDevice = [[DLABDevice alloc] initWithDeckLink:newDeckLink];
-            if (!newDevice)
-                continue;
+            // Create new DLABDevice from IDeckLink obj
+            if ([self deviceWithDeckLink:newDeckLink] == nil) {
+                newDevice = [[DLABDevice alloc] initWithDeckLink:newDeckLink];
+            }
             
-            BOOL captureFlag = ((newDirection & DLABVideoIOSupportCapture) &&
-                                newDevice.supportCaptureW);
-            BOOL playbackFlag = ((newDirection & DLABVideoIOSupportPlayback) &&
-                                 newDevice.supportPlaybackW);
+            // Release source IDeckLink obj
+            newDeckLink->Release();
             
-            if (captureFlag || playbackFlag) {
-                [newDevices addObject:newDevice];
+            if (newDevice) {
+                // Check capability
+                BOOL captureFlag = ((newDirection & DLABVideoIOSupportCapture) &&
+                                    newDevice.supportCaptureW);
+                BOOL playbackFlag = ((newDirection & DLABVideoIOSupportPlayback) &&
+                                     newDevice.supportPlaybackW);
+                
+                // Register as new device
+                if (captureFlag || playbackFlag) {
+                    [newDevices addObject:newDevice];
+                }
             }
         }
         iterator->Release();
