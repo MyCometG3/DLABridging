@@ -15,7 +15,7 @@
 - (instancetype) init
 {
     NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithDisplayModeObj:));
+    NSString *selectorString = NSStringFromSelector(@selector(initWithSampleType:channelCount:sampleRate:));
     [NSException raise:NSGenericException
                 format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
     return nil;
