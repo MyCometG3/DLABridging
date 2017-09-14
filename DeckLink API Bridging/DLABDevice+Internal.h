@@ -37,8 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
     NSMutableSet* outputVideoFrameIdleSet;
 }
 
-- (nullable instancetype) init NS_UNAVAILABLE;
-
 /**
  Create DLABDevice instance from IDeckLink object.
 

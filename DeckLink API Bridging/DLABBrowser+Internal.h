@@ -23,8 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
     void* browserQueueKey;
 }
 
-- (nullable instancetype) init;
-
 /**
  NSMutableArray of DLABDevice objects.
  */

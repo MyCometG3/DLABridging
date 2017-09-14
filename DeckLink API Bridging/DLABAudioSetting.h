@@ -36,6 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
  | 32bit |16channel | 64bytes |
  */
 @interface DLABAudioSetting : NSObject <NSCopying>
+
+- (instancetype) init NS_UNAVAILABLE;
+
 /* =================================================================================== */
 // MARK: Property - Ready on init
 /* =================================================================================== */

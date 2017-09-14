@@ -204,6 +204,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface DLABDevice : NSObject
 
+- (instancetype) init NS_UNAVAILABLE;
+
 /* =================================================================================== */
 // MARK: (Public) - Readonly
 /* =================================================================================== */

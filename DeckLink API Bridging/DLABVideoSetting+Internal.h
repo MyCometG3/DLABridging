@@ -15,8 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DLABVideoSetting ()
 
-- (nullable instancetype) init NS_UNAVAILABLE;
-
 /**
  Create DLABVideoSetting reference instance from IDeckLinkDisplayMode Object.
 

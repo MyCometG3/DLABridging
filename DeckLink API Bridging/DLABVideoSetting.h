@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface DLABVideoSetting : NSObject <NSCopying>
 
+- (instancetype) init NS_UNAVAILABLE;
+
 /* =================================================================================== */
 // MARK: Property - Ready on init
 /* =================================================================================== */

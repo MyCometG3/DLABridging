@@ -15,8 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DLABAudioSetting ()
 
-- (nullable instancetype) init NS_UNAVAILABLE;
-
 /**
  Create DLABAudioSetting instance.
 
