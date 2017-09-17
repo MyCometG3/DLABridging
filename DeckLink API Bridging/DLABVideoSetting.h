@@ -165,6 +165,41 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL) buildVideoFormatDescription;
 
+/**
+ Add clean aperture (clap) VideoFormatDescriptionExtension to CVPixelBuffer.
+ See kCMFormatDescriptionExtension_CleanAperture.
+
+ @param clapWidthN Numerator of kCMFormatDescriptionKey_CleanApertureWidthRational
+ @param clapWidthD Denominator of kCMFormatDescriptionKey_CleanApertureWidthRational
+ @param clapHeightN Numerator of kCMFormatDescriptionKey_CleanApertureHeightRational
+ @param clapHeightD Denominator of kCMFormatDescriptionKey_CleanApertureHeightRational
+ @param clapHOffsetN Numerator of kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational
+ @param clapHOffsetD Denominator of kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational
+ @param clapVOffsetN Numerator of kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational
+ @param clapVOffsetD Denominator of kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational
+ @return YES if successfully populated. NO if failed with supplied parameters.
+ */
+- (BOOL) addClapExtOfWidthN:(int32_t)clapWidthN
+                     widthD:(int32_t)clapWidthD
+                    heightN:(int32_t)clapHeightN
+                    heightD:(int32_t)clapHeightD
+                   hOffsetN:(int32_t)clapHOffsetN
+                   hOffsetD:(int32_t)clapHOffsetD
+                   vOffsetN:(int32_t)clapVOffsetN
+                   vOffsetD:(int32_t)clapVOffsetD
+                      error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Add pixel aspect ratio (pasp) VideoFormatDescriptionExtension to CVPixelBuffer.
+ See kCMFormatDescriptionExtension_PixelAspectRatio.
+ 
+ @param paspHSpacing Value of kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing
+ @param paspVSpacing Value of kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing
+ @return YES if successfully populated. NO if failed with supplied parameters.
+ */
+- (BOOL) addPaspExtOfHSpacing:(uint32_t)paspHSpacing
+                     vSpacing:(uint32_t)paspVSpacing
+                        error:(NSError * _Nullable * _Nullable)error;
 @end
 
 NS_ASSUME_NONNULL_END

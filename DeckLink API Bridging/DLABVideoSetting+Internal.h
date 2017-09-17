@@ -52,6 +52,24 @@ NS_ASSUME_NONNULL_BEGIN
                               displayModeSupport:(BMDDisplayModeSupport)displayModeSupport;
 
 /* =================================================================================== */
+// MARK: - (Private) - error helper
+/* =================================================================================== */
+
+/**
+ Utility method to fill (NSError * _Nullable * _Nullable)
+ 
+ @param description string for NSLocalizedDescriptionKey
+ @param failureReason string for NSLocalizedFailureReasonErrorKey
+ @param result error code
+ @param error pointer to (NSError*)
+ @return YES if no error, NO if failed
+ */
+- (BOOL) post:(nullable NSString*)description
+       reason:(nullable NSString*)failureReason
+         code:(NSInteger)result
+           to:(NSError * _Nullable * _Nullable)error;
+
+/* =================================================================================== */
 // MARK: Property - Ready on init
 /* =================================================================================== */
 
@@ -127,6 +145,64 @@ NS_ASSUME_NONNULL_BEGIN
  Convenience property if preferred timecode type is RP188.
  */
 @property (nonatomic, assign) BOOL useRP188W;
+
+/* =================================================================================== */
+// MARK: Property - Ready when added
+/* =================================================================================== */
+
+// clap extension
+
+/**
+ Yes if clean aperture (clap) is ready.
+ */
+@property (nonatomic, assign) BOOL clapReady;
+/**
+ Numerator of kCMFormatDescriptionKey_CleanApertureWidthRational.
+ */
+@property (nonatomic, assign) int32_t clapWidthN;
+/**
+ Denominator of kCMFormatDescriptionKey_CleanApertureWidthRational.
+ */
+@property (nonatomic, assign) int32_t clapWidthD;
+/**
+ Numerator of kCMFormatDescriptionKey_CleanApertureHeightRational.
+ */
+@property (nonatomic, assign) int32_t clapHeightN;
+/**
+ Denominator of kCMFormatDescriptionKey_CleanApertureHeightRational.
+ */
+@property (nonatomic, assign) int32_t clapHeightD;
+/**
+ Numerator of kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational.
+ */
+@property (nonatomic, assign) int32_t clapHOffsetN;
+/**
+ Denominator of kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational.
+ */
+@property (nonatomic, assign) int32_t clapHOffsetD;
+/**
+ Numerator of kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational.
+ */
+@property (nonatomic, assign) int32_t clapVOffsetN;
+/**
+ Denominator of kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational.
+ */
+@property (nonatomic, assign) int32_t clapVOffsetD;
+
+// pasp extension
+
+/**
+ Yes if pixel aspect ratio (pasp) is ready.
+ */
+@property (nonatomic, assign) BOOL paspReady;
+/**
+ Value of kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing
+ */
+@property (nonatomic, assign) uint32_t paspHSpacing;
+/**
+ Value of kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing
+ */
+@property (nonatomic, assign) uint32_t paspVSpacing;
 
 /* =================================================================================== */
 // MARK: Property - Ready on enabled

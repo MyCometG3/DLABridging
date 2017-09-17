@@ -178,6 +178,20 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     if (!( self.useVITCW == object.useVITCW )) return NO;
     if (!( self.useRP188W == object.useRP188W )) return NO;
     
+    if (!( self.clapReady == object.clapReady )) return NO;
+    if (!( self.clapWidthN == object.clapWidthN )) return NO;
+    if (!( self.clapWidthD == object.clapWidthD )) return NO;
+    if (!( self.clapHeightN == object.clapHeightN )) return NO;
+    if (!( self.clapHeightD == object.clapHeightD )) return NO;
+    if (!( self.clapHOffsetN == object.clapHOffsetN )) return NO;
+    if (!( self.clapHOffsetD == object.clapHOffsetD )) return NO;
+    if (!( self.clapVOffsetN == object.clapVOffsetN )) return NO;
+    if (!( self.clapVOffsetD == object.clapVOffsetD )) return NO;
+    
+    if (!( self.paspReady == object.paspReady )) return NO;
+    if (!( self.paspHSpacing == object.paspHSpacing )) return NO;
+    if (!( self.paspVSpacing == object.paspVSpacing )) return NO;
+    
     if (!( self.pixelFormatW == object.pixelFormatW )) return NO;
     if (!( self.inputFlagW == object.inputFlagW )) return NO;
     if (!( self.outputFlagW == object.outputFlagW )) return NO;
@@ -199,6 +213,21 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         obj.isHDW = self.isHDW;
         obj.useVITCW = self.useVITCW;
         obj.useRP188W = self.useRP188W;
+        
+        obj.clapReady = self.clapReady;
+        obj.clapWidthN = self.clapWidthN;
+        obj.clapWidthD = self.clapWidthD;
+        obj.clapHeightN = self.clapHeightN;
+        obj.clapHeightD = self.clapHeightD;
+        obj.clapHOffsetN = self.clapHOffsetN;
+        obj.clapHOffsetD = self.clapHOffsetD;
+        obj.clapVOffsetN = self.clapVOffsetN;
+        obj.clapVOffsetD = self.clapVOffsetD;
+        
+        obj.paspReady = self.paspReady;
+        obj.paspHSpacing = self.paspHSpacing;
+        obj.paspVSpacing = self.paspVSpacing;
+        
         obj.pixelFormatW = self.pixelFormatW;
         obj.inputFlagW = self.inputFlagW;
         obj.outputFlagW = self.outputFlagW;
@@ -211,6 +240,29 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         }
     }
     return obj;
+}
+
+/* =================================================================================== */
+// MARK: - (Private) - error helper
+/* =================================================================================== */
+
+- (BOOL) post:(NSString*)description
+       reason:(NSString*)failureReason
+         code:(NSInteger)result
+           to:(NSError**)error;
+{
+    if (error) {
+        if (!description) description = @"unknown description";
+        if (!failureReason) failureReason = @"unknown failureReason";
+        
+        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
+        NSInteger code = (NSInteger)result;
+        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
+                                   NSLocalizedFailureReasonErrorKey : failureReason,};
+        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
+        return YES;
+    }
+    return NO;
 }
 
 /* =================================================================================== */
@@ -404,6 +456,50 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
             }
         }
         
+        if (ready && self.clapReady) {
+            // Clean Aperture
+            NSString* keyClap = (__bridge NSString*)kCMFormatDescriptionExtension_CleanAperture;
+            
+            NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
+            NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
+            NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;
+            NSString* keyClapVOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational;
+            
+            NSNumber* clapWidthN = @(self.clapWidthN);
+            NSNumber* clapWidthD = @(self.clapWidthD);
+            NSNumber* clapHeightN = @(self.clapHeightN);
+            NSNumber* clapHeightD = @(self.clapHeightD);
+            NSNumber* clapHOffsetN = @(self.clapHOffsetN);
+            NSNumber* clapHOffsetD = @(self.clapHOffsetD);
+            NSNumber* clapVOffsetN = @(self.clapVOffsetN);
+            NSNumber* clapVOffsetD = @(self.clapVOffsetD);
+            
+            NSDictionary* valueClap = @{
+                                        keyClapWidthR   : @[clapWidthN, clapWidthD],
+                                        keyClapHeightR  : @[clapHeightN, clapHeightD],
+                                        keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
+                                        keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
+                                        };
+            extensions[keyClap] = valueClap;
+        }
+        
+        if (ready && self.paspReady) {
+            // Pixel Aspect Ratio
+            NSString* keyPasp = (__bridge NSString*)kCMFormatDescriptionExtension_PixelAspectRatio;
+            
+            NSString* keyPaspHSpacing = (__bridge NSString*)kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing;
+            NSString* keyPaspVSpacing = (__bridge NSString*)kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing;
+            
+            NSNumber* paspHSpacing = @(self.paspHSpacing);
+            NSNumber* paspVSpacing = @(self.paspVSpacing);
+            
+            NSDictionary* valuePasp = @{
+                                        keyPaspHSpacing : paspHSpacing,
+                                        keyPaspVSpacing : paspVSpacing,
+                                        };
+            extensions[keyPasp] = valuePasp;
+        }
+        
         if (ready) {
             // format name (either rgb or yuv related name)
             NSString* keyFormatName = (__bridge NSString*)kCMFormatDescriptionExtension_FormatName;
@@ -465,6 +561,76 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         return TRUE;
     } else {
         return FALSE;    // TODO handle err
+    }
+}
+
+- (BOOL) addClapExtOfWidthN:(int32_t)clapWidthN
+                     widthD:(int32_t)clapWidthD
+                    heightN:(int32_t)clapHeightN
+                    heightD:(int32_t)clapHeightD
+                   hOffsetN:(int32_t)clapHOffsetN
+                   hOffsetD:(int32_t)clapHOffsetD
+                   vOffsetN:(int32_t)clapVOffsetN
+                   vOffsetD:(int32_t)clapVOffsetD
+                      error:(NSError**)error
+{
+    NSParameterAssert(clapWidthD && clapHeightD && clapHOffsetD && clapVOffsetD);
+    
+    double visibleWidth = (double)clapWidthN/clapWidthD;
+    double visibleHeight = (double)clapHeightN/clapHeightD;
+    double hOffset = (double)clapHOffsetN/clapHOffsetD;
+    double vOffset = (double)clapVOffsetN/clapVOffsetD;
+    
+    double encWidth = (double)self.width;
+    double encHeight = (double)self.height;
+    double hFrame = (encWidth - visibleWidth) / 2.0;
+    double vFrame = (encHeight - visibleHeight) / 2.0;
+    
+    if (visibleWidth > 0.0 && visibleWidth <= encWidth &&
+        visibleHeight > 0.0 && visibleHeight <= encHeight &&
+        hOffset >= -hFrame && hOffset <= hFrame &&
+        vOffset >= -vFrame && vOffset <= vFrame)
+    {
+        self.clapWidthN = clapWidthN;     self.clapWidthD = clapWidthD;
+        self.clapHeightN = clapHeightN;   self.clapHeightD = clapHeightD;
+        self.clapHOffsetN = clapHOffsetN; self.clapHOffsetD = clapHOffsetD;
+        self.clapVOffsetN = clapVOffsetN; self.clapVOffsetD = clapVOffsetD;
+        self.clapReady = TRUE;
+        
+        if (self.videoFormatDescription) {
+            [self buildVideoFormatDescription];
+        }
+        return TRUE;
+    } else {
+        self.clapReady = FALSE;
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"Unsupported clap settins detected."
+              code:E_INVALIDARG
+                to:error];
+        return FALSE;
+    }
+}
+
+- (BOOL) addPaspExtOfHSpacing:(uint32_t)paspHSpacing
+                     vSpacing:(uint32_t)paspVSpacing
+                        error:(NSError**)error
+{
+    if (paspHSpacing > 0 && paspVSpacing > 0) {
+        self.paspHSpacing = paspHSpacing;
+        self.paspVSpacing = paspVSpacing;
+        self.paspReady = TRUE;
+        
+        if (self.videoFormatDescription) {
+            [self buildVideoFormatDescription];
+        }
+        return TRUE;
+    } else {
+        self.paspReady = FALSE;
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"Unsupported pasp settins detected."
+              code:E_INVALIDARG
+                to:error];
+        return FALSE;
     }
 }
 
