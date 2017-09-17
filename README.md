@@ -15,6 +15,7 @@ NOTE: This framework is under development.
     import Cocoa
     import DLABridging
     var device :DLABDevice? = nil
+    var running :Bool = false
 
     let browser = DLABBrowser()
     _ = browser.start()
@@ -35,28 +36,38 @@ NOTE: This framework is under development.
       try aSetting = device.createInputAudioSetting(of: .type16bitInteger,
                                                     channelCount: 2,
                                                     sampleRate: .rate48kHz)
+      if let vSetting = vSetting {
+        try vSetting.addClapExt(ofWidthN: 704, widthD: 1,
+                                heightN: 480, heightD: 1,
+                                hOffsetN: 4, hOffsetD: 1,
+                                vOffsetN: 0, vOffsetD: 1)
+        try vSetting.addPaspExt(ofHSpacing: 40,
+                                vSpacing: 33)
+      }
 
       if let vSetting = vSetting, let aSetting = aSetting, displayModeSupportFlag != .notSupported {
         device.inputDelegate = self
         try device.enableVideoInput(with: vSetting)
         try device.enableAudioInput(with: aSetting)
         try device.startStreams()
+        running = true
       }
     } catch {
-      Swift.print("ERROR!!")
+      print("ERROR!!")
     }
 ###### 3. Handle CMSampleBuffer (Video/Audio)
     public func processCapturedVideoSample(_ sampleBuffer: CMSampleBuffer) {
-      Swift.print("video")
+      print("video")
     }
     public func processCapturedAudioSample(_ sampleBuffer: CMSampleBuffer) {
-      Swift.print("audio")
+      print("audio")
     }
     public func processCapturedVideoSample(_ sampleBuffer: CMSampleBuffer,
                                            timecodeSetting setting: DLABTimecodeSetting) {
-      Swift.print("video/timecode")
+      print("video/timecode")
     }
 ###### 4. Stop input stream
+    running = false
     do {
       try device.stopStreams()
       try device.disableVideoInput()
@@ -64,7 +75,7 @@ NOTE: This framework is under development.
 
       try device.setInputScreenPreviewTo(nil)
     } catch {
-        Swift.print("ERROR!!")
+      print("ERROR!!")
     }
     device = nil
 
