@@ -97,6 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  CVSMPTETime struct support
+ Updating this will adjust dropFrame value.
  
  NOTE: negative component values are not supported
  */
@@ -111,14 +112,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience property to access if dropframe timecode is used
+ Updating this will adjust CVSMPTETimeType value.
  */
 @property (nonatomic, assign) BOOL dropFrame;
-
-/**
- Convenience property to access CVSMPTETimeType
- Some types are only defined in CoreAudio SMPTETime only = (**)
- */
-@property (nonatomic, assign) uint32_t smpteTimeType;
 
 /* =================================================================================== */
 // MARK: Public method - Conversion
@@ -130,6 +126,17 @@ NS_ASSUME_NONNULL_BEGIN
  @return NSString representation of timecode
  */
 - (NSString*)timecodeString;
+
+/**
+ Update CVSMPTETimeType according to DLABDisplayMode.
+ If you use either 2398/2400/2500/5000 modes, dropFrame will be turned off.
+
+ @param displayMode DLABDisplayMode to define proper CVSMPTETimeType value
+ @param error Error description if failed.
+ @return YES if successfully populated. NO if failed with supplied parameters.
+ */
+- (BOOL) updateCVSMPTETimeTypeUsing:(DLABDisplayMode)displayMode
+                              error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

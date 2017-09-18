@@ -157,6 +157,29 @@
 }
 
 /* =================================================================================== */
+// MARK: - (Private) - error helper
+/* =================================================================================== */
+
+- (BOOL) post:(NSString*)description
+       reason:(NSString*)failureReason
+         code:(NSInteger)result
+           to:(NSError**)error;
+{
+    if (error) {
+        if (!description) description = @"unknown description";
+        if (!failureReason) failureReason = @"unknown failureReason";
+        
+        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
+        NSInteger code = (NSInteger)result;
+        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
+                                   NSLocalizedFailureReasonErrorKey : failureReason,};
+        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
+        return YES;
+    }
+    return NO;
+}
+
+/* =================================================================================== */
 // MARK: - Property - Timecode components
 /* =================================================================================== */
 
@@ -288,6 +311,12 @@
         
         // update CVSMPTETimeType as DropFrame timecode
         switch (_smpteTime.type) {
+            case 2:
+            case 5:
+            case 8:
+            case 9:
+                // OK
+                break;
             case 3:                     // kSMPTETimeType30, kCVSMPTETimeType30
                 _smpteTime.type = 2;    // kSMPTETimeType30Drop, kCVSMPTETimeType30Drop
                 break;
@@ -301,6 +330,8 @@
                 _smpteTime.type = 9;    // kSMPTETimeType5994Drop (**)
                 break;
             default:
+                // TODO: invalid combination detected
+                _smpteTime.type = 5;    // Reset CVSMPTETimeType
                 break;
         }
     } else {
@@ -322,25 +353,10 @@
                 _smpteTime.type = 7;    // kSMPTETimeType5994 (**)
                 break;
             default:
+                // OK
                 break;
         }
     }
-}
-
-- (uint32_t) smpteTimeType
-{
-    uint32_t type = _smpteTime.type;
-    return type;
-}
-
-- (void) setSmpteTimeType:(uint32_t) newSmpteType
-{
-    // Create new CVSMPTETime struct
-    CVSMPTETime newSMPTETime = _smpteTime;
-    newSMPTETime.type = newSmpteType;
-
-    // Force update as is DropFrame or not
-    [self setSmpteTime:newSMPTETime];
 }
 
 /* =================================================================================== */
@@ -359,4 +375,98 @@
     return string;
 }
 
+// Update CVSMPTETimeType using DLABDisplayMode.
+
+- (BOOL) updateCVSMPTETimeTypeUsing:(DLABDisplayMode)displayMode
+                              error:(NSError * _Nullable * _Nullable)error
+{
+    // Update CVSMPTETimeType according to DLABDisplayMode.
+    // Some types are only defined in CoreAudio SMPTETime only = (**)
+    uint32_t type = 0;
+    {
+        BOOL err = NO;
+        switch (displayMode) {
+            case DLABDisplayModeHD1080p24:
+            case DLABDisplayMode2k24:
+            case DLABDisplayMode2kDCI24:
+            case DLABDisplayMode4K2160p24:
+            case DLABDisplayMode4kDCI24:
+                type = 0; break;    // kSMPTETimeType24, kCVSMPTETimeType24
+            case DLABDisplayModePAL:
+            case DLABDisplayModeHD1080p25:
+            case DLABDisplayModeHD1080i50:
+            case DLABDisplayMode2k25:
+            case DLABDisplayMode2kDCI25:
+            case DLABDisplayMode4K2160p25:
+            case DLABDisplayMode4kDCI25:
+                type = 1; break;    // kSMPTETimeType25, kCVSMPTETimeType25
+            case DLABDisplayModeHD1080p30:
+            case DLABDisplayModeHD1080i6000:
+            case DLABDisplayMode4K2160p30:
+                type = 3; break;    // kSMPTETimeType30, kCVSMPTETimeType30
+            case DLABDisplayModeNTSC:
+            case DLABDisplayModeNTSC2398:
+            case DLABDisplayModeHD1080p2997:
+            case DLABDisplayModeHD1080i5994:
+            case DLABDisplayMode4K2160p2997:
+                type = 4; break;    // kSMPTETimeType2997, kCVSMPTETimeType2997
+            case DLABDisplayModeHD720p60:
+            case DLABDisplayModeHD1080p6000:
+            case DLABDisplayMode4K2160p60:
+                type = 6; break;    // kSMPTETimeType60, kCVSMPTETimeType60
+            case DLABDisplayModeNTSCp:
+            case DLABDisplayModeHD720p5994:
+            case DLABDisplayModeHD1080p5994:
+            case DLABDisplayMode4K2160p5994:
+                type = 7; break;    // kSMPTETimeType5994, kCVSMPTETimeType5994
+            case DLABDisplayModePALp:
+            case DLABDisplayModeHD720p50:
+            case DLABDisplayModeHD1080p50:
+            case DLABDisplayMode4K2160p50:
+                type = 10; break;   // kSMPTETimeType50 (**)
+            case DLABDisplayModeHD1080p2398:
+            case DLABDisplayMode2k2398:
+            case DLABDisplayMode2kDCI2398:
+            case DLABDisplayMode4K2160p2398:
+            case DLABDisplayMode4kDCI2398:
+                type = 11; break;   // kSMPTETimeType2398 (**)
+            default:
+                err = YES; break;
+        }
+        if (err) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Unsupported displayMode setting detected."
+                  code:E_INVALIDARG
+                    to:error];
+            return NO;
+        }
+    }
+    
+    // update CVSMPTETimeType if DropFrame timecode is used
+    if (self.dropFrame) {
+        switch (type) {
+            case 3:                 // kSMPTETimeType30, kCVSMPTETimeType30
+                type = 2; break;    // kSMPTETimeType30Drop, kCVSMPTETimeType30Drop
+            case 4:                 // kSMPTETimeType2997, kCVSMPTETimeType2997
+                type = 5; break;    // kSMPTETimeType2997Drop, kCVSMPTETimeType2997Drop
+            case 6:                 // kSMPTETimeType60, kCVSMPTETimeType60
+                type = 8; break;    // kSMPTETimeType60Drop (**)
+            case 7:                 // kSMPTETimeType5994, kCVSMPTETimeType5994
+                type = 9; break;    // kSMPTETimeType5994Drop (**)
+            default:
+                // This displayMode is incompatible with dropFrame (2398/2400/2500/5000)
+                // DropFrame support will be turned off in [self setSmpteTime:newValue]
+                break;
+        }
+    }
+    
+    // Update with proper CVSMPTETimeType
+    // Create new CVSMPTETime struct
+    CVSMPTETime newSMPTETime = self.smpteTime;
+    newSMPTETime.type = type;
+    
+    // Force update as is DropFrame or not
+    [self setSmpteTime:newSMPTETime];
+    return YES;
+}
 @end
