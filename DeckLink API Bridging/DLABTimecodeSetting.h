@@ -44,12 +44,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Create DLABTimecode instance from CVSMPTETime struct.
 
- @param format Specify value of either RP188 family or VITC family.
- @param smpte CVSMPTETime stuct for each timecode value fields.
+ @param timecodeFormat Specify value of either RP188 family or VITC family.
+ @param cvSMPTETime CVSMPTETime stuct for each timecode value fields.
+ @param userBits Extra userBits(uint32_t) for timecode.
  @return Instance of DLABTimecode.
  */
-- (nullable instancetype) initWithTimecodeFormat:(DLABTimecodeFormat)format
-                                     CVSMPTETime:(CVSMPTETime)smpte;
+- (nullable instancetype) initWithTimecodeFormat:(DLABTimecodeFormat)timecodeFormat
+                                     cvSMPTETime:(CVSMPTETime)cvSMPTETime
+                                        userBits:(DLABTimecodeUserBits)userBits;
 
 /* =================================================================================== */
 // MARK: Property - Timecode components
@@ -106,6 +108,17 @@ NS_ASSUME_NONNULL_BEGIN
  BCD representation in uint32_t.
  */
 @property (nonatomic, assign) DLABTimecodeBCD timecodeBCD;
+
+/**
+ Convenience property to access if dropframe timecode is used
+ */
+@property (nonatomic, assign) BOOL dropFrame;
+
+/**
+ Convenience property to access CVSMPTETimeType
+ Some types are only defined in CoreAudio SMPTETime only = (**)
+ */
+@property (nonatomic, assign) uint32_t smpteTimeType;
 
 /* =================================================================================== */
 // MARK: Public method - Conversion

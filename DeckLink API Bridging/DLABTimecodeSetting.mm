@@ -61,9 +61,11 @@
     
     HRESULT result = E_FAIL;
     uint8_t hour = 0, minute = 0, second = 0, frame = 0;
+    DLABTimecodeFlag flag = DLABTimecodeFlagDefault;
     if (timecodeObj) {
         timecodeObj->AddRef();
         result = timecodeObj->GetComponents(&hour, &minute, &second, &frame);
+        flag = (DLABTimecodeFlag) timecodeObj->GetFlags();
         timecodeObj->Release();
     }
     if (result) return nil;
@@ -73,12 +75,13 @@
                                  minute:minute
                                  second:second
                                   frame:frame
-                                  flags:DLABTimecodeFlagDefault
-                               userBits:0];
+                                  flags:flag
+                               userBits:userBits];
 }
 
 - (instancetype) initWithTimecodeFormat:(DLABTimecodeFormat)format
-                                     CVSMPTETime:(CVSMPTETime)smpte
+                            cvSMPTETime:(CVSMPTETime)smpte
+                               userBits:(DLABTimecodeUserBits)userBits
 {
     NSParameterAssert(format);
     
@@ -91,13 +94,26 @@
     uint8_t second = (uint8_t) smpte.seconds;
     uint8_t frame = (uint8_t) smpte.frames;
     
+    DLABTimecodeFlag flag = DLABTimecodeFlagDefault;
+    switch (smpte.type) {
+        case 2: // kSMPTETimeType30Drop, kCVSMPTETimeType30Drop
+        case 5: // kSMPTETimeType2997Drop, kCVSMPTETimeType2997Drop
+        case 8: // kSMPTETimeType60Drop
+        case 9: // kSMPTETimeType5994Drop
+            flag = DLABTimecodeFlagIsDropFrame;
+            break;
+        default:
+            flag = DLABTimecodeFlagDefault;
+            break;
+    }
+    
     return [self initWithTimecodeFormat:(DLABTimecodeFormat)format
                                    hour:hour
                                  minute:minute
                                  second:second
                                   frame:frame
-                                  flags:DLABTimecodeFlagDefault
-                               userBits:0];
+                                  flags:flag
+                               userBits:userBits];
 }
 
 // public comparison - NSObject
@@ -168,6 +184,14 @@
     _smpteTime.frames = (SInt16) frame;
 }
 
+- (void) setFlags:(DLABTimecodeFlag)flags
+{
+    _flags = flags;
+    
+    // Force update as is DropFrame or not
+    [self setDropFrame:(_flags & DLABTimecodeFlagIsDropFrame)];
+}
+
 /* =================================================================================== */
 // MARK: - Property - Conversion
 /* =================================================================================== */
@@ -184,11 +208,21 @@
     _second = (uint8_t) smpte.seconds;
     _frame = (uint8_t) smpte.frames;
     
-    _smpteTime = {0};
-    _smpteTime.hours = (SInt16)_hour;
-    _smpteTime.minutes = (SInt16)_minute;
-    _smpteTime.seconds = (SInt16)_second;
-    _smpteTime.frames = (SInt16)_frame;
+    _smpteTime = smpte;
+    
+    // update DLABTimecodeFlag with Drop or non-Drop timecode
+    // Some types are only defined in CoreAudio SMPTETime only = (**)
+    switch (_smpteTime.type) {
+        case 2: // kSMPTETimeType30Drop, kCVSMPTETimeType30Drop
+        case 5: // kSMPTETimeType2997Drop, kCVSMPTETimeType2997Drop
+        case 8: // kSMPTETimeType60Drop (**)
+        case 9: // kSMPTETimeType5994Drop (**)
+            [self setDropFrame:YES];
+            break;
+        default:
+            [self setDropFrame:NO];
+            break;
+    }
 }
 
 // DLABTimecodeBCD support
@@ -237,6 +271,76 @@
     _smpteTime.minutes = (SInt16)_minute;
     _smpteTime.seconds = (SInt16)_second;
     _smpteTime.frames = (SInt16)_frame;
+}
+
+- (BOOL) dropFrame
+{
+    BOOL useDropFrame = (_flags & DLABTimecodeFlagIsDropFrame) ? YES : NO;
+    return useDropFrame;
+}
+
+- (void) setDropFrame:(BOOL)useDropFrame
+{
+    // Some types are only defined in CoreAudio SMPTETime only = (**)
+    if (useDropFrame) {
+        // update DLABTimecodeFlag as Drop timecode
+        _flags |= DLABTimecodeFlagIsDropFrame;
+        
+        // update CVSMPTETimeType as DropFrame timecode
+        switch (_smpteTime.type) {
+            case 3:                     // kSMPTETimeType30, kCVSMPTETimeType30
+                _smpteTime.type = 2;    // kSMPTETimeType30Drop, kCVSMPTETimeType30Drop
+                break;
+            case 4:                     // kSMPTETimeType2997, kCVSMPTETimeType2997
+                _smpteTime.type = 5;    // kSMPTETimeType2997Drop, kCVSMPTETimeType2997Drop
+                break;
+            case 6:                     // kSMPTETimeType60, kCVSMPTETimeType60
+                _smpteTime.type = 8;    // kSMPTETimeType60Drop (**)
+                break;
+            case 7:                     // kSMPTETimeType5994 (**)
+                _smpteTime.type = 9;    // kSMPTETimeType5994Drop (**)
+                break;
+            default:
+                break;
+        }
+    } else {
+        // update DLABTimecodeFlag as non-Drop timecode
+        _flags &= (~DLABTimecodeFlagIsDropFrame);
+        
+        // update CVSMPTETimeType as non-DropFrame timecode
+        switch (_smpteTime.type) {
+            case 2:                     // kSMPTETimeType30Drop, kCVSMPTETimeType30Drop
+                _smpteTime.type = 3;    // kSMPTETimeType30, kCVSMPTETimeType30
+                break;
+            case 5:                     // kSMPTETimeType2997Drop, kCVSMPTETimeType2997Drop
+                _smpteTime.type = 4;    // kSMPTETimeType2997, kCVSMPTETimeType2997
+                break;
+            case 8:                     // kSMPTETimeType60Drop (**)
+                _smpteTime.type = 6;    // kSMPTETimeType60, kCVSMPTETimeType60
+                break;
+            case 9:                     // kSMPTETimeType5994Drop (**)
+                _smpteTime.type = 7;    // kSMPTETimeType5994 (**)
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+- (uint32_t) smpteTimeType
+{
+    uint32_t type = _smpteTime.type;
+    return type;
+}
+
+- (void) setSmpteTimeType:(uint32_t) newSmpteType
+{
+    // Create new CVSMPTETime struct
+    CVSMPTETime newSMPTETime = _smpteTime;
+    newSMPTETime.type = newSmpteType;
+
+    // Force update as is DropFrame or not
+    [self setSmpteTime:newSMPTETime];
 }
 
 /* =================================================================================== */
