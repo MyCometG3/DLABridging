@@ -46,6 +46,15 @@ NS_ASSUME_NONNULL_BEGIN
          code:(NSInteger)result
            to:(NSError * _Nullable * _Nullable)error;
 
+/* =================================================================================== */
+// MARK: (Private) - Conversion
+/* =================================================================================== */
+
+- (nullable CMBlockBufferRef) createBlockBufferOfSMPTETime:(CVSMPTETime)smpteTime
+                                            sizes:(size_t)sizes
+                                           quanta:(uint32_t)quanta
+                                           tcType:(uint32_t)tcType;
+
 @end
 
 NS_ASSUME_NONNULL_END

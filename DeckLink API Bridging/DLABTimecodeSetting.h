@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreVideo/Corevideo.h>
+#import <CoreMedia/CoreMedia.h>
 #import "DLABConstants.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -137,6 +138,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL) updateCVSMPTETimeTypeUsing:(DLABDisplayMode)displayMode
                               error:(NSError * _Nullable * _Nullable)error;
+
+
+/**
+ Create CMSampleBuffer for Timecode with timingInfo from videoSampleBuffer.
+ Supports kCMTimeCodeFormatType_TimeCode32 or kCMTimeCodeFormatType_TimeCode64.
+
+ @param formatType Choose either TimeCode32 or TimeCode64.
+ @param videoSampleBuffer Reference as CMTimingInfo source.
+ @return Result CMSampleBuffer for Timecode.
+ */
+- (nullable CMSampleBufferRef) createTimecodeSampleOfFormatType:(CMTimeCodeFormatType)formatType
+                                     videoSampleBuffer:(CMSampleBufferRef)videoSampleBuffer;
 
 @end
 

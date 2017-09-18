@@ -469,4 +469,218 @@
     [self setSmpteTime:newSMPTETime];
     return YES;
 }
+
+- (CMSampleBufferRef) createTimecodeSampleOfFormatType:(CMTimeCodeFormatType)formatType
+                                     videoSampleBuffer:(CMSampleBufferRef)videoSampleBuffer
+{
+    NSParameterAssert(formatType && videoSampleBuffer);
+    
+    CVSMPTETime smpte = self.smpteTime;
+    
+    // Check CMTimeCodeFormatType
+    size_t sizes = 0;
+    switch (formatType) {
+        case kCMTimeCodeFormatType_TimeCode32:
+            sizes = sizeof(int32_t); break;
+        case kCMTimeCodeFormatType_TimeCode64:
+            sizes = sizeof(int64_t); break;
+        default:
+            // Unsupported : kCMTimeCodeFormatType_Counter32/kCMTimeCodeFormatType_Counter64
+            return NULL; break;
+    }
+    
+    // Evaluate TimeCode Quanta
+    uint32_t quanta = 30;
+    switch (smpte.type) {
+        case  0:
+            quanta = 24; break;
+        case  1:
+            quanta = 25; break;
+        case  2:
+        case  3:
+        case  4:
+        case  5:
+            quanta = 30; break;
+        case  6:
+        case  7:
+        case  8:
+        case  9:
+            quanta = 60; break;
+        case  10:
+            quanta = 50; break;
+        case  11:
+            quanta = 25; break;
+        default:
+            break;
+    }
+    
+    // Evaluate TimeCode type
+    uint32_t tcType =  kCMTimeCodeFlag_24HourMax; // | kCMTimeCodeFlag_NegTimesOK
+    switch (smpte.type) {
+        case  2:
+        case  5:
+        case  8:
+        case  9:
+            tcType |= kCMTimeCodeFlag_DropFrame;
+            break;
+        default:
+            break;
+    }
+    
+    // Prepare Data Buffer for new SampleBuffer
+    CMBlockBufferRef dataBuffer = [self createBlockBufferOfSMPTETime:smpte
+                                                               sizes:sizes
+                                                              quanta:quanta
+                                                              tcType:tcType];
+    if (!dataBuffer)
+        return NULL;
+    
+    /* ============================================ */
+    
+    // Prepare TimeCode SampleBuffer
+    CMSampleBufferRef sampleBuffer = NULL;
+    if (dataBuffer && formatType) {
+        OSStatus status = noErr;
+        
+        // Extract duration from video sample
+        CMTime duration = CMSampleBufferGetDuration(videoSampleBuffer);
+        
+        // Extract timeingInfo from videoSample
+        CMSampleTimingInfo timingInfo = {0};
+        CMSampleBufferGetSampleTimingInfo(videoSampleBuffer, 0, &timingInfo);
+        
+        // Prepare CMTimeCodeFormatDescription
+        CMTimeCodeFormatDescriptionRef description = NULL;
+        status = CMTimeCodeFormatDescriptionCreate(kCFAllocatorDefault,
+                                                   formatType,
+                                                   duration,
+                                                   quanta,
+                                                   tcType,
+                                                   NULL,
+                                                   &description);
+        if (status != noErr || description == NULL) {
+            NSLog(@"ERROR: Could not create format description.");
+            CFRelease(dataBuffer);
+            return NULL;
+        }
+        
+        // Create new sampleBuffer
+        CMSampleTimingInfo timingInfoTMP = {0};
+        status = CMSampleBufferCreate(kCFAllocatorDefault,
+                                      dataBuffer,
+                                      true,
+                                      NULL,
+                                      NULL,
+                                      description,
+                                      1,
+                                      1,
+                                      &timingInfoTMP,
+                                      1,
+                                      &sizes,
+                                      &sampleBuffer);
+        CFRelease(description);
+        CFRelease(dataBuffer);
+        
+        if (status != noErr || sampleBuffer == NULL) {
+            NSLog(@"ERROR: Could not create sample buffer.");
+            return NULL;
+        }
+    }
+    
+    return sampleBuffer;
+}
+
+- (CMBlockBufferRef) createBlockBufferOfSMPTETime:(CVSMPTETime)smpteTime
+                                            sizes:(size_t)sizes
+                                           quanta:(uint32_t)quanta
+                                           tcType:(uint32_t)tcType
+{
+    // Calculate frameNumber for specific SMPTETime
+    int64_t frameNumber64 = 0;
+    int16_t tcNegativeFlag = (int16_t)0x80;
+    frameNumber64 = (int64_t)(smpteTime.frames);
+    frameNumber64 += (int64_t)(smpteTime.seconds) * (int64_t)(quanta);
+    frameNumber64 += (int64_t)(smpteTime.minutes & ~tcNegativeFlag) * (int64_t)(quanta) * 60;
+    frameNumber64 += (int64_t)(smpteTime.hours) * (int64_t)(quanta) * 60 * 60;
+    
+    int64_t fpm = (int64_t)(quanta) * 60;
+    if ((tcType & kCMTimeCodeFlag_DropFrame) != 0) {
+        int64_t fpm10 = fpm * 10;
+        int64_t num10s = frameNumber64 / fpm10;
+        int64_t frameAdjust = -num10s * (9*2);
+        int64_t numFramesLeft = frameNumber64 % fpm10;
+        
+        if (numFramesLeft > 1) {
+            int64_t num1s = numFramesLeft / fpm;
+            if (num1s > 0) {
+                frameAdjust -= (num1s - 1 ) * 2;
+                numFramesLeft = numFramesLeft % fpm;
+                if (numFramesLeft > 1 ) {
+                    frameAdjust -= 2;
+                } else {
+                    frameAdjust -= (numFramesLeft + 1);
+                }
+            }
+        }
+        frameNumber64 += frameAdjust;
+    }
+    
+    if ((smpteTime.minutes & tcNegativeFlag) != 0) {
+        frameNumber64 = -frameNumber64;
+    }
+    
+    // TODO
+    int32_t frameNumber32 = (int32_t)frameNumber64;
+    
+    /* ============================================ */
+    
+    // Allocate BlockBuffer
+    CMBlockBufferRef dataBuffer = NULL;
+    OSStatus status = noErr;
+    status = CMBlockBufferCreateWithMemoryBlock(kCFAllocatorDefault,
+                                                NULL,
+                                                sizes,
+                                                kCFAllocatorDefault,
+                                                NULL,
+                                                0,
+                                                sizes,
+                                                kCMBlockBufferAssureMemoryNowFlag,
+                                                &dataBuffer);
+    if (status != noErr || dataBuffer == NULL) {
+        NSLog(@"ERROR: Could not create block buffer.");
+        return NULL;
+    }
+    
+    // Write FrameNumber into BlockBuffer
+    if (dataBuffer) {
+        if (sizes == sizeof(int32_t)){
+            int32_t frameNumber32BE = EndianS32_NtoB(frameNumber32);
+            status = CMBlockBufferReplaceDataBytes(&frameNumber32BE,
+                                                   dataBuffer,
+                                                   0,
+                                                   sizes);
+        } else if (sizes == sizeof(int64_t)) {
+            int64_t frameNumber64BE = EndianS64_NtoB(frameNumber64);
+            status = CMBlockBufferReplaceDataBytes(&frameNumber64BE,
+                                                   dataBuffer,
+                                                   0,
+                                                   sizes);
+        } else {
+            status = -1;
+        }
+        if (status != kCMBlockBufferNoErr) {
+            NSLog(@"ERROR: Could not write into block buffer.");
+            CFRelease(dataBuffer);
+            return NULL;
+        }
+    }
+
+    return dataBuffer;
+}
+
+
+
+
+
+
 @end
