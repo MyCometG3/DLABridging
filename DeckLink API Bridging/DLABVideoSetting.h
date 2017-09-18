@@ -177,6 +177,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param clapHOffsetD Denominator of kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational
  @param clapVOffsetN Numerator of kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational
  @param clapVOffsetD Denominator of kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational
+ @param error Error description if failed.
  @return YES if successfully populated. NO if failed with supplied parameters.
  */
 - (BOOL) addClapExtOfWidthN:(int32_t)clapWidthN
@@ -195,6 +196,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param paspHSpacing Value of kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing
  @param paspVSpacing Value of kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing
+ @param error Error description if failed.
  @return YES if successfully populated. NO if failed with supplied parameters.
  */
 - (BOOL) addPaspExtOfHSpacing:(uint32_t)paspHSpacing
