@@ -56,6 +56,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable DLABDevice*) deviceWithDeckLink:(IDeckLink*)deckLink;
 
+/**
+ Query device with secified parameter with inclusive option.
+ Specify flag = true to consider as same if a pair of persistentID/topologicalID matches.
+ 
+ @param deckLink IDeckLink object.
+ @param flag Do inclusive comarison.
+ @return device instance.
+ */
+- (nullable DLABDevice*) deviceWithDeckLink:(IDeckLink *)deckLink inclusive:(BOOL)flag;
+
 /* =================================================================================== */
 // MARK: - protocol DLABDeviceNotificationCallbackDelegate
 /* =================================================================================== */

@@ -198,7 +198,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
             DLABDevice* newDevice = nil;
             
             // Create new DLABDevice from IDeckLink obj
-            if ([self deviceWithDeckLink:newDeckLink] == nil) {
+            if ([self deviceWithDeckLink:newDeckLink inclusive:YES] == nil) {
                 newDevice = [[DLABDevice alloc] initWithDeckLink:newDeckLink];
             }
             
@@ -232,6 +232,70 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 // MARK: - private query
 /* =================================================================================== */
 
+NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t *persistentIDRef)
+{
+    HRESULT error = E_FAIL;
+    
+    IDeckLinkAttributes* attr = NULL;
+    error = deckLink->QueryInterface(IID_IDeckLinkAttributes,
+                                     (void **)&attr);
+    if (!error && attr) {
+        attr->AddRef();
+    
+        int64_t persistentID = 0;
+        HRESULT errPID = attr->GetInt(BMDDeckLinkPersistentID, &persistentID);
+        if (!errPID) {
+            *persistentIDRef = persistentID;
+        }
+        int64_t topologicalID = 0;
+        HRESULT errTID = attr->GetInt(BMDDeckLinkTopologicalID, &topologicalID);
+        if (!errTID) {
+            *topologicalIDRef = topologicalID;
+        }
+        
+        attr->Release();
+        attr = NULL;
+        
+        if (errPID && errTID) {
+            error = E_FAIL;
+        }
+    }
+    
+    if (!error) {
+        return YES;
+    }
+    return NO;
+}
+- (DLABDevice*) deviceWithDeckLink:(IDeckLink *)deckLink inclusive:(BOOL)flag
+{
+    NSParameterAssert(deckLink);
+    
+    int64_t newTopologicalID = 0;
+    int64_t newPersistentID = 0;
+    if (flag && !getTwoIDs(deckLink, &newTopologicalID, &newPersistentID)) {
+        return nil;
+    }
+    
+    for (DLABDevice* device in self.devices) {
+        if (device.deckLink == deckLink) {
+            return device;
+        }
+        
+        if (flag) {
+            int64_t srcTopologicalID = 0;
+            int64_t srcPersistentID = 0;
+            if (!getTwoIDs(device.deckLink, &srcTopologicalID, &srcPersistentID)) {
+                continue;
+            }
+            if (srcTopologicalID == newTopologicalID &&
+                srcPersistentID == newPersistentID) {
+                return device;
+            }
+        }
+    }
+    return nil;
+}
+
 - (DLABDevice*) deviceWithDeckLink:(IDeckLink *)deckLink
 {
     NSParameterAssert(deckLink);
@@ -253,7 +317,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     NSParameterAssert(deckLink);
     
     // Avoid duplication
-    if ([self deviceWithDeckLink:deckLink])
+    if ([self deviceWithDeckLink:deckLink inclusive:YES])
         return;
     
     DLABDevice* device = [[DLABDevice alloc] initWithDeckLink:deckLink];
@@ -276,7 +340,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     NSParameterAssert(deckLink);
     
-    DLABDevice* device = [self deviceWithDeckLink:deckLink];
+    DLABDevice* device = [self deviceWithDeckLink:deckLink inclusive:YES];
     if (device) {
         [self browser_sync:^{
             [self.devices removeObject:device];
