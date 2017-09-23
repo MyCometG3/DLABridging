@@ -17,7 +17,7 @@
  1a. remove "s" at end of typename
  1b. No "ID" at end of typename
  2. each bmdValuename modified as typename + valuename (DLABtypename+valuename)
- 3. a few NS_ENUM/NS_OPTIONS contains extention for easy to use ("// Non-native extention @@@@")
+ 3. a few NS_ENUM/NS_OPTIONS contains extension for easy to use ("// Non-native extension @@@@")
  */
 
 /* =================================================================================== */
@@ -62,7 +62,7 @@ typedef NS_OPTIONS(uint32_t, DLABFrameFlag)
     
     /* Flags that are applicable only to instances of IDeckLinkVideoInputFrame */
     
-    DLABFrameFlagHasNoInputSource                                     = 1U << 31     // Non-native extention @@@@
+    DLABFrameFlagHasNoInputSource                                     = 1U << 31     // Non-native extension @@@@
 };
 
 /* Enum BMDVideoInputFlags - Flags applicable to video input */
@@ -447,14 +447,14 @@ typedef NS_OPTIONS(uint32_t, DLABDeviceBusyState)
 /* Enum BMDVideoIOSupport - Device video input/output support */
 typedef NS_OPTIONS(uint32_t, DLABVideoIOSupport)
 {
-    DLABVideoIOSupportNone = 0,             // Non-native extention @@@@
+    DLABVideoIOSupportNone = 0,             // Non-native extension @@@@
     
     DLABVideoIOSupportCapture                                     = 1 << 0,
     DLABVideoIOSupportPlayback                                    = 1 << 1
     
-    , DLABVideoIOSupportInternalKeying = 1 << 16     // Non-native extention @@@@
-    , DLABVideoIOSupportExternalKeying = 1 << 17     // Non-native extention @@@@
-    , DLABVideoIOSupportHDKeying = 1 << 18     // Non-native extention @@@@
+    , DLABVideoIOSupportInternalKeying = 1 << 16     // Non-native extension @@@@
+    , DLABVideoIOSupportExternalKeying = 1 << 17     // Non-native extension @@@@
+    , DLABVideoIOSupportHDKeying = 1 << 18     // Non-native extension @@@@
 };
 
 /* Enum BMD3DPreviewFormat - Linked Frame preview format */
