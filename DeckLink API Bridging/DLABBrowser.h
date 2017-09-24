@@ -25,16 +25,16 @@ NS_ASSUME_NONNULL_BEGIN
  Called when new device is detected as specified direction.
 
  @param device Newly detected device.
- @param browser Monitoring DLABBrowser object.
+ @param sender Monitoring DLABBrowser object.
  */
-- (void) didAddDevice:(DLABDevice*) device browser:(DLABBrowser*) browser;
+- (void) didAddDevice:(DLABDevice*) device ofBrowser:(DLABBrowser*)sender;
 /**
  Called when a device is removed as specified direction.
  
  @param device The removed device.
- @param browser Monitoring DLABBrowser object.
+ @param sender Monitoring DLABBrowser object.
  */
-- (void) didRemoveDevice:(DLABDevice*) device browser:(DLABBrowser*) browser;
+- (void) didRemoveDevice:(DLABDevice*) device ofBrowser:(DLABBrowser*)sender;
 @optional
 @end
 

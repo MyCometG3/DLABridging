@@ -30,26 +30,29 @@
     [self releaseOutputVideoFrame:(IDeckLinkMutableVideoFrame *)frame];
     
     // delegate can schedule next frame here
+    __weak typeof(self) wself = self;
     id<DLABOutputPlaybackDelegate> delegate = self.outputDelegate;
     [self delegate_async:^{
-        [delegate renderVideoFrame]; // async
+        [delegate renderVideoFrameOfDevice:wself]; // async
     }];
 }
 
 - (void)renderAudioSamplesPreroll:(BOOL)preroll
 {
+    __weak typeof(self) wself = self;
     id<DLABOutputPlaybackDelegate> delegate = self.outputDelegate;
     [self delegate_async:^{
-        [delegate renderAudioSamples]; // async
+        [delegate renderAudioSamplesOfDevice:wself]; // async
     }];
 }
 
 - (void)scheduledPlaybackHasStopped
 {
     // delegate can schedule next frame here
+    __weak typeof(self) wself = self;
     id<DLABOutputPlaybackDelegate> delegate = self.outputDelegate;
     [self delegate_async:^{
-        [delegate scheduledPlaybackHasStopped]; // async
+        [delegate scheduledPlaybackHasStoppedOfDevice:wself]; // async
     }];
 }
 

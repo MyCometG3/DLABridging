@@ -13,6 +13,7 @@
 #import <CoreVideo/CoreVideo.h>
 
 #import "DLABConstants.h"
+@class DLABDevice;
 @class DLABVideoSetting;
 @class DLABAudioSetting;
 @class DLABTimecodeSetting;
@@ -29,19 +30,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Called when new output VideoFrame is ready to be queued.
+ 
+ @param sender Source DLABDevice object.
  */
-- (void)renderVideoFrame;
+- (void)renderVideoFrameOfDevice:(DLABDevice*)sender;
 
 /**
  Called when new output AudioSamples are ready to be queued.
+ 
+ @param sender Source DLABDevice object.
  */
-- (void)renderAudioSamples;
+- (void)renderAudioSamplesOfDevice:(DLABDevice*)sender;
 @optional
 
 /**
  Called when sceduled playback is stopped.
+ 
+ @param sender Source DLABDevice object.
  */
-- (void)scheduledPlaybackHasStopped;
+- (void)scheduledPlaybackHasStoppedOfDevice:(DLABDevice*)sender;
 @end
 
 NS_ASSUME_NONNULL_END
@@ -62,15 +69,19 @@ NS_ASSUME_NONNULL_BEGIN
  Called when new input VideoSample is available.
 
  @param sampleBuffer CMSampleBufferRef for Video
+ @param sender Source DLABDevice object.
  */
-- (void)processCapturedVideoSample:(CMSampleBufferRef)sampleBuffer;
+- (void)processCapturedVideoSample:(CMSampleBufferRef)sampleBuffer
+                          ofDevice:(DLABDevice*)sender;
 
 /**
  Called when new input AudioSample is available.
 
  @param sampleBuffer CMSampleBufferRef for Audio
+ @param sender Source DLABDevice object.
  */
-- (void)processCapturedAudioSample:(CMSampleBufferRef)sampleBuffer;
+- (void)processCapturedAudioSample:(CMSampleBufferRef)sampleBuffer
+                          ofDevice:(DLABDevice*)sender;
 @optional
 
 /**
@@ -78,9 +89,11 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param sampleBuffer CMSampleBufferRef for Video
  @param setting DLABTimecodeSetting for this VideoSample
+ @param sender Source DLABDevice object.
  */
 - (void)processCapturedVideoSample:(CMSampleBufferRef)sampleBuffer
-                   timecodeSetting:(DLABTimecodeSetting*)setting;
+                   timecodeSetting:(DLABTimecodeSetting*)setting
+                          ofDevice:(DLABDevice*)sender;
 
 /**
  Called when input video format change is detected.
@@ -103,10 +116,12 @@ NS_ASSUME_NONNULL_BEGIN
  @param newVideoSetting New VideoSetting
  @param events DLABVideoInputFormatChangedEvent
  @param flags DLABDetectedVideoInputFormatFlag
+ @param sender Source DLABDevice object.
  */
 - (void)processInputFormatChangeWithVideoSetting:(nullable DLABVideoSetting*)newVideoSetting
                                           events:(DLABVideoInputFormatChangedEvent)events
-                                           flags:(DLABDetectedVideoInputFormatFlag)flags;
+                                           flags:(DLABDetectedVideoInputFormatFlag)flags
+                                        ofDevice:(DLABDevice*)sender;
 
 /*
  */
@@ -130,7 +145,8 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param statusID DLABDeckLinkStatus
  */
-- (void)statusChanged:(DLABDeckLinkStatus)statusID;
+- (void)statusChanged:(DLABDeckLinkStatus)statusID
+             ofDevice:(DLABDevice*)sender;
 @optional
 @end
 
@@ -150,7 +166,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Called when preference update is detected.
  */
-- (void)prefsChanged;
+- (void)prefsChangedOfDevice:(DLABDevice*)sender;
 @optional
 @end
 

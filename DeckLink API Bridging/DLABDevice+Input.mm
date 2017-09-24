@@ -77,10 +77,12 @@
     }
     
     // delegate will handle ChangeVideoInputFormatEvent
+    __weak typeof(self) wself = self;
     [self delegate_async:^{
         [delegate processInputFormatChangeWithVideoSetting:tmpSetting
                                                     events:events
-                                                     flags:flags]; // async
+                                                     flags:flags
+                                                  ofDevice:wself]; // async
     }];
 }
 
@@ -114,13 +116,18 @@
         
         // delegate will handle InputVideoSampleBuffer
         if (sampleBuffer && setting) {
+            __weak typeof(self) wself = self;
             [self delegate_async:^{
-                [delegate processCapturedVideoSample:sampleBuffer timecodeSetting:setting]; // async
+                [delegate processCapturedVideoSample:sampleBuffer
+                                     timecodeSetting:setting
+                                            ofDevice:wself]; // async
                 CFRelease(sampleBuffer);
             }];
         } else if (sampleBuffer) {
+            __weak typeof(self) wself = self;
             [self delegate_async:^{
-                [delegate processCapturedVideoSample:sampleBuffer]; // async
+                [delegate processCapturedVideoSample:sampleBuffer
+                                            ofDevice:wself]; // async
                 CFRelease(sampleBuffer);
             }];
         } else {
@@ -136,8 +143,10 @@
         
         // delegate will handle InputAudioSampleBuffer
         if (sampleBuffer) {
+            __weak typeof(self) wself = self;
             [self delegate_async:^{
-                [delegate processCapturedAudioSample:sampleBuffer]; // async
+                [delegate processCapturedAudioSample:sampleBuffer
+                                            ofDevice:wself]; // async
                 CFRelease(sampleBuffer);
             }];
         } else {

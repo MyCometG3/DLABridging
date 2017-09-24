@@ -330,7 +330,7 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
         if (captureFlag || playbackFlag) {
             [self browser_sync:^{
                 [self.devices addObject:device];
-                [_delegate didAddDevice:device browser:self];
+                [_delegate didAddDevice:device ofBrowser:self];
             }];
         }
     }
@@ -344,7 +344,7 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
     if (device) {
         [self browser_sync:^{
             [self.devices removeObject:device];
-            [_delegate didRemoveDevice:device browser:self];
+            [_delegate didRemoveDevice:device ofBrowser:self];
         }];
     }
 }

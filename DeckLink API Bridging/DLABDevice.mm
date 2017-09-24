@@ -329,16 +329,19 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         // delegate can handle status changed event here
         id<DLABStatusChangeDelegate> delegate = self.statusDelegate;
         if (delegate) {
+            __weak typeof(self) wself = self;
             [self delegate_async:^{
-                [delegate statusChanged:(DLABDeckLinkStatus)param1]; // async
+                [delegate statusChanged:(DLABDeckLinkStatus)param1
+                               ofDevice:wself]; // async
             }];
         }
     } else if (topic == bmdPreferencesChanged) {
         // delegate can handle prefs change event here
         id<DLABPrefsChangeDelegate> delegate = self.prefsDelegate;
         if (delegate) {
+            __weak typeof(self) wself = self;
             [self delegate_async:^{
-                [delegate prefsChanged]; // async
+                [delegate prefsChangedOfDevice:wself]; // async
             }];
         }
     } else {
