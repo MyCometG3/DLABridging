@@ -148,8 +148,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param videoSampleBuffer Reference as CMTimingInfo source.
  @return Result CMSampleBuffer for Timecode.
  */
-- (nullable CMSampleBufferRef) createTimecodeSampleOfFormatType:(CMTimeCodeFormatType)formatType
-                                     videoSampleBuffer:(CMSampleBufferRef)videoSampleBuffer;
+- (nullable CMSampleBufferRef) createTimecodeSampleIn:(CMTimeCodeFormatType)formatType
+                                          videoSample:(CMSampleBufferRef)videoSampleBuffer CF_RETURNS_RETAINED;
 
 @end
 

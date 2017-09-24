@@ -470,8 +470,8 @@
     return YES;
 }
 
-- (CMSampleBufferRef) createTimecodeSampleOfFormatType:(CMTimeCodeFormatType)formatType
-                                     videoSampleBuffer:(CMSampleBufferRef)videoSampleBuffer
+- (CMSampleBufferRef) createTimecodeSampleIn:(CMTimeCodeFormatType)formatType
+                                 videoSample:(CMSampleBufferRef)videoSampleBuffer
 {
     NSParameterAssert(formatType && videoSampleBuffer);
     
@@ -677,10 +677,5 @@
 
     return dataBuffer;
 }
-
-
-
-
-
 
 @end
