@@ -50,6 +50,15 @@ NS_ASSUME_NONNULL_BEGIN
 // MARK: (Private) - Conversion
 /* =================================================================================== */
 
+/**
+ Utility method to create SMPTETime blockBuffer from SVSMPTETime (ref: TN2310)
+
+ @param smpteTime A source CVSMPTETime (kCMTimeCodeFormatType_TimeCode32 or TimeCode64)
+ @param sizes blockBuffer size, either sizeof(int32_t) or sizeof(int64_t)
+ @param quanta temporal count per second of a picture (ceil up to int value)
+ @param tcType kCMTimeCodeFlag_... value.
+ @return timecode BlockBuffer from a CVSMPTETime, NULL if failed
+ */
 - (nullable CMBlockBufferRef) createBlockBufferOfSMPTETime:(CVSMPTETime)smpteTime
                                             sizes:(size_t)sizes
                                            quanta:(uint32_t)quanta
