@@ -517,26 +517,33 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
             // field dominance
             NSString* keyFieldCount = (__bridge NSString*)kCMFormatDescriptionExtension_FieldCount;
             NSString* keyFieldDetail = (__bridge NSString*)kCMFormatDescriptionExtension_FieldDetail;
-            NSString* tempBottomFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalBottomFirst;
             NSString* tempTopFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalTopFirst;
+            //NSString* tempBottomFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalBottomFirst;
             NSString* spatTopEarly = (__bridge NSString*)kCMFormatDescriptionFieldDetail_SpatialFirstLineEarly;
-            
+            NSString* spatBotEarly = (__bridge NSString*)kCMFormatDescriptionFieldDetail_SpatialFirstLineLate;
+            /*
+             * SpatialFirstLine... are for "2 fields woven into a frame".
+             * SpatialFirstLineLate (14) is suit for NTSC D1 source.
+             * SpatialFirstLineEarly (9) is suit for any HD interlaced and PAL D1 source.
+             * So Decompressed CMSampleBuffer is either progressive or spatialFistLineXXX.
+             */
+
             BMDFieldDominance fieldDominance = self.fieldDominanceW;
             switch (fieldDominance) {
-                case bmdLowerFieldFirst:
+                case bmdLowerFieldFirst: // woven-fields representation
                     extensions[keyFieldCount] = @2;
-                    extensions[keyFieldDetail] = tempBottomFirst;
+                    extensions[keyFieldDetail] = spatBotEarly; // detail == 14
                     break;
-                case bmdUpperFieldFirst:
+                case bmdUpperFieldFirst: // woven-fields representation
                     extensions[keyFieldCount] = @2;
-                    extensions[keyFieldDetail] = tempTopFirst;
+                    extensions[keyFieldDetail] = spatTopEarly; // detail == 9
                     break;
                 case bmdProgressiveFrame:
                     extensions[keyFieldCount] = @1;
                     break;
-                case bmdProgressiveSegmentedFrame:
+                case bmdProgressiveSegmentedFrame: // split-fields representation
                     extensions[keyFieldCount] = @2;
-                    extensions[keyFieldDetail] = spatTopEarly;
+                    extensions[keyFieldDetail] = tempTopFirst; // detail == 1
                     break;
                 default:
                     break;
