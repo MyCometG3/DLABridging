@@ -153,6 +153,7 @@
 		164C82AD1F514687001208BD /* DeckLink API Bridging */ = {
 			isa = PBXGroup;
 			children = (
+				16A4C6C31F8B79C40027F5EA /* C++ Class */,
 				164C82AF1F514687001208BD /* DLABAudioSetting.h */,
 				164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */,
 				164C82B01F514687001208BD /* DLABAudioSetting.mm */,
@@ -171,12 +172,21 @@
 				164C82C61F514687001208BD /* DLABVideoSetting.h */,
 				164C82C51F514687001208BD /* DLABVideoSetting+Internal.h */,
 				164C82C71F514687001208BD /* DLABVideoSetting.mm */,
-				164C82EB1F5146ED001208BD /* C++ class */,
 			);
 			path = "DeckLink API Bridging";
 			sourceTree = "<group>";
 		};
-		164C82EB1F5146ED001208BD /* C++ class */ = {
+		164C82EC1F51488A001208BD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				164C82F11F5148E3001208BD /* DeckLinkAPI.framework */,
+				164C82EF1F514898001208BD /* CoreMedia.framework */,
+				164C82ED1F51488A001208BD /* CoreVideo.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		16A4C6C31F8B79C40027F5EA /* C++ Class */ = {
 			isa = PBXGroup;
 			children = (
 				164C82BA1F514687001208BD /* DLABDeviceNotificationCallback.h */,
@@ -188,17 +198,7 @@
 				164C82C01F514687001208BD /* DLABOutputCallback.h */,
 				164C82C11F514687001208BD /* DLABOutputCallback.mm */,
 			);
-			name = "C++ class";
-			sourceTree = "<group>";
-		};
-		164C82EC1F51488A001208BD /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				164C82F11F5148E3001208BD /* DeckLinkAPI.framework */,
-				164C82EF1F514898001208BD /* CoreMedia.framework */,
-				164C82ED1F51488A001208BD /* CoreVideo.framework */,
-			);
-			name = Frameworks;
+			path = "C++ Class";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
