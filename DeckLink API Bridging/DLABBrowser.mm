@@ -69,11 +69,11 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     
     direction = DLABVideoIOSupportNone;
     
-    // remove all registerd devices
-    [_devices removeAllObjects];
-    
     __block HRESULT result = E_FAIL;
     [self browser_sync:^{
+        // remove all registerd devices
+        [_devices removeAllObjects];
+        
         if (discovery) {
             if (callback) {
                 result = discovery->UninstallDeviceNotifications();
@@ -104,11 +104,11 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
         return NO;
     }
     
-    // initial registration should be done here
-    [self registerDevicesForDirection:newDirection];
-    
     __block HRESULT result = E_FAIL;
     [self browser_sync:^{
+        // initial registration should be done here
+        [self registerDevicesForDirection:newDirection];
+        
         if (!discovery && !callback) {
             discovery = CreateDeckLinkDiscoveryInstance();
             if (discovery) {
@@ -316,37 +316,37 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
 {
     NSParameterAssert(deckLink);
     
-    // Avoid duplication
-    if ([self deviceWithDeckLink:deckLink inclusive:YES])
-        return;
-    
-    DLABDevice* device = [[DLABDevice alloc] initWithDeckLink:deckLink];
-    if (device) {
-        BOOL captureFlag = ((direction & DLABVideoIOSupportCapture) &&
-                            device.supportCaptureW);
-        BOOL playbackFlag = ((direction & DLABVideoIOSupportPlayback) &&
-                             device.supportPlaybackW);
+    [self browser_sync:^{
+        // Avoid duplication
+        if ([self deviceWithDeckLink:deckLink inclusive:YES])
+            return;
         
-        if (captureFlag || playbackFlag) {
-            [self browser_sync:^{
+        DLABDevice* device = [[DLABDevice alloc] initWithDeckLink:deckLink];
+        if (device) {
+            BOOL captureFlag = ((direction & DLABVideoIOSupportCapture) &&
+                                device.supportCaptureW);
+            BOOL playbackFlag = ((direction & DLABVideoIOSupportPlayback) &&
+                                 device.supportPlaybackW);
+            
+            if (captureFlag || playbackFlag) {
                 [self.devices addObject:device];
                 [_delegate didAddDevice:device ofBrowser:self];
-            }];
+            }
         }
-    }
+    }];
 }
 
 - (void) didRemoveDevice:(IDeckLink*)deckLink
 {
     NSParameterAssert(deckLink);
     
-    DLABDevice* device = [self deviceWithDeckLink:deckLink inclusive:YES];
-    if (device) {
-        [self browser_sync:^{
+    [self browser_sync:^{
+        DLABDevice* device = [self deviceWithDeckLink:deckLink inclusive:YES];
+        if (device) {
             [self.devices removeObject:device];
             [_delegate didRemoveDevice:device ofBrowser:self];
-        }];
-    }
+        }
+    }];
 }
 
 /* =================================================================================== */
