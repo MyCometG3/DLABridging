@@ -63,14 +63,13 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 
 - (BOOL) stop
 {
-    if (direction == DLABVideoIOSupportNone) {
-        return NO;
-    }
-    
-    direction = DLABVideoIOSupportNone;
-    
     __block HRESULT result = E_FAIL;
     [self browser_sync:^{
+        if (direction == DLABVideoIOSupportNone) {
+            return;
+        }
+        direction = DLABVideoIOSupportNone;
+
         // remove all registerd devices
         [_devices removeAllObjects];
         
@@ -98,14 +97,18 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     NSParameterAssert(newDirection);
     
     // Check parameters
-    BOOL currentFlag = (direction != DLABVideoIOSupportNone);
     BOOL newFlag = ((newDirection & (DLABVideoIOSupportCapture|DLABVideoIOSupportPlayback)) == 0);
-    if (currentFlag || newFlag) {
+    if (newFlag) {
         return NO;
     }
     
     __block HRESULT result = E_FAIL;
     [self browser_sync:^{
+        BOOL currentFlag = (direction != DLABVideoIOSupportNone);
+        if (currentFlag) {
+            return;
+        }
+        
         // initial registration should be done here
         [self registerDevicesForDirection:newDirection];
         
@@ -118,10 +121,13 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
                 }
             }
         }
+        
+        if (!result) {
+            direction = newDirection;
+        }
     }];
     
     if (!result) {
-        direction = newDirection;
         return YES;
     } else {
         return NO;
