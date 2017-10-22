@@ -18,10 +18,11 @@ NOTE: This framework is under development.
     var running :Bool = false
 
     let browser = DLABBrowser()
-    _ = browser.start()
+    _ = browser.startForInput()
     let deviceList = browser.allDevices
     device = deviceList.first!
     _ = browser.stop()
+
 ###### 2. Start input stream
     do {
       try device.setInputScreenPreviewTo(parentView)
@@ -54,23 +55,29 @@ NOTE: This framework is under development.
       }
     } catch {
       print("ERROR!!")
-    }
+
+
 ###### 3. Handle CMSampleBuffer (Video/Audio)
-    public func processCapturedVideoSample(_ sampleBuffer: CMSampleBuffer) {
+    public func processCapturedVideoSample(_ sampleBuffer: CMSampleBuffer,
+                                           of sender:DLABDevice) {
       print("video")
     }
-    public func processCapturedAudioSample(_ sampleBuffer: CMSampleBuffer) {
+    public func processCapturedAudioSample(_ sampleBuffer: CMSampleBuffer,
+                                           of sender:DLABDevice) {
       print("audio")
     }
     public func processCapturedVideoSample(_ sampleBuffer: CMSampleBuffer,
-                                           timecodeSetting setting: DLABTimecodeSetting) {
+                                           timecodeSetting setting: DLABTimecodeSetting,
+                                           of sender:DLABDevice) {
       print("video/timecode")
     }
+
 ###### 4. Stop input stream
     running = false
     do {
       try device.stopStreams()
       try device.disableVideoInput()
+      try device.disableAudioInput()
       device.inputDelegate = nil
 
       try device.setInputScreenPreviewTo(nil)
@@ -81,8 +88,8 @@ NOTE: This framework is under development.
 
 #### Development environment
 - MacOS X 10.12.6 Sierra
-- Xcode 8.3.3
-- Objective-C++, Swift 3.1.0
+- Xcode 9.0.1
+- Objective-C++, Swift 4.0
 
 #### License
     - The MIT License
