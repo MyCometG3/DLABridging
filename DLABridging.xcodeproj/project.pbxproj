@@ -110,7 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				164C82A31F514687001208BD /* DeckLink API */,
-				164C82AD1F514687001208BD /* DeckLink API Bridging */,
+				164C82AD1F514687001208BD /* Source */,
 				164C82871F514632001208BD /* DLABridging */,
 				164C82861F514632001208BD /* Products */,
 				164C82EC1F51488A001208BD /* Frameworks */,
@@ -150,7 +150,7 @@
 			path = "DeckLink API";
 			sourceTree = "<group>";
 		};
-		164C82AD1F514687001208BD /* DeckLink API Bridging */ = {
+		164C82AD1F514687001208BD /* Source */ = {
 			isa = PBXGroup;
 			children = (
 				16A4C6C31F8B79C40027F5EA /* C++ Class */,
@@ -173,7 +173,7 @@
 				164C82C51F514687001208BD /* DLABVideoSetting+Internal.h */,
 				164C82C71F514687001208BD /* DLABVideoSetting.mm */,
 			);
-			path = "DeckLink API Bridging";
+			path = Source;
 			sourceTree = "<group>";
 		};
 		164C82EC1F51488A001208BD /* Frameworks */ = {
