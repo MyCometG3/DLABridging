@@ -92,48 +92,6 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     }
 }
 
-- (BOOL) startForDirection:(DLABVideoIOSupport) newDirection
-{
-    NSParameterAssert(newDirection);
-    
-    // Check parameters
-    BOOL newFlag = ((newDirection & (DLABVideoIOSupportCapture|DLABVideoIOSupportPlayback)) == 0);
-    if (newFlag) {
-        return NO;
-    }
-    
-    __block HRESULT result = E_FAIL;
-    [self browser_sync:^{
-        BOOL currentFlag = (direction != DLABVideoIOSupportNone);
-        if (currentFlag) {
-            return;
-        }
-        
-        // initial registration should be done here
-        [self registerDevicesForDirection:newDirection];
-        
-        if (!discovery && !callback) {
-            discovery = CreateDeckLinkDiscoveryInstance();
-            if (discovery) {
-                callback = new DLABDeviceNotificationCallback(self);
-                if (callback) {
-                    result = discovery->InstallDeviceNotifications(callback);
-                }
-            }
-        }
-        
-        if (!result) {
-            direction = newDirection;
-        }
-    }];
-    
-    if (!result) {
-        return YES;
-    } else {
-        return NO;
-    }
-}
-
 /* =================================================================================== */
 // MARK: - public query
 /* =================================================================================== */
@@ -187,8 +145,50 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 }
 
 /* =================================================================================== */
-// MARK: - private method - initial registration
+// MARK: - private method - utility method
 /* =================================================================================== */
+
+- (BOOL) startForDirection:(DLABVideoIOSupport) newDirection
+{
+    NSParameterAssert(newDirection);
+    
+    // Check parameters
+    BOOL newFlag = ((newDirection & (DLABVideoIOSupportCapture|DLABVideoIOSupportPlayback)) == 0);
+    if (newFlag) {
+        return NO;
+    }
+    
+    __block HRESULT result = E_FAIL;
+    [self browser_sync:^{
+        BOOL currentFlag = (direction != DLABVideoIOSupportNone);
+        if (currentFlag) {
+            return;
+        }
+        
+        // initial registration should be done here
+        [self registerDevicesForDirection:newDirection];
+        
+        if (!discovery && !callback) {
+            discovery = CreateDeckLinkDiscoveryInstance();
+            if (discovery) {
+                callback = new DLABDeviceNotificationCallback(self);
+                if (callback) {
+                    result = discovery->InstallDeviceNotifications(callback);
+                }
+            }
+        }
+        
+        if (!result) {
+            direction = newDirection;
+        }
+    }];
+    
+    if (!result) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
 
 - (void) registerDevicesForDirection:(DLABVideoIOSupport) newDirection
 {

@@ -34,8 +34,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) dispatch_queue_t browserQueue;
 
 /* =================================================================================== */
-// MARK: - private method - initial registration
+// MARK: - private method - utility method
 /* =================================================================================== */
+
+/**
+ Start detection with specified flag.
+ 
+ @return YES if successfully started. NO if any error.
+ */
+- (BOOL) startForDirection:(DLABVideoIOSupport) newDirection;
 
 /**
  Utility method to find all devices of specified direction.

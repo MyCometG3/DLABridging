@@ -125,13 +125,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL) stop;
 
-/**
- Start detection with specified flag.
- 
- @return YES if successfully started. NO if any error.
- */
-- (BOOL) startForDirection:(DLABVideoIOSupport) newDirection;
-
 @end
 
 NS_ASSUME_NONNULL_END
