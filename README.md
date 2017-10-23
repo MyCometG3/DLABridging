@@ -17,11 +17,12 @@ NOTE: This framework is under development.
     var device :DLABDevice? = nil
     var running :Bool = false
 
-    let browser = DLABBrowser()
-    _ = browser.startForInput()
-    let deviceList = browser.allDevices
-    device = deviceList.first!
-    _ = browser.stop()
+    do {
+      let browser = DLABBrowser()
+      _ = browser.registerDevicesForInput()
+      let deviceList = browser.allDevices
+      device = deviceList.first!
+    }
 
 ###### 2. Start input stream
     do {
