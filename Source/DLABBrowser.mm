@@ -92,6 +92,24 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     }
 }
 
+- (void) registerDevicesForInput
+{
+    DLABVideoIOSupport newDirection = DLABVideoIOSupportCapture;
+    [self registerDevicesForDirection:newDirection];
+}
+
+- (void) registerDevicesForOutput
+{
+    DLABVideoIOSupport newDirection = DLABVideoIOSupportPlayback;
+    [self registerDevicesForDirection:newDirection];
+}
+
+- (void) registerDevices
+{
+    DLABVideoIOSupport newDirection = DLABVideoIOSupportCapture | DLABVideoIOSupportPlayback;
+    [self registerDevicesForDirection:newDirection];
+}
+
 /* =================================================================================== */
 // MARK: - public query
 /* =================================================================================== */

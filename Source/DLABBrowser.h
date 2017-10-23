@@ -125,6 +125,21 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL) stop;
 
+/**
+ Register all DLABDevice(s) which support input.
+ */
+- (void) registerDevicesForInput;
+
+/**
+ Register all DLABDevice(s) which support output.
+ */
+- (void) registerDevicesForOutput;
+
+/**
+ Register all DLABDevice(s) which support either input/output.
+ */
+- (void) registerDevices;
+
 @end
 
 NS_ASSUME_NONNULL_END
