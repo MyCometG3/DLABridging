@@ -37,6 +37,8 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
         discovery->Release();
         discovery = NULL;
     }
+    
+    [self unregisterDevices];
 }
 
 /* =================================================================================== */
@@ -105,6 +107,13 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     DLABVideoIOSupport newDirection = DLABVideoIOSupportCapture | DLABVideoIOSupportPlayback;
     [self registerDevicesForDirection:newDirection];
+}
+
+- (void) unregisterDevices
+{
+    [self browser_sync:^{
+        [self.devices removeAllObjects];
+    }];
 }
 
 /* =================================================================================== */
