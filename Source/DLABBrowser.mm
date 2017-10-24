@@ -183,9 +183,6 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
             return;
         }
         
-        // initial registration should be done here
-        [self registerDevicesForDirection:newDirection];
-        
         if (!discovery && !callback) {
             discovery = CreateDeckLinkDiscoveryInstance();
             if (discovery) {
