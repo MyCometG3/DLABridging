@@ -70,9 +70,6 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
         }
         direction = DLABVideoIOSupportNone;
 
-        // remove all registerd devices
-        [_devices removeAllObjects];
-        
         if (discovery) {
             if (callback) {
                 result = discovery->UninstallDeviceNotifications();
