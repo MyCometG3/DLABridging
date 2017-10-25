@@ -48,8 +48,9 @@ NS_ASSUME_NONNULL_BEGIN
  Utility method to find all devices of specified direction.
 
  @param newDirection Preferred direction(Capture/Playback/Both).
+ @return Count of registered DLABDevice(s)
  */
-- (void) registerDevicesForDirection:(DLABVideoIOSupport) newDirection;
+- (NSUInteger) registerDevicesForDirection:(DLABVideoIOSupport) newDirection;
 
 /* =================================================================================== */
 // MARK: - private query

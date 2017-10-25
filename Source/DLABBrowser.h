@@ -127,18 +127,24 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Register all DLABDevice(s) which support input.
+
+ @return Count of registered DLABDevice(s)
  */
-- (void) registerDevicesForInput;
+- (NSUInteger) registerDevicesForInput;
 
 /**
  Register all DLABDevice(s) which support output.
+
+ @return Count of registered DLABDevice(s)
  */
-- (void) registerDevicesForOutput;
+- (NSUInteger) registerDevicesForOutput;
 
 /**
  Register all DLABDevice(s) which support either input/output.
+
+ @return Count of registered DLABDevice(s)
  */
-- (void) registerDevices;
+- (NSUInteger) registerDevices;
 
 /**
  Unregister all DLABDevice(s).

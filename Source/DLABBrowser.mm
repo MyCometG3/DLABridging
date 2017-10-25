@@ -91,22 +91,22 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     }
 }
 
-- (void) registerDevicesForInput
+- (NSUInteger) registerDevicesForInput
 {
     DLABVideoIOSupport newDirection = DLABVideoIOSupportCapture;
-    [self registerDevicesForDirection:newDirection];
+    return [self registerDevicesForDirection:newDirection];
 }
 
-- (void) registerDevicesForOutput
+- (NSUInteger) registerDevicesForOutput
 {
     DLABVideoIOSupport newDirection = DLABVideoIOSupportPlayback;
-    [self registerDevicesForDirection:newDirection];
+    return [self registerDevicesForDirection:newDirection];
 }
 
-- (void) registerDevices
+- (NSUInteger) registerDevices
 {
     DLABVideoIOSupport newDirection = DLABVideoIOSupportCapture | DLABVideoIOSupportPlayback;
-    [self registerDevicesForDirection:newDirection];
+    return [self registerDevicesForDirection:newDirection];
 }
 
 - (void) unregisterDevices
@@ -211,7 +211,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     }
 }
 
-- (void) registerDevicesForDirection:(DLABVideoIOSupport) newDirection
+- (NSUInteger) registerDevicesForDirection:(DLABVideoIOSupport) newDirection
 {
     NSParameterAssert(newDirection);
     
@@ -253,6 +253,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
             [self.devices addObjectsFromArray:newDevices];
         }];
     }
+    return [newDevices count];
 }
 
 /* =================================================================================== */
