@@ -624,8 +624,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _outputPreviewCallback = NULL;
     }
     if (newPreviewCallback) {
-        newPreviewCallback->AddRef();
         _outputPreviewCallback = newPreviewCallback;
+        _outputPreviewCallback->AddRef();
     }
 }
 
@@ -637,8 +637,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _inputPreviewCallback = NULL;
     }
     if (newPreviewCallback) {
-        newPreviewCallback->AddRef();
         _inputPreviewCallback = newPreviewCallback;
+        _inputPreviewCallback->AddRef();
     }
 }
 

@@ -63,10 +63,8 @@
     uint8_t hour = 0, minute = 0, second = 0, frame = 0;
     DLABTimecodeFlag flag = DLABTimecodeFlagDefault;
     if (timecodeObj) {
-        timecodeObj->AddRef();
         result = timecodeObj->GetComponents(&hour, &minute, &second, &frame);
         flag = (DLABTimecodeFlag) timecodeObj->GetFlags();
-        timecodeObj->Release();
     }
     if (result) return nil;
     

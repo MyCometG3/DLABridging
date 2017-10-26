@@ -292,6 +292,7 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
     }
     return NO;
 }
+
 - (DLABDevice*) deviceWithDeckLink:(IDeckLink *)deckLink inclusive:(BOOL)flag
 {
     NSParameterAssert(deckLink);

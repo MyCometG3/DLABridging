@@ -87,9 +87,9 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     self = [super init];
     if (self) {
         // Retain
-        newDisplayModeObj->AddRef();
         _displayModeObj = newDisplayModeObj;
-        
+        _displayModeObj->AddRef();
+
         // get properties
         HRESULT result = E_FAIL;
         

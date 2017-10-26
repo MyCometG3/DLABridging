@@ -93,11 +93,9 @@
     if (!delegate)
         return;
     
-    // Retain objects first
-    if (videoFrame)
-        videoFrame->AddRef();
-    if (audioPacket)
-        audioPacket->AddRef();
+    // Retain objects first - possible lengthy operation
+    if (videoFrame) videoFrame->AddRef();
+    if (audioPacket) audioPacket->AddRef();
     
     if (videoFrame) {
         // Create video sampleBuffer
@@ -110,9 +108,6 @@
         if (sampleBuffer && setting && self.inputVANCHandler) {
             [self callbackInputVANCHandler:videoFrame];
         }
-        
-        // Free videoFrame
-        videoFrame->Release();
         
         // delegate will handle InputVideoSampleBuffer
         if (sampleBuffer && setting) {
@@ -138,9 +133,6 @@
         // Create audio sampleBuffer
         CMSampleBufferRef sampleBuffer = [self createAudioSampleForAudioPacket:audioPacket];
         
-        // Free audioPacket
-        audioPacket->Release();
-        
         // delegate will handle InputAudioSampleBuffer
         if (sampleBuffer) {
             __weak typeof(self) wself = self;
@@ -153,6 +145,10 @@
             // do nothing
         }
     }
+    
+    // Release objects
+    if (videoFrame) videoFrame->Release();
+    if (audioPacket) audioPacket->Release();
 }
 
 /* =================================================================================== */
