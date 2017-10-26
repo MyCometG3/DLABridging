@@ -40,16 +40,16 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         HRESULT err4 = newDeckLink->QueryInterface(IID_IDeckLinkNotification,
                                                    (void**)&_deckLinkNotification);
         if (err1 || err2 || err3 || err4) {
+            if (_deckLinkAttributes) _deckLinkAttributes->Release();
+            if (_deckLinkConfiguration) _deckLinkConfiguration->Release();
+            if (_deckLinkStatus) _deckLinkStatus->Release();
+            if (_deckLinkNotification) _deckLinkNotification->Release();
             return nil;
         }
         
         // Retain IDeckLink and each Interfaces
         _deckLink = newDeckLink;
         _deckLink->AddRef();
-        _deckLinkAttributes->AddRef();
-        _deckLinkConfiguration->AddRef();
-        _deckLinkStatus->AddRef();
-        _deckLinkNotification->AddRef();
         
         // Validate support feature (capture/playback)
         HRESULT error = E_FAIL;
@@ -60,7 +60,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
             if (support & bmdDeviceSupportsCapture) {
                 error = _deckLink->QueryInterface(IID_IDeckLinkInput, (void **)&_deckLinkInput);
                 if (!error) {
-                    _deckLinkInput->AddRef();
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportCapture);
                     _supportCaptureW = TRUE;
                 }
@@ -68,7 +67,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
             if (support & bmdDeviceSupportsPlayback) {
                 error = _deckLink->QueryInterface(IID_IDeckLinkOutput, (void **)&_deckLinkOutput);
                 if (!error) {
-                    _deckLinkOutput->AddRef();
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportPlayback);
                     _supportPlaybackW = TRUE;
                 }
@@ -85,7 +83,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         if ( (!err1 && keyingInternal) || (!err2 && keyingExternal) || (!err3 && keyingHD) ) {
             error = _deckLink->QueryInterface(IID_IDeckLinkKeyer, (void **)&_deckLinkKeyer);
             if (!error) {
-                _deckLinkKeyer->AddRef();
                 _supportKeyingW = TRUE;
                 if (keyingInternal)
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportInternalKeying);

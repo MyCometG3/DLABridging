@@ -268,8 +268,6 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
     error = deckLink->QueryInterface(IID_IDeckLinkAttributes,
                                      (void **)&attr);
     if (!error && attr) {
-        attr->AddRef();
-    
         int64_t persistentID = 0;
         HRESULT errPID = attr->GetInt(BMDDeckLinkPersistentID, &persistentID);
         if (!errPID) {

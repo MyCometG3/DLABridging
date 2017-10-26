@@ -93,9 +93,6 @@
                                                       pixelFormat, flags, &outFrame);
                     if (result) break;
                     
-                    // Retain output video frame and pool it
-                    outFrame->AddRef();
-                    
                     // register outputVideoFrame into the pool
                     NSValue* ptrValue = [NSValue valueWithPointer:(void*)outFrame];
                     [outputVideoFrameSet addObject:ptrValue];
