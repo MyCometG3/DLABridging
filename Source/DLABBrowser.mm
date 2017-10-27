@@ -282,14 +282,9 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
         attr->Release();
         attr = NULL;
         
-        if (errPID && errTID) {
-            error = E_FAIL;
-        }
-    }
-    
-    if (!error) {
         return YES;
     }
+    
     return NO;
 }
 
