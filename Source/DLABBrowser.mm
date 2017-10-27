@@ -292,27 +292,29 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
 {
     NSParameterAssert(deckLink);
     
+    if (!flag) {
+        return [self deviceWithDeckLink:deckLink];
+    }
+    
     int64_t newTopologicalID = 0;
     int64_t newPersistentID = 0;
-    if (flag && !getTwoIDs(deckLink, &newTopologicalID, &newPersistentID)) {
+    if (!getTwoIDs(deckLink, &newTopologicalID, &newPersistentID)) {
         return nil;
     }
     
     for (DLABDevice* device in self.devices) {
+        int64_t srcTopologicalID = 0;
+        int64_t srcPersistentID = 0;
+        if (!getTwoIDs(device.deckLink, &srcTopologicalID, &srcPersistentID)) {
+            continue;
+        }
+        
         if (device.deckLink == deckLink) {
             return device;
         }
-        
-        if (flag) {
-            int64_t srcTopologicalID = 0;
-            int64_t srcPersistentID = 0;
-            if (!getTwoIDs(device.deckLink, &srcTopologicalID, &srcPersistentID)) {
-                continue;
-            }
-            if (srcTopologicalID == newTopologicalID &&
-                srcPersistentID == newPersistentID) {
-                return device;
-            }
+        if (srcTopologicalID == newTopologicalID &&
+            srcPersistentID == newPersistentID) {
+            return device;
         }
     }
     return nil;
