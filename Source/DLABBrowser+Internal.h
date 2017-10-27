@@ -24,6 +24,11 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 /**
+ True if subscribing DeviceNotification.
+ */
+@property (nonatomic, assign) BOOL isInstalled;
+
+/**
  NSMutableArray of DLABDevice objects.
  */
 @property (nonatomic, strong, nullable) NSMutableArray* devices;

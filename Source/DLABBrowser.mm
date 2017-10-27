@@ -29,15 +29,6 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     [self stop];
     
-    if (callback) {
-        callback->Release();
-        callback = NULL;
-    }
-    if (discovery) {
-        discovery->Release();
-        discovery = NULL;
-    }
-    
     [self unregisterDevices];
 }
 
@@ -72,16 +63,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
         }
         direction = DLABVideoIOSupportNone;
 
-        if (discovery) {
-            if (callback) {
-                result = discovery->UninstallDeviceNotifications();
-                
-                callback->Release();
-                callback = NULL;
-            }
-            discovery->Release();
-            discovery = NULL;
-        }
+        result = [self subscribeDeviceNotification:NO];
     }];
     
     if (!result) {
@@ -172,6 +154,51 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 // MARK: - private method - utility method
 /* =================================================================================== */
 
+- (HRESULT) subscribeDeviceNotification:(BOOL)flag
+{
+    HRESULT result = E_FAIL;
+    if (flag) {
+        if (!self.isInstalled) {
+            discovery = CreateDeckLinkDiscoveryInstance();
+            callback = new DLABDeviceNotificationCallback(self);
+            if (discovery && callback) {
+                result = discovery->InstallDeviceNotifications(callback);
+            }
+        }
+        if (!result) {
+            self.isInstalled = YES;
+        } else {
+            if (callback) {
+                callback->Release();
+                callback = NULL;
+            }
+            if (discovery) {
+                discovery->Release();
+                discovery = NULL;
+            }
+        }
+        return result;
+    } else {
+        if (self.isInstalled) {
+            if (discovery && callback) {
+                result = discovery->UninstallDeviceNotifications();
+            }
+        }
+        if (!result) {
+            self.isInstalled = NO;
+            if (callback) {
+                callback->Release();
+                callback = NULL;
+            }
+            if (discovery) {
+                discovery->Release();
+                discovery = NULL;
+            }
+        }
+        return result;
+    }
+}
+
 - (BOOL) startForDirection:(DLABVideoIOSupport) newDirection
 {
     NSParameterAssert(newDirection);
@@ -189,16 +216,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
             return;
         }
         
-        if (!discovery && !callback) {
-            discovery = CreateDeckLinkDiscoveryInstance();
-            if (discovery) {
-                callback = new DLABDeviceNotificationCallback(self);
-                if (callback) {
-                    result = discovery->InstallDeviceNotifications(callback);
-                }
-            }
-        }
-        
+        result = [self subscribeDeviceNotification:YES];
         if (!result) {
             direction = newDirection;
         }
