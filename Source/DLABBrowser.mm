@@ -102,6 +102,10 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 // MARK: - public query
 /* =================================================================================== */
 
+- (BOOL) isRunning {
+    return _isInstalled;
+}
+
 - (NSArray*) allDevices
 {
     __block NSArray* array = nil;

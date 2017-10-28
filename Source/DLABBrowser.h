@@ -62,6 +62,8 @@ NS_ASSUME_NONNULL_BEGIN
 // MARK: Public query
 /* =================================================================================== */
 
+@property (nonatomic, assign, readonly) BOOL isRunning;
+
 /**
  Query all detected devices.
  */
