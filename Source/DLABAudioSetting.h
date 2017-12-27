@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) uint32_t sampleSize;
 
 /**
- Number of audio channel. 1 for Mono, 2 for Stereo. 16 max for discrete.
+ Number of audio channel. 2 for Stereo. 8 or 16 for discrete.
  */
 @property (nonatomic, assign, readonly) uint32_t channelCount;
 
