@@ -58,10 +58,10 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     __block HRESULT result = E_FAIL;
     [self browser_sync:^{
-        if (direction == DLABVideoIOSupportNone) {
+        if (self->direction == DLABVideoIOSupportNone) {
             return;
         }
-        direction = DLABVideoIOSupportNone;
+        self->direction = DLABVideoIOSupportNone;
 
         result = [self subscribeDeviceNotification:NO];
     }];
@@ -215,14 +215,14 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     
     __block HRESULT result = E_FAIL;
     [self browser_sync:^{
-        BOOL currentFlag = (direction != DLABVideoIOSupportNone);
+        BOOL currentFlag = (self->direction != DLABVideoIOSupportNone);
         if (currentFlag) {
             return;
         }
         
         result = [self subscribeDeviceNotification:YES];
         if (!result) {
-            direction = newDirection;
+            self->direction = newDirection;
         }
     }];
     
@@ -369,9 +369,9 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
         
         DLABDevice* device = [[DLABDevice alloc] initWithDeckLink:deckLink];
         if (device) {
-            BOOL captureFlag = ((direction & DLABVideoIOSupportCapture) &&
+            BOOL captureFlag = ((self->direction & DLABVideoIOSupportCapture) &&
                                 device.supportCaptureW);
-            BOOL playbackFlag = ((direction & DLABVideoIOSupportPlayback) &&
+            BOOL playbackFlag = ((self->direction & DLABVideoIOSupportPlayback) &&
                                  device.supportPlaybackW);
             
             if (captureFlag || playbackFlag) {
