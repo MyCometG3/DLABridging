@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable CMBlockBufferRef) createBlockBufferOfSMPTETime:(CVSMPTETime)smpteTime
                                             sizes:(size_t)sizes
                                            quanta:(uint32_t)quanta
-                                           tcType:(uint32_t)tcType;
+                                           tcType:(uint32_t)tcType CF_RETURNS_RETAINED;
 
 @end
 

@@ -142,7 +142,7 @@
         if (ready) {
             // ASBD
             AudioStreamBasicDescription streamBasicDescription = {
-                sampleRate,                         //mSampleRate
+                static_cast<Float64>(sampleRate),   //mSampleRate
                 kAudioFormatLinearPCM,              //mFormatID
                 kAudioFormatFlagIsSignedInteger,    //mFormatFlags
                 sampleSize,                         //mBytesPerPacket
