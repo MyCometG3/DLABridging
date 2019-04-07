@@ -88,11 +88,11 @@ NOTE: This framework is under development.
     device = nil
 
 #### Development environment
-- MacOS X 10.12.6 Sierra
-- Xcode 9.0.1
-- Objective-C++, Swift 4.0
+- MacOS X 10.14.4 Mojave
+- Xcode 10.2.0
+- Objective-C++, Swift 5.0
 
 #### License
     - The MIT License
 
-Copyright © 2017年 MyCometG3. All rights reserved.
+Copyright © 2017-2019年 MyCometG3. All rights reserved.
