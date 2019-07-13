@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -125,7 +125,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
  */
-@property (nonatomic, assign, readonly) DLABDisplayModeSupportFlag displayModeSupport;
+@property (nonatomic, assign, readonly) DLABDisplayModeSupportFlag1011 displayModeSupport __attribute__((deprecated));
 
 /* =================================================================================== */
 // MARK: Property - Ready on streaming

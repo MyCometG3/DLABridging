@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -338,34 +338,52 @@
 - (DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
                                                pixelFormat:(DLABPixelFormat)pixelFormat
                                                 outputFlag:(DLABVideoOutputFlag)videoOutputFlag
-                                               supportedAs:(DLABDisplayModeSupportFlag*)displayModeSupportFlag
+                                               supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
                                                      error:(NSError**)error
 {
     NSParameterAssert(displayMode && pixelFormat);
     
-    __block HRESULT result = E_FAIL;
-    DLABVideoSetting* setting = nil;
+    DLABVideoSetting* setting = [self createOutputVideoSettingOfDisplayMode:displayMode
+                                                                pixelFormat:pixelFormat
+                                                                 outputFlag:videoOutputFlag
+                                                                      error:error];
+    if (setting && displayModeSupportFlag) {
+        *displayModeSupportFlag = DLABDisplayModeSupportFlag1011Supported;
+    }
     
+    return setting;
+}
+
+- (DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
+                                               pixelFormat:(DLABPixelFormat)pixelFormat
+                                                outputFlag:(DLABVideoOutputFlag)videoOutputFlag
+                                                     error:(NSError**)error
+{
+    NSParameterAssert(displayMode && pixelFormat);
+    
+    DLABVideoSetting* setting = nil;
     IDeckLinkOutput *output = self.deckLinkOutput;
     if (output) {
-        __block BMDDisplayModeSupport support = bmdDisplayModeNotSupported;
-        __block IDeckLinkDisplayMode* displayModeObj = NULL;
+        __block HRESULT result = E_FAIL;
+        __block BMDDisplayMode actualMode = 0;
+        __block bool supported = false;
         [self playback_sync:^{
-            result = output->DoesSupportVideoMode(displayMode,
+            result = output->DoesSupportVideoMode(bmdVideoConnectionUnspecified,
+                                                  displayMode,
                                                   pixelFormat,
                                                   videoOutputFlag,
-                                                  &support,
-                                                  &displayModeObj);
+                                                  &actualMode,
+                                                  &supported);
         }];
         if (!result) {
-            *displayModeSupportFlag = (DLABDisplayModeSupportFlag)support;
-            
-            setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
-                                                           pixelFormat:pixelFormat
-                                                       videoOutputFlag:videoOutputFlag
-                                                    displayModeSupport:support];
-            
-            displayModeObj->Release();
+            if (supported) {
+                IDeckLinkDisplayMode* displayModeObj = NULL;
+                output->GetDisplayMode(actualMode, &displayModeObj);
+                setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
+                                                               pixelFormat:pixelFormat
+                                                           videoOutputFlag:videoOutputFlag];
+                displayModeObj->Release();
+            }
         } else {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkOutput::DoesSupportVideoMode failed."

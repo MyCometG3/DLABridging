@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -286,8 +286,8 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
 {
     HRESULT error = E_FAIL;
     
-    IDeckLinkAttributes* attr = NULL;
-    error = deckLink->QueryInterface(IID_IDeckLinkAttributes,
+    IDeckLinkProfileAttributes* attr = NULL;
+    error = deckLink->QueryInterface(IID_IDeckLinkProfileAttributes,
                                      (void **)&attr);
     if (!error && attr) {
         int64_t persistentID = 0;

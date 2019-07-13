@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -587,7 +587,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
                                                         pixelFormat:(DLABPixelFormat)format
                                                          outputFlag:(DLABVideoOutputFlag)videoOutputFlag
-                                                        supportedAs:(DLABDisplayModeSupportFlag*)displayModeSupportFlag
+                                                        supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
+                                                              error:(NSError * _Nullable * _Nullable)error __attribute__((deprecated));
+
+- (nullable DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
+                                                        pixelFormat:(DLABPixelFormat)format
+                                                         outputFlag:(DLABVideoOutputFlag)videoOutputFlag
                                                               error:(NSError * _Nullable * _Nullable)error;
 
 /**
@@ -992,7 +997,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
                                                        pixelFormat:(DLABPixelFormat)format
                                                          inputFlag:(DLABVideoInputFlag)videoInputFlag
-                                                       supportedAs:(DLABDisplayModeSupportFlag*)displayModeSupportFlag
+                                                       supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
+                                                             error:(NSError * _Nullable * _Nullable)error __attribute__((deprecated));
+
+- (nullable DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
+                                                       pixelFormat:(DLABPixelFormat)format
+                                                         inputFlag:(DLABVideoInputFlag)videoInputFlag
                                                              error:(NSError * _Nullable * _Nullable)error;
 
 /**

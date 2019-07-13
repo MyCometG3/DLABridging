@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -43,15 +43,28 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
 - (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                             pixelFormat:(BMDPixelFormat)pixelFormat
                          videoInputFlag:(BMDVideoInputFlags)inputFlag
-                     displayModeSupport:(BMDDisplayModeSupport)displayModeSupport
+                     displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport
 {
     NSParameterAssert(newDisplayModeObj && pixelFormat && displayModeSupport);
+    self = [self initWithDisplayModeObj:newDisplayModeObj
+                            pixelFormat:pixelFormat
+                         videoInputFlag:inputFlag];
+    if (self) {
+        _displayModeSupportW = (DLABDisplayModeSupportFlag1011)displayModeSupport;
+    }
+    return self;
+}
+
+- (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
+                            pixelFormat:(BMDPixelFormat)pixelFormat
+                         videoInputFlag:(BMDVideoInputFlags)inputFlag
+{
+    NSParameterAssert(newDisplayModeObj && pixelFormat);
     
     self = [self initWithDisplayModeObj:newDisplayModeObj];
     if (self) {
         _pixelFormatW = (DLABPixelFormat)pixelFormat;
         _inputFlagW = (DLABVideoInputFlag)inputFlag;
-        _displayModeSupportW = (DLABDisplayModeSupportFlag)displayModeSupport;
         _rowBytesW = rowBytesFor(pixelFormat, _widthW);
         
         _useVITCW = !_isHDW;
@@ -63,15 +76,29 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
 - (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                             pixelFormat:(BMDPixelFormat)pixelFormat
                         videoOutputFlag:(BMDVideoOutputFlags)outputFlag
-                     displayModeSupport:(BMDDisplayModeSupport)displayModeSupport
+                     displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport
 {
     NSParameterAssert(newDisplayModeObj && pixelFormat && displayModeSupport);
+    
+    self = [self initWithDisplayModeObj:newDisplayModeObj
+                            pixelFormat:pixelFormat
+                        videoOutputFlag:outputFlag];
+    if (self) {
+        _displayModeSupportW = (DLABDisplayModeSupportFlag1011)displayModeSupport;
+    }
+    return self;
+}
+
+- (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
+                            pixelFormat:(BMDPixelFormat)pixelFormat
+                        videoOutputFlag:(BMDVideoOutputFlags)outputFlag
+{
+    NSParameterAssert(newDisplayModeObj && pixelFormat);
     
     self = [self initWithDisplayModeObj:newDisplayModeObj];
     if (self) {
         _pixelFormatW = (DLABPixelFormat)pixelFormat;
         _outputFlagW = (DLABVideoOutputFlag)outputFlag;
-        _displayModeSupportW = (DLABDisplayModeSupportFlag)displayModeSupport;
         _rowBytesW = rowBytesFor(pixelFormat, _widthW);
         
         _useVITCW = !_isHDW && (_outputFlagW & bmdVideoOutputVITC);
@@ -118,7 +145,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         // uint32_t
         _displayModeW = (DLABDisplayMode) _displayModeObj->GetDisplayMode();
         _fieldDominanceW = (DLABFieldDominance) _displayModeObj->GetFieldDominance();
-        _displayModeFlagW = (DLABDisplayModeSupportFlag) _displayModeObj->GetFlags();
+        _displayModeFlagW = (DLABDisplayModeFlag) _displayModeObj->GetFlags();
         
         //
         switch (_displayModeW) {
@@ -195,7 +222,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     if (!( self.pixelFormatW == object.pixelFormatW )) return NO;
     if (!( self.inputFlagW == object.inputFlagW )) return NO;
     if (!( self.outputFlagW == object.outputFlagW )) return NO;
-    if (!( self.displayModeSupportW == object.displayModeSupportW )) return NO;
+    if (!( self.displayModeSupportW == object.displayModeSupportW )) return NO; // TODO: deprecated
     
     if (!( self.rowBytesW == object.rowBytesW )) return NO;
     
@@ -231,7 +258,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         obj.pixelFormatW = self.pixelFormatW;
         obj.inputFlagW = self.inputFlagW;
         obj.outputFlagW = self.outputFlagW;
-        obj.displayModeSupportW = self.displayModeSupportW;
+        obj.displayModeSupportW = self.displayModeSupportW; // TODO: deprecated
         obj.rowBytesW = self.rowBytesW;
         
         // private properties
@@ -305,7 +332,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
 - (DLABPixelFormat) pixelFormat { return _pixelFormatW; }
 - (DLABVideoInputFlag) inputFlag { return _inputFlagW; }
 - (DLABVideoOutputFlag) outputFlag { return _outputFlagW; }
-- (DLABDisplayModeSupportFlag) displayModeSupport { return _displayModeSupportW; }
+- (DLABDisplayModeSupportFlag1011) displayModeSupport { return _displayModeSupportW; } // TODO: deprecated
 - (long) rowBytes { return _rowBytesW; }
 - (CMVideoFormatDescriptionRef) videoFormatDescription { return _videoFormatDescriptionW; }
 - (BOOL) isHD { return _isHDW; }
@@ -355,7 +382,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     DLABPixelFormat pixelFormat = self.pixelFormatW;
     DLABVideoInputFlag inputFlag = self.inputFlagW;
     DLABVideoOutputFlag outputFlag = self.outputFlagW;
-    DLABDisplayModeSupportFlag displayModeSupport = self.displayModeSupportW;
+    DLABDisplayModeSupportFlag1011 displayModeSupport = self.displayModeSupportW; // TODO: deprecated
     
     NSDictionary *displayModeDictionary = @{@"objIdentifier" : obj,
                                             @"width" : @(width),
@@ -369,7 +396,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
                                             @"pixelFormat" : @(pixelFormat),
                                             @"inputFlag" : @(inputFlag),
                                             @"outputFlag" : @(outputFlag),
-                                            @"displayModeSupport" : @(displayModeSupport),
+                                            @"displayModeSupport" : @(displayModeSupport), // TODO: deprecated
                                             @"rowBytes" : @(rowBytes),
                                             };
     return displayModeDictionary;

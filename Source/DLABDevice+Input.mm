@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -33,7 +33,6 @@
     // get current inputSetting parameters
     BMDPixelFormat pixelFormat = self.inputVideoSettingW.pixelFormatW;
     BMDVideoInputFlags inputFlag = self.inputVideoSettingW.inputFlagW;
-    BMDDisplayModeSupport displayModeSupport = self.inputVideoSettingW.displayModeSupportW;
     
     // decide new color space
     BOOL yuvColorSpaceNow = (pixelFormat == bmdFormat8BitYUV || pixelFormat == bmdFormat10BitYUV);
@@ -62,8 +61,7 @@
     if (pixelFormat) {
         tmpSetting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                           pixelFormat:pixelFormat
-                                                       videoInputFlag:inputFlag
-                                                   displayModeSupport:displayModeSupport];
+                                                       videoInputFlag:inputFlag];
         [tmpSetting buildVideoFormatDescription];
     } else {
         // do nothing. let delegate handle the error.
@@ -543,32 +541,51 @@
 - (DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
                                               pixelFormat:(DLABPixelFormat)pixelFormat
                                                 inputFlag:(DLABVideoInputFlag)videoInputFlag
-                                              supportedAs:(DLABDisplayModeSupportFlag*)displayModeSupportFlag
+                                              supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
+                                                    error:(NSError**)error
+{
+    NSParameterAssert(displayMode && pixelFormat);
+    
+    DLABVideoSetting* setting = [self createInputVideoSettingOfDisplayMode:displayMode
+                                                               pixelFormat:pixelFormat
+                                                                 inputFlag:videoInputFlag
+                                                                     error:error];
+    if (setting && displayModeSupportFlag) {
+        *displayModeSupportFlag = DLABDisplayModeSupportFlag1011Supported;
+    }
+    
+    return setting;
+}
+
+- (DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
+                                              pixelFormat:(DLABPixelFormat)pixelFormat
+                                                inputFlag:(DLABVideoInputFlag)videoInputFlag
                                                     error:(NSError**)error
 {
     NSParameterAssert(displayMode && pixelFormat);
     
     __block HRESULT result = E_FAIL;
-    __block BMDDisplayModeSupport support = bmdDisplayModeNotSupported;
-    __block IDeckLinkDisplayMode* displayModeObj = NULL;
     DLABVideoSetting* setting = nil;
     IDeckLinkInput *input = self.deckLinkInput;
     if (input) {
+        __block bool supported = false;
         [self capture_sync:^{
-            result = input->DoesSupportVideoMode(displayMode,
+            result = input->DoesSupportVideoMode(bmdVideoConnectionUnspecified,
+                                                 displayMode,
                                                  pixelFormat,
                                                  videoInputFlag,
-                                                 &support,
-                                                 &displayModeObj);
+                                                 &supported);
         }];
         if (!result) {
-            setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
-                                                           pixelFormat:pixelFormat
-                                                        videoInputFlag:videoInputFlag
-                                                    displayModeSupport:support];
-            [setting buildVideoFormatDescription];
-            
-            displayModeObj->Release();
+            if (supported) {
+                IDeckLinkDisplayMode* displayModeObj = NULL;
+                input->GetDisplayMode(displayMode, &displayModeObj);
+                setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
+                                                               pixelFormat:pixelFormat
+                                                            videoInputFlag:videoInputFlag];
+                [setting buildVideoFormatDescription];
+                displayModeObj->Release();
+            }
         } else {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkInput::DoesSupportVideoMode failed."
@@ -579,10 +596,6 @@
     }
     
     if (setting && setting.videoFormatDescriptionW) {
-        if (displayModeSupportFlag) {
-            *displayModeSupportFlag = (DLABDisplayModeSupportFlag)support;
-        }
-        
         return setting;
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]

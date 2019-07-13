@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -35,7 +35,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                                      pixelFormat:(BMDPixelFormat)pixelFormat
                                   videoInputFlag:(BMDVideoInputFlags)inputFlag
-                              displayModeSupport:(BMDDisplayModeSupport)displayModeSupport;
+                              displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport __attribute__((deprecated));
+
+- (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
+                                     pixelFormat:(BMDPixelFormat)pixelFormat
+                                  videoInputFlag:(BMDVideoInputFlags)inputFlag;
 
 /**
  Create DLABVideoSetting(Output) instance from IDeckLinkDisplayMode Object and required details.
@@ -49,7 +53,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                                      pixelFormat:(BMDPixelFormat)pixelFormat
                                  videoOutputFlag:(BMDVideoOutputFlags)outputFlag
-                              displayModeSupport:(BMDDisplayModeSupport)displayModeSupport;
+                              displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport __attribute__((deprecated));
+
+- (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
+                                     pixelFormat:(BMDPixelFormat)pixelFormat
+                                 videoOutputFlag:(BMDVideoOutputFlags)outputFlag;
 
 /* =================================================================================== */
 // MARK: - (Private) - error helper
@@ -228,7 +236,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
  */
-@property (nonatomic, assign) DLABDisplayModeSupportFlag displayModeSupportW;
+@property (nonatomic, assign) DLABDisplayModeSupportFlag1011 displayModeSupportW __attribute__((deprecated));
 
 /* =================================================================================== */
 // MARK: Property - Ready on streaming

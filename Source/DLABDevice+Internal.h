@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -11,6 +11,7 @@
 #import "DLABDevice.h"
 
 #import "DeckLinkAPI.h"
+#import "DeckLinkAPI_v10_11.h"
 
 #import "DLABInputCallback.h"
 #import "DLABOutputCallback.h"
@@ -156,7 +157,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  IDeckLinkAttributes object.
  */
-@property (nonatomic, assign) IDeckLinkAttributes *deckLinkAttributes;
+@property (nonatomic, assign) IDeckLinkProfileAttributes *deckLinkProfileAttributes;
 
 /**
  IDeckLinkConfiguration object.

@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017年 Takashi Mochizuki. All rights reserved.
+//  Copyright © 2017, 2019年 Takashi Mochizuki. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -31,8 +31,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     
     if (self = [super init]) {
         // validate property support (attributes/configuration/status/notification)
-        HRESULT err1 = newDeckLink->QueryInterface(IID_IDeckLinkAttributes,
-                                                   (void **)&_deckLinkAttributes);
+        HRESULT err1 = newDeckLink->QueryInterface(IID_IDeckLinkProfileAttributes,
+                                                   (void **)&_deckLinkProfileAttributes);
         HRESULT err2 = newDeckLink->QueryInterface(IID_IDeckLinkConfiguration,
                                                    (void **)&_deckLinkConfiguration);
         HRESULT err3 = newDeckLink->QueryInterface(IID_IDeckLinkStatus,
@@ -40,7 +40,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         HRESULT err4 = newDeckLink->QueryInterface(IID_IDeckLinkNotification,
                                                    (void**)&_deckLinkNotification);
         if (err1 || err2 || err3 || err4) {
-            if (_deckLinkAttributes) _deckLinkAttributes->Release();
+            if (_deckLinkProfileAttributes) _deckLinkProfileAttributes->Release();
             if (_deckLinkConfiguration) _deckLinkConfiguration->Release();
             if (_deckLinkStatus) _deckLinkStatus->Release();
             if (_deckLinkNotification) _deckLinkNotification->Release();
@@ -54,7 +54,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         // Validate support feature (capture/playback)
         HRESULT error = E_FAIL;
         int64_t support = 0;
-        error = _deckLinkAttributes->GetInt(BMDDeckLinkVideoIOSupport, &support);
+        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkVideoIOSupport, &support);
         if (!error && support) {
             _supportFlagW = DLABVideoIOSupportNone;
             if (support & bmdDeviceSupportsCapture) {
@@ -75,12 +75,10 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         
         // Validate support feature (Internal/External/HD keying)
         bool keyingInternal = false;
-        err1 = _deckLinkAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &keyingInternal);
+        err1 = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &keyingInternal);
         bool keyingExternal = false;
-        err2 = _deckLinkAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &keyingExternal);
-        bool keyingHD = false;
-        err3 = _deckLinkAttributes->GetFlag(BMDDeckLinkSupportsHDKeying, &keyingHD);
-        if ( (!err1 && keyingInternal) || (!err2 && keyingExternal) || (!err3 && keyingHD) ) {
+        err2 = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &keyingExternal);
+        if ( (!err1 && keyingInternal) || (!err2 && keyingExternal) ) {
             error = _deckLink->QueryInterface(IID_IDeckLinkKeyer, (void **)&_deckLinkKeyer);
             if (!error) {
                 _supportKeyingW = TRUE;
@@ -88,8 +86,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportInternalKeying);
                 if (keyingExternal)
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportExternalKeying);
-                if (keyingHD)
-                    _supportFlagW = (_supportFlagW | DLABVideoIOSupportHDKeying);
             }
         }
         
@@ -106,17 +102,17 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         
         _persistentIDW = 0;
         int64_t newPersistentID = 0;
-        error = _deckLinkAttributes->GetInt(BMDDeckLinkPersistentID, &newPersistentID);
+        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkPersistentID, &newPersistentID);
         if (!error) _persistentIDW = newPersistentID;
         
         _topologicalIDW = 0;
         int64_t newTopologicalID = 0;
-        error = _deckLinkAttributes->GetInt(BMDDeckLinkTopologicalID, &newTopologicalID);
+        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkTopologicalID, &newTopologicalID);
         if (!error) _topologicalIDW = newTopologicalID;
         
         _supportInputFormatDetectionW = false;
         bool newSupportsInputFormatDetection = false;
-        error = _deckLinkAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
+        error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
                                              &newSupportsInputFormatDetection);
         if (!error) _supportInputFormatDetectionW = newSupportsInputFormatDetection;
         
@@ -183,8 +179,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _deckLinkConfiguration->Release();
         //_deckLinkConfiguration = NULL;
     }
-    if (_deckLinkAttributes) {
-        _deckLinkAttributes->Release();
+    if (_deckLinkProfileAttributes) {
+        _deckLinkProfileAttributes->Release();
         //_deckLinkAttributes = NULL;
     }
     if (_deckLink) {
@@ -652,7 +648,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     bool newBoolValue = false;
-    result = _deckLinkAttributes->GetFlag(attr, &newBoolValue);
+    result = _deckLinkProfileAttributes->GetFlag(attr, &newBoolValue);
     if (!result) {
         return @(newBoolValue);
     } else {
@@ -670,7 +666,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     int64_t newIntValue = 0;
-    result = _deckLinkAttributes->GetInt(attr, &newIntValue);
+    result = _deckLinkProfileAttributes->GetInt(attr, &newIntValue);
     if (!result) {
         return @(newIntValue);
     } else {
@@ -688,7 +684,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     double newDoubleValue = 0;
-    result = _deckLinkAttributes->GetFloat(attr, &newDoubleValue);
+    result = _deckLinkProfileAttributes->GetFloat(attr, &newDoubleValue);
     if (!result) {
         return @(newDoubleValue);
     } else {
@@ -706,7 +702,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     CFStringRef newStringValue = NULL;
-    result = _deckLinkAttributes->GetString(attr, &newStringValue);
+    result = _deckLinkProfileAttributes->GetString(attr, &newStringValue);
     if (!result) {
         return (NSString*)CFBridgingRelease(newStringValue);
     } else {
