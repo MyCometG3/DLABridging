@@ -5,9 +5,19 @@ Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 - __Requirement__: MacOS X 10.11 or later.
 - __Capture Device__: Blackmagic Intensity Shuttle, or other DeckLink devices.
 - __Restriction__: Only 8 or 10 bit yuv, or 8 bit rgb are supported.
-- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh_10.9.5 or later.
+- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh_11.2 or later.
 
 NOTE: This framework is under development.
+NOTE: Currently following features are not supported.
+  : IDeckLinkVideoFrame3DExtensions
+  : IDeckLinkAPIInformation
+  : IDeckLinkMemoryAllocator
+  : IDeckLinkScreenPreviewCallback, IDeckLinkGLScreenPreviewHelper
+  : IDeckLinkDeckControl, IDeckLinkDeckControlStatusCallback
+  : Any encoder related class - IBMDStreaming*, IDeckLinkEncoder*, etc.
+  : IDeckLinkVideoFrameMetadataExtensions
+  : IDeckLinkVideoConversion
+  : High-End features - IDeckLinkProfileIterator, -Callback, -Manager
 
 #### Basic usage (capture)
 
@@ -28,12 +38,10 @@ NOTE: This framework is under development.
     do {
       try device.setInputScreenPreviewTo(parentView)
 
-      var displayModeSupportFlag:DLABDisplayModeSupportFlag = .notSupported
       var vSetting:DLABVideoSetting? = nil
       try vSetting = device.createInputVideoSetting(of: .modeNTSC,
                                                     pixelFormat: .format8BitYUV,
-                                                    inputFlag: [],
-                                                    supportedAs: &displayModeSupportFlag)
+                                                    inputFlag: [])
       var aSetting:DLABAudioSetting? = nil
       try aSetting = device.createInputAudioSetting(of: .type16bitInteger,
                                                     channelCount: 2,
@@ -47,7 +55,7 @@ NOTE: This framework is under development.
                                 vSpacing: 33)
       }
 
-      if let vSetting = vSetting, let aSetting = aSetting, displayModeSupportFlag != .notSupported {
+      if let vSetting = vSetting, let aSetting = aSetting {
         device.inputDelegate = self
         try device.enableVideoInput(with: vSetting)
         try device.enableAudioInput(with: aSetting)
@@ -88,9 +96,9 @@ NOTE: This framework is under development.
     device = nil
 
 #### Development environment
-- MacOS X 10.14.4 Mojave
-- Xcode 10.2.0
-- Objective-C++, Swift 5.0
+- MacOS X 10.14.5 Mojave
+- Xcode 10.2.1
+- Objective-C++, Swift 5.0.1
 
 #### License
     - The MIT License
