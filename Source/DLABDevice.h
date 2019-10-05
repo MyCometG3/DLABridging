@@ -19,6 +19,37 @@
 @class DLABTimecodeSetting;
 
 /* =================================================================================== */
+/*
+ : About unsupported feature(s):
+ : Following interfaces are not supported. (Section # are from SDK 11.4 pdf)
+ :
+ : 2.5.8 IDeckLinkVideoFrame3DExtensions
+ : 2.5.18 IDeckLinkMemoryAllocator
+ : 2.5.21 IDeckLinkVideoFrameAncillaryPackets   // TODO
+ : 2.5.22 IDeckLinkAncillaryPacketIterator      // TODO
+ : 2.5.23 IDeckLinkAncillaryPacket              // TODO
+ : 2.5.26 IDeckLinkGLScreenPreviewHelper
+ : 2.5.27 IDeckLinkCocoaScreenPreviewCallback
+ : 2.5.28 IDeckLinkDX9ScreenPreviewHelper
+ : 2.5.29 IDeckLinkDeckControl
+ : 2.5.30 IDeckLinkDeckControlStatusCallback.
+ : 2.5.35 IDeckLinkEncoderInput
+ : 2.5.36 IDeckLinkEncoderInputCallback
+ : 2.5.37 IDeckLinkEncoderPacket
+ : 2.5.38 IDeckLinkEncoderVideoPacket
+ : 2.5.39 IDeckLinkEncoderAudioPacket
+ : 2.5.40 IDeckLinkH265NALPacket
+ : 2.5.41 IDeckLinkEncoderConfiguration
+ : 2.5.43 IDeckLinkVideoFrameMetadataExtensions // TODO
+ : 2.5.44 IDeckLinkVideoConversion
+ : 2.5.45 IDeckLinkHDMIInputEDID                // TODO
+ : 2.5.46 IDeckLinkProfileManager               // TODO
+ : 2.5.47 IDeckLinkProfileIterator              // TODO
+ : 2.5.48 IDeckLinkProfile                      // TODO
+ : 2.5.49 IDeckLinkProfileCallback              // TODO
+ : 2.6.x Any Streaming Interface APIs
+ */
+/* =================================================================================== */
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -207,15 +238,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  General DeckLink Device object, wrapper of multiple original DeckLink API C++ objects.
-
- NOTE: Currently following features are not supported.
-  : IdeckLinkVideoFrame3DExtensions
-  : IDeckLinkMemoryAllocator
-  : IDeckLinkScreenPreviewCallback, IDeckLinkGLScreenPreviewHelper
-  : IDeckLinkDeckControl, IDeckLinkDeckControlStatusCallback.
-  : Any Encoder related features (compressed packet support).
-  : IDeckLinkVideoFrameMetadataExtensions
-  : IDeckLinkVideoConversion
  */
 @interface DLABDevice : NSObject
 
