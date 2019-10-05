@@ -38,6 +38,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong) dispatch_queue_t browserQueue;
 
+/**
+ IDeckLinkAPIInformation object interface.
+ */
+@property (nonatomic, assign, nullable) IDeckLinkAPIInformation* apiInformation;
+
 /* =================================================================================== */
 // MARK: - private method - utility method
 /* =================================================================================== */

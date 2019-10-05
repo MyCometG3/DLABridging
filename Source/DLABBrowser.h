@@ -95,6 +95,38 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable DLABDevice*) deviceWithModelName:(NSString*)model
                                  displayName:(NSString*)display;
 
+/**
+ Getter for DLABDeckLinkAPIInformation
+
+ @param informationID DLABDeckLinkAPIInformation
+ @return Query result in NSNumber<BOOL>* form.
+ */
+- (nullable NSNumber*) boolValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID;
+
+/**
+ Getter for DLABDeckLinkAPIInformation
+ 
+ @param informationID DLABDeckLinkAPIInformation
+ @return Query result in NSNumber<int64_t>* form.
+ */
+- (nullable NSNumber*) intValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID;
+
+/**
+ Getter for DLABDeckLinkAPIInformation
+ 
+ @param informationID DLABDeckLinkAPIInformation
+ @return Query result in NSNumber<double>* form.
+ */
+- (nullable NSNumber*) doubleValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID;
+
+/**
+ Getter for DLABDeckLinkAPIInformation
+ 
+ @param informationID DLABDeckLinkAPIInformation
+ @return Query result in NSString* form.
+ */
+- (nullable NSString*) stringValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID;
+
 /* =================================================================================== */
 // MARK: Public method
 /* =================================================================================== */

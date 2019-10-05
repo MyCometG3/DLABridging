@@ -30,6 +30,10 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     [self stop];
     
     [self unregisterDevices];
+    
+    if (_apiInformation != NULL) {
+        _apiInformation->Release();
+    }
 }
 
 /* =================================================================================== */
@@ -149,6 +153,70 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     for (DLABDevice* device in self.devices) {
         if (device.topologicalIDW == topologicalID) {
             return device;
+        }
+    }
+    return nil;
+}
+
+/* =================================================================================== */
+// MARK: public Key/Value
+/* =================================================================================== */
+
+- (NSNumber*) boolValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID
+{
+    IDeckLinkAPIInformation* api = self.apiInformation;
+    if (api) {
+        HRESULT result = E_FAIL;
+        BMDDeckLinkAPIInformationID cfgID = informationID;
+        bool newBoolValue = false;
+        result = api->GetFlag(cfgID, &newBoolValue);
+        if (!result) {
+            return @(newBoolValue);
+        }
+    }
+    return nil;
+}
+
+- (NSNumber*) intValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID
+{
+    IDeckLinkAPIInformation* api = self.apiInformation;
+    if (api) {
+        HRESULT result = E_FAIL;
+        BMDDeckLinkAPIInformationID cfgID = informationID;
+        int64_t newIntValue = false;
+        result = api->GetInt(cfgID, &newIntValue);
+        if (!result) {
+            return @(newIntValue);
+        }
+    }
+    return nil;
+}
+
+- (NSNumber*) doubleValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID
+{
+    IDeckLinkAPIInformation* api = self.apiInformation;
+    if (api) {
+        HRESULT result = E_FAIL;
+        BMDDeckLinkAPIInformationID cfgID = informationID;
+        double newDoubleValue = false;
+        result = api->GetFloat(cfgID, &newDoubleValue);
+        if (!result) {
+            return @(newDoubleValue);
+        }
+    }
+    return nil;
+}
+
+- (NSString*) stringValueForAPIInformation:(DLABDeckLinkAPIInformation)informationID
+{
+    IDeckLinkAPIInformation* api = self.apiInformation;
+    if (api) {
+        HRESULT result = E_FAIL;
+        BMDDeckLinkAPIInformationID cfgID = informationID;
+        CFStringRef newStringValue = NULL;
+        result = api->GetString(cfgID, &newStringValue);
+        if (!result) {
+            return (NSString*)CFBridgingRelease(newStringValue);
         }
     }
     return nil;
@@ -408,6 +476,15 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
         dispatch_queue_set_specific(_browserQueue, browserQueueKey, unused, NULL);
     }
     return _browserQueue;
+}
+
+- (IDeckLinkAPIInformation*) apiInformation
+{
+    if (!_apiInformation) {
+        IDeckLinkAPIInformation* interface = CreateDeckLinkAPIInformationInstance();
+        _apiInformation = interface;
+    }
+    return _apiInformation;
 }
 
 /* =================================================================================== */

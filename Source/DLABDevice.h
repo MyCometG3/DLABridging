@@ -210,7 +210,6 @@ NS_ASSUME_NONNULL_BEGIN
 
  NOTE: Currently following features are not supported.
   : IdeckLinkVideoFrame3DExtensions
-  : IDeckLinkAPIInformation
   : IDeckLinkMemoryAllocator
   : IDeckLinkScreenPreviewCallback, IDeckLinkGLScreenPreviewHelper
   : IDeckLinkDeckControl, IDeckLinkDeckControlStatusCallback.
