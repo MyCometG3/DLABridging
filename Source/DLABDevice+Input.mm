@@ -564,17 +564,38 @@
 {
     NSParameterAssert(displayMode && pixelFormat);
     
+    DLABVideoConnection videoConnection = DLABVideoConnectionUnspecified;
+    DLABSupportedVideoModeFlag supportedVideoModeFlag = DLABSupportedVideoModeFlagDefault;
+    DLABVideoSetting* setting = [self createInputVideoSettingOfDisplayMode:displayMode
+                                                               pixelFormat:pixelFormat
+                                                                 inputFlag:videoInputFlag
+                                                                connection:videoConnection
+                                                         supportedModeFlag:supportedVideoModeFlag
+                                                                     error:error];
+    
+    return setting;
+}
+
+- (DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
+                                              pixelFormat:(DLABPixelFormat)pixelFormat
+                                                inputFlag:(DLABVideoInputFlag)videoInputFlag
+                                               connection:(DLABVideoConnection)videoConnection
+                                        supportedModeFlag:(DLABSupportedVideoModeFlag)supportedVideoModeFlag
+                                                    error:(NSError**)error
+{
+    NSParameterAssert(displayMode && pixelFormat);
+    
     __block HRESULT result = E_FAIL;
     DLABVideoSetting* setting = nil;
     IDeckLinkInput *input = self.deckLinkInput;
     if (input) {
         __block bool supported = false;
         [self capture_sync:^{
-            result = input->DoesSupportVideoMode(bmdVideoConnectionUnspecified,
-                                                 displayMode,
-                                                 pixelFormat,
-                                                 videoInputFlag,
-                                                 &supported);
+            result = input->DoesSupportVideoMode(videoConnection,           // BMDVideoConnection = DLABVideoConnection
+                                                 displayMode,               // BMDDisplayMode = DLABDisplayMode
+                                                 pixelFormat,               // BMDPixelFormat = DLABPixelFormat
+                                                 supportedVideoModeFlag,    // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                 &supported);               // bool
         }];
         if (!result) {
             if (supported) {

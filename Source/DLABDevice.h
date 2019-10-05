@@ -590,9 +590,36 @@ NS_ASSUME_NONNULL_BEGIN
                                                         supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
                                                               error:(NSError * _Nullable * _Nullable)error __attribute__((deprecated));
 
+/**
+ Convenience constructer for Output Video Setting
+ 
+ @param mode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
+ @param format Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
+ @param videoOutputFlag Additional flag of video (i.e. DLABVideoOutputFlagVANC)
+ @param error Error description if failed.
+ @return Output Video Setting Object.
+ */
 - (nullable DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
                                                         pixelFormat:(DLABPixelFormat)format
                                                          outputFlag:(DLABVideoOutputFlag)videoOutputFlag
+                                                              error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Convenience constructer for Output Video Setting
+
+ @param displayMode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
+ @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
+ @param videoOutputFlag Additional flag of video (i.e. DLABVideoOutputFlagVANC)
+ @param videoConnection Video connection types
+ @param supportedVideoModeFlag Flags to describe supported video mode
+ @param error Error description if failed.
+ @return Output Video Setting Object.
+ */
+- (nullable DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
+                                                        pixelFormat:(DLABPixelFormat)pixelFormat
+                                                         outputFlag:(DLABVideoOutputFlag)videoOutputFlag
+                                                         connection:(DLABVideoConnection)videoConnection
+                                                  supportedModeFlag:(DLABSupportedVideoModeFlag)supportedVideoModeFlag
                                                               error:(NSError * _Nullable * _Nullable)error;
 
 /**
@@ -1000,9 +1027,36 @@ NS_ASSUME_NONNULL_BEGIN
                                                        supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
                                                              error:(NSError * _Nullable * _Nullable)error __attribute__((deprecated));
 
+/**
+ Convenience constructer for Input Video Setting
+ 
+ @param mode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
+ @param format Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
+ @param videoInputFlag Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
+ @param error Error description if failed.
+ @return Input Video Setting Object.
+ */
 - (nullable DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
                                                        pixelFormat:(DLABPixelFormat)format
                                                          inputFlag:(DLABVideoInputFlag)videoInputFlag
+                                                             error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Convenience constructer for Input Video Setting
+
+ @param displayMode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
+ @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
+ @param videoInputFlag Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
+ @param videoConnection Video connection types
+ @param supportedVideoModeFlag Flags to describe supported video mode
+ @param error Error description if failed.
+ @return Input Video Setting Object.
+ */
+- (nullable DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
+                                                       pixelFormat:(DLABPixelFormat)pixelFormat
+                                                         inputFlag:(DLABVideoInputFlag)videoInputFlag
+                                                        connection:(DLABVideoConnection)videoConnection
+                                                 supportedModeFlag:(DLABSupportedVideoModeFlag)supportedVideoModeFlag
                                                              error:(NSError * _Nullable * _Nullable)error;
 
 /**

@@ -361,6 +361,27 @@
 {
     NSParameterAssert(displayMode && pixelFormat);
     
+    DLABVideoConnection videoConnection = DLABVideoConnectionUnspecified;
+    DLABSupportedVideoModeFlag supportedVideoModeFlag = DLABSupportedVideoModeFlagDefault;
+    DLABVideoSetting* setting = [self createOutputVideoSettingOfDisplayMode:displayMode
+                                                                pixelFormat:pixelFormat
+                                                                 outputFlag:videoOutputFlag
+                                                                 connection:videoConnection
+                                                          supportedModeFlag:supportedVideoModeFlag
+                                                                      error:error];
+    
+    return setting;
+}
+
+- (DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
+                                               pixelFormat:(DLABPixelFormat)pixelFormat
+                                                outputFlag:(DLABVideoOutputFlag)videoOutputFlag
+                                                connection:(DLABVideoConnection)videoConnection
+                                         supportedModeFlag:(DLABSupportedVideoModeFlag)supportedVideoModeFlag
+                                                     error:(NSError**)error
+{
+    NSParameterAssert(displayMode && pixelFormat);
+    
     DLABVideoSetting* setting = nil;
     IDeckLinkOutput *output = self.deckLinkOutput;
     if (output) {
@@ -368,12 +389,12 @@
         __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
         [self playback_sync:^{
-            result = output->DoesSupportVideoMode(bmdVideoConnectionUnspecified,
-                                                  displayMode,
-                                                  pixelFormat,
-                                                  videoOutputFlag,
-                                                  &actualMode,
-                                                  &supported);
+            result = output->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
+                                                  displayMode,              // BMDDisplayMode = DLABDisplayMode
+                                                  pixelFormat,              // BMDPixelFormat = DLABPixelFormat
+                                                  supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                  &actualMode,              // BMDDisplayMode = DLABDisplayMode
+                                                  &supported);              // bool
         }];
         if (!result) {
             if (supported) {
