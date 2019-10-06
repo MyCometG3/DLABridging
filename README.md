@@ -5,19 +5,37 @@ Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 - __Requirement__: MacOS X 10.11 or later.
 - __Capture Device__: Blackmagic Intensity Shuttle, or other DeckLink devices.
 - __Restriction__: Only 8 or 10 bit yuv, or 8 bit rgb are supported.
-- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh_11.2 or later.
+- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh_11.4 or later.
 
 NOTE: This framework is under development.
-NOTE: Currently following features are not supported.
-  : IDeckLinkVideoFrame3DExtensions
-  : IDeckLinkAPIInformation
-  : IDeckLinkMemoryAllocator
-  : IDeckLinkScreenPreviewCallback, IDeckLinkGLScreenPreviewHelper
-  : IDeckLinkDeckControl, IDeckLinkDeckControlStatusCallback
-  : Any encoder related class - IBMDStreaming*, IDeckLinkEncoder*, etc.
-  : IDeckLinkVideoFrameMetadataExtensions
-  : IDeckLinkVideoConversion
-  : High-End features - IDeckLinkProfileIterator, -Callback, -Manager
+
+#### About unsupported feature(s):
+    : Following interfaces are not supported. (Section # are from SDK 11.4 pdf)
+    :
+    : 2.5.8 IDeckLinkVideoFrame3DExtensions
+    : 2.5.18 IDeckLinkMemoryAllocator
+    : 2.5.21 IDeckLinkVideoFrameAncillaryPackets   // TODO
+    : 2.5.22 IDeckLinkAncillaryPacketIterator      // TODO
+    : 2.5.23 IDeckLinkAncillaryPacket              // TODO
+    : 2.5.26 IDeckLinkGLScreenPreviewHelper
+    : 2.5.27 IDeckLinkCocoaScreenPreviewCallback
+    : 2.5.28 IDeckLinkDX9ScreenPreviewHelper
+    : 2.5.29 IDeckLinkDeckControl
+    : 2.5.30 IDeckLinkDeckControlStatusCallback.
+    : 2.5.35 IDeckLinkEncoderInput
+    : 2.5.36 IDeckLinkEncoderInputCallback
+    : 2.5.37 IDeckLinkEncoderPacket
+    : 2.5.38 IDeckLinkEncoderVideoPacket
+    : 2.5.39 IDeckLinkEncoderAudioPacket
+    : 2.5.40 IDeckLinkH265NALPacket
+    : 2.5.41 IDeckLinkEncoderConfiguration
+    : 2.5.43 IDeckLinkVideoFrameMetadataExtensions // TODO
+    : 2.5.44 IDeckLinkVideoConversion
+    : 2.5.46 IDeckLinkProfileManager               // TODO
+    : 2.5.47 IDeckLinkProfileIterator              // TODO
+    : 2.5.48 IDeckLinkProfile                      // TODO
+    : 2.5.49 IDeckLinkProfileCallback              // TODO
+    : 2.6.x Any Streaming Interface APIs
 
 #### Basic usage (capture)
 
@@ -96,11 +114,11 @@ NOTE: Currently following features are not supported.
     device = nil
 
 #### Development environment
-- MacOS X 10.14.5 Mojave
-- Xcode 10.2.1
+- MacOS X 10.14.6 Mojave
+- Xcode 10.3
 - Objective-C++, Swift 5.0.1
 
 #### License
-    - The MIT License
+- The MIT License
 
 Copyright © 2017-2019年 MyCometG3. All rights reserved.
