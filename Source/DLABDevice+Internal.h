@@ -175,6 +175,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) IDeckLinkNotification *deckLinkNotification;
 
 /**
+ IDeckLinkHDMIInputEDID object.
+ */
+@property (nonatomic, assign, nullable) IDeckLinkHDMIInputEDID *deckLinkHDMIInputEDID;
+
+/**
  IDeckLinkInput object for input.
  */
 @property (nonatomic, assign, nullable) IDeckLinkInput *deckLinkInput;

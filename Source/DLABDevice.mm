@@ -118,6 +118,13 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         
         outputVideoFrameSet = [NSMutableSet set];
         outputVideoFrameIdleSet = [NSMutableSet set];
+        
+        // validate HDMIInputEDID support (optional)
+        error = newDeckLink->QueryInterface(IID_IDeckLinkHDMIInputEDID, (void **)&_deckLinkHDMIInputEDID);
+        if (error) {
+            if (_deckLinkHDMIInputEDID) _deckLinkHDMIInputEDID->Release();
+            _deckLinkHDMIInputEDID = NULL;
+        }
     }
     return self;
 }
@@ -170,6 +177,10 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     if (_deckLinkKeyer) {
         _deckLinkKeyer->Release();
         _deckLinkKeyer = NULL;
+    }
+    if (_deckLinkHDMIInputEDID) {
+        _deckLinkHDMIInputEDID->Release();
+        _deckLinkHDMIInputEDID = NULL;
     }
     if (_deckLinkStatus) {
         _deckLinkStatus->Release();

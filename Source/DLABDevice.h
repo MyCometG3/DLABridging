@@ -42,7 +42,6 @@
  : 2.5.41 IDeckLinkEncoderConfiguration
  : 2.5.43 IDeckLinkVideoFrameMetadataExtensions // TODO
  : 2.5.44 IDeckLinkVideoConversion
- : 2.5.45 IDeckLinkHDMIInputEDID                // TODO
  : 2.5.46 IDeckLinkProfileManager               // TODO
  : 2.5.47 IDeckLinkProfileIterator              // TODO
  : 2.5.48 IDeckLinkProfile                      // TODO
@@ -1221,6 +1220,40 @@ NS_ASSUME_NONNULL_BEGIN
                                        timeInFrame:(NSInteger*)timeInFrame
                                      ticksPerFrame:(NSInteger*)ticksPerFrame
                                              error:(NSError * _Nullable * _Nullable)error;
+
+/* =================================================================================== */
+// MARK: HDMIInputEDID
+/* =================================================================================== */
+
+/**
+ Wrapper of IDeckLinkHDMIInputEDID::GetInt
+
+ @param hdmiInputEDID DLABDeckLinkHDMIInputEDID
+ @param error Error description if failed.
+ @return Query result in NSNumber<int64_t>* form.
+ */
+- (nullable NSNumber*) intValueForHDMIInputEDID:(DLABDeckLinkHDMIInputEDID) hdmiInputEDID
+                                          error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Wrapper of IDeckLinkHDMIInputEDID::SetInt
+
+ @param value NSInteger value
+ @param hdmiInputEDID DLABDeckLinkHDMIInputEDID
+ @param error Error description if failed.
+ @return YES if no error, NO if failed
+ */
+- (BOOL) setIntValue:(NSInteger)value
+    forHDMIInputEDID:(DLABDeckLinkHDMIInputEDID) hdmiInputEDID
+               error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Wrapper of IDeckLinkHDMIInputEDID::WriteToEDID
+
+ @param error Error description if failed.
+ @return YES if no error, NO if failed
+ */
+- (BOOL) writeToHDMIInputEDIDWithError:(NSError * _Nullable * _Nullable)error;
 
 @end
 

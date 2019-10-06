@@ -991,4 +991,85 @@
     }
 }
 
+/* =================================================================================== */
+// MARK: HDMIInputEDID
+/* =================================================================================== */
+
+- (NSNumber*) intValueForHDMIInputEDID:(DLABDeckLinkHDMIInputEDID) hdmiInputEDID
+                                 error:(NSError**)error
+{
+    IDeckLinkHDMIInputEDID *inputEDID = self.deckLinkHDMIInputEDID;
+    if (inputEDID) {
+        HRESULT result = E_FAIL;
+        BMDDeckLinkHDMIInputEDIDID edid = hdmiInputEDID;
+        int64_t newIntValue = 0;
+        result = inputEDID->GetInt(edid, &newIntValue);
+        if (!result) {
+            return @(newIntValue);
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkHDMIInputEDID::GetInt failed."
+                  code:result
+                    to:error];
+        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkHDMIInputEDID is not supported."
+              code:E_NOINTERFACE
+                to:error];
+    }
+    return nil;
+}
+
+- (BOOL) setIntValue:(NSInteger)value
+    forHDMIInputEDID:(DLABDeckLinkHDMIInputEDID) hdmiInputEDID
+               error:(NSError**)error
+{
+    IDeckLinkHDMIInputEDID *inputEDID = self.deckLinkHDMIInputEDID;
+    if (inputEDID) {
+        HRESULT result = E_FAIL;
+        BMDDeckLinkHDMIInputEDIDID edid = hdmiInputEDID;
+        int64_t newIntValue = (int64_t)value;
+        result = inputEDID->SetInt(edid, newIntValue);
+        if (!result) {
+            return YES;
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkHDMIInputEDID::SetInt failed."
+                  code:result
+                    to:error];
+            return NO;
+        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkHDMIInputEDID is not supported."
+              code:E_NOINTERFACE
+                to:error];
+    }
+    return FALSE;
+}
+
+- (BOOL) writeToHDMIInputEDIDWithError:(NSError**)error
+{
+    IDeckLinkHDMIInputEDID *inputEDID = self.deckLinkHDMIInputEDID;
+    if (inputEDID) {
+        HRESULT result = E_FAIL;
+        result = inputEDID->WriteToEDID();
+        if (!result) {
+            return YES;
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkHDMIInputEDID::WriteToEDID failed."
+                  code:result
+                    to:error];
+        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkHDMIInputEDID is not supported."
+              code:E_NOINTERFACE
+                to:error];
+    }
+    return FALSE;
+}
+
 @end
