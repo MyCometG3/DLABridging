@@ -1,5 +1,5 @@
 /* -LICENSE-START-
-** Copyright (c) 2019 Blackmagic Design
+** Copyright (c) 2020 Blackmagic Design
 **
 ** Permission is hereby granted, free of charge, to any person or organization
 ** obtaining a copy of the software and accompanying documentation covered by
@@ -69,8 +69,8 @@ BMD_CONST REFIID IID_IDeckLinkMemoryAllocator                     = /* B36EB6E7-
 BMD_CONST REFIID IID_IDeckLinkAudioOutputCallback                 = /* 403C681B-7F46-4A12-B993-2BB127084EE6 */ { 0x40,0x3C,0x68,0x1B,0x7F,0x46,0x4A,0x12,0xB9,0x93,0x2B,0xB1,0x27,0x08,0x4E,0xE6 };
 BMD_CONST REFIID IID_IDeckLinkIterator                            = /* 50FB36CD-3063-4B73-BDBB-958087F2D8BA */ { 0x50,0xFB,0x36,0xCD,0x30,0x63,0x4B,0x73,0xBD,0xBB,0x95,0x80,0x87,0xF2,0xD8,0xBA };
 BMD_CONST REFIID IID_IDeckLinkAPIInformation                      = /* 7BEA3C68-730D-4322-AF34-8A7152B532A4 */ { 0x7B,0xEA,0x3C,0x68,0x73,0x0D,0x43,0x22,0xAF,0x34,0x8A,0x71,0x52,0xB5,0x32,0xA4 };
-BMD_CONST REFIID IID_IDeckLinkOutput                              = /* 065A0F6C-C508-4D0D-B919-F5EB0EBFC96B */ { 0x06,0x5A,0x0F,0x6C,0xC5,0x08,0x4D,0x0D,0xB9,0x19,0xF5,0xEB,0x0E,0xBF,0xC9,0x6B };
-BMD_CONST REFIID IID_IDeckLinkInput                               = /* 2A88CF76-F494-4216-A7EF-DC74EEB83882 */ { 0x2A,0x88,0xCF,0x76,0xF4,0x94,0x42,0x16,0xA7,0xEF,0xDC,0x74,0xEE,0xB8,0x38,0x82 };
+BMD_CONST REFIID IID_IDeckLinkOutput                              = /* BE2D9020-461E-442F-84B7-E949CB953B9D */ { 0xBE,0x2D,0x90,0x20,0x46,0x1E,0x44,0x2F,0x84,0xB7,0xE9,0x49,0xCB,0x95,0x3B,0x9D };
+BMD_CONST REFIID IID_IDeckLinkInput                               = /* 9434C6E4-B15D-4B1C-979E-661E3DDCB4B9 */ { 0x94,0x34,0xC6,0xE4,0xB1,0x5D,0x4B,0x1C,0x97,0x9E,0x66,0x1E,0x3D,0xDC,0xB4,0xB9 };
 BMD_CONST REFIID IID_IDeckLinkHDMIInputEDID                       = /* ABBBACBC-45BC-4665-9D92-ACE6E5A97902 */ { 0xAB,0xBB,0xAC,0xBC,0x45,0xBC,0x46,0x65,0x9D,0x92,0xAC,0xE6,0xE5,0xA9,0x79,0x02 };
 BMD_CONST REFIID IID_IDeckLinkEncoderInput                        = /* F222551D-13DF-4FD8-B587-9D4F19EC12C9 */ { 0xF2,0x22,0x55,0x1D,0x13,0xDF,0x4F,0xD8,0xB5,0x87,0x9D,0x4F,0x19,0xEC,0x12,0xC9 };
 BMD_CONST REFIID IID_IDeckLinkVideoFrame                          = /* 3F716FE0-F023-4111-BE5D-EF4414C05B17 */ { 0x3F,0x71,0x6F,0xE0,0xF0,0x23,0x41,0x11,0xBE,0x5D,0xEF,0x44,0x14,0xC0,0x5B,0x17 };
@@ -525,6 +525,8 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkAudioOutputXLRChannelCount                        = /* 'aoxc' */ 0x616F7863,
     BMDDeckLinkProfileID                                         = /* 'prid' */ 0x70726964,	// Returns a BMDProfileID
     BMDDeckLinkDuplex                                            = /* 'dupx' */ 0x64757078,
+    BMDDeckLinkMinimumPrerollFrames                              = /* 'mprf' */ 0x6D707266,
+    BMDDeckLinkSupportedDynamicRange                             = /* 'sudr' */ 0x73756472,
 
     /* Floats */
 
@@ -771,7 +773,7 @@ protected:
 class BMD_PUBLIC IDeckLinkOutput : public IUnknown
 {
 public:
-    virtual HRESULT DoesSupportVideoMode (/* in */ BMDVideoConnection connection /* If a value of 0 is specified, the caller does not care about the connection */, /* in */ BMDDisplayMode requestedMode, /* in */ BMDPixelFormat requestedPixelFormat, /* in */ BMDSupportedVideoModeFlags flags, /* out */ BMDDisplayMode* actualMode, /* out */ bool* supported) = 0;
+    virtual HRESULT DoesSupportVideoMode (/* in */ BMDVideoConnection connection /* If a value of 0 is specified, the caller does not care about the connection */, /* in */ BMDDisplayMode requestedMode, /* in */ BMDPixelFormat requestedPixelFormat, /* in */ BMDVideoOutputConversionMode conversionMode, /* in */ BMDSupportedVideoModeFlags flags, /* out */ BMDDisplayMode* actualMode, /* out */ bool* supported) = 0;
     virtual HRESULT GetDisplayMode (/* in */ BMDDisplayMode displayMode, /* out */ IDeckLinkDisplayMode** resultDisplayMode) = 0;
     virtual HRESULT GetDisplayModeIterator (/* out */ IDeckLinkDisplayModeIterator** iterator) = 0;
     virtual HRESULT SetScreenPreviewCallback (/* in */ IDeckLinkScreenPreviewCallback* previewCallback) = 0;
@@ -822,7 +824,7 @@ protected:
 class BMD_PUBLIC IDeckLinkInput : public IUnknown
 {
 public:
-    virtual HRESULT DoesSupportVideoMode (/* in */ BMDVideoConnection connection /* If a value of 0 is specified, the caller does not care about the connection */, /* in */ BMDDisplayMode requestedMode, /* in */ BMDPixelFormat requestedPixelFormat, /* in */ BMDSupportedVideoModeFlags flags, /* out */ bool* supported) = 0;
+    virtual HRESULT DoesSupportVideoMode (/* in */ BMDVideoConnection connection /* If a value of 0 is specified, the caller does not care about the connection */, /* in */ BMDDisplayMode requestedMode, /* in */ BMDPixelFormat requestedPixelFormat, /* in */ BMDVideoInputConversionMode conversionMode, /* in */ BMDSupportedVideoModeFlags flags, /* out */ BMDDisplayMode* actualMode, /* out */ bool* supported) = 0;
     virtual HRESULT GetDisplayMode (/* in */ BMDDisplayMode displayMode, /* out */ IDeckLinkDisplayMode** resultDisplayMode) = 0;
     virtual HRESULT GetDisplayModeIterator (/* out */ IDeckLinkDisplayModeIterator** iterator) = 0;
     virtual HRESULT SetScreenPreviewCallback (/* in */ IDeckLinkScreenPreviewCallback* previewCallback) = 0;
