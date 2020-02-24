@@ -25,10 +25,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_11.4.zip @ 2019/09/09 UTC
+ Derived from: Blackmagic_DeckLink_SDK_11.5.zip @ 2020/02/19 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b040000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.4"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b050000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.5"
  */
 
 /* =================================================================================== */
@@ -423,7 +423,9 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeAudioOutputXLRChannelCount                        = /* 'aoxc' */ 0x616F7863,
     DLABAttributeProfileID                                         = /* 'prid' */ 0x70726964,    // Returns a BMDProfileID
     DLABAttributeDuplex                                            = /* 'dupx' */ 0x64757078,
-    
+    DLABAttributeMinimumPrerollFrames                              = /* 'mprf' */ 0x6D707266,
+    DLABAttributeSupportedDynamicRange                             = /* 'sudr' */ 0x73756472,
+
     /* Floats */
     
     DLABAttributeVideoInputGainMinimum                             = /* 'vigm' */ 0x7669676D,
