@@ -308,10 +308,11 @@
 			};
 			buildConfigurationList = 164C827F1F514632001208BD /* Build configuration list for PBXProject "DLABridging" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
+				Base,
+				en,
 			);
 			mainGroup = 164C827B1F514632001208BD;
 			productRefGroup = 164C82861F514632001208BD /* Products */;
