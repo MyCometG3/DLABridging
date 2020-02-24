@@ -11,7 +11,14 @@
 #import "DLABDevice.h"
 
 #import "DeckLinkAPI.h"
+
 #import "DeckLinkAPI_v10_11.h"
+#import "DeckLinkAPIConfiguration_v10_11.h"
+#import "DeckLinkAPIVideoInput_v10_11.h"
+#import "DeckLinkAPIVideoOutput_v10_11.h"
+
+#import "DeckLinkAPIVideoInput_v11_4.h"
+#import "DeckLinkAPIVideoOutput_v11_4.h"
 
 #import "DLABInputCallback.h"
 #import "DLABOutputCallback.h"
@@ -349,6 +356,11 @@ NS_ASSUME_NONNULL_BEGIN
  CVPixelBufferPoolRef for input PixelBuffer
  */
 @property (nonatomic, assign, nullable) CVPixelBufferPoolRef inputPixelBufferPool;
+
+/**
+ BLACKMAGIC_DECKLINK_API_VERSION from current runtime
+ */
+@property (nonatomic, assign) int apiVersion;
 
 @end
 

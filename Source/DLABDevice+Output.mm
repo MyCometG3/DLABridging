@@ -388,18 +388,34 @@
         __block HRESULT result = E_FAIL;
         __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
+        __block bool pre1105 = (self.apiVersion < 0x0b050000); // 10.11, 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
         [self playback_sync:^{
-            result = output->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
-                                                  displayMode,              // BMDDisplayMode = DLABDisplayMode
-                                                  pixelFormat,              // BMDPixelFormat = DLABPixelFormat
-                                                  supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
-                                                  &actualMode,              // BMDDisplayMode = DLABDisplayMode
-                                                  &supported);              // bool
+            if (!pre1105) {
+                BMDVideoOutputConversionMode convertMode = bmdNoVideoOutputConversion;
+                result = output->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
+                                                      displayMode,              // BMDDisplayMode = DLABDisplayMode
+                                                      pixelFormat,              // BMDPixelFormat = DLABPixelFormat
+                                                      convertMode,              // BMDVideoOutputConversionMode = DLABVideoOutputConversionMode
+                                                      supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                      &actualMode,              // BMDDisplayMode = DLABDisplayMode
+                                                      &supported);              // bool
+            } else
+            if (pre1105) {
+                IDeckLinkOutput_v11_4 *output1104 = (IDeckLinkOutput_v11_4*)output;
+                result = output1104->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
+                                                          displayMode,              // BMDDisplayMode = DLABDisplayMode
+                                                          pixelFormat,              // BMDPixelFormat = DLABPixelFormat
+                                                          supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                          &actualMode,              // BMDDisplayMode = DLABDisplayMode
+                                                          &supported);              // bool
+            }
         }];
         if (!result) {
             if (supported) {
-                IDeckLinkDisplayMode* displayModeObj = NULL;
-                output->GetDisplayMode(actualMode, &displayModeObj);
+                __block IDeckLinkDisplayMode* displayModeObj = NULL;
+                [self playback_sync:^{
+                    output->GetDisplayMode(actualMode, &displayModeObj);
+                }];
                 setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                                pixelFormat:pixelFormat
                                                            videoOutputFlag:videoOutputFlag];

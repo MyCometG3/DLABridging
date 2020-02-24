@@ -39,6 +39,16 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
                                                    (void**)&_deckLinkStatus);
         HRESULT err4 = newDeckLink->QueryInterface(IID_IDeckLinkNotification,
                                                    (void**)&_deckLinkNotification);
+        
+        if (err2) { // 10.11
+            err2 = newDeckLink->QueryInterface(IID_IDeckLinkConfiguration_v10_11, //IID_IDeckLinkConfiguration,
+            (void **)&_deckLinkConfiguration);
+        }
+        if (err4) { // 10.11
+            err4 = newDeckLink->QueryInterface(IID_IDeckLinkNotification_v10_11, //IID_IDeckLinkNotification,
+            (void**)&_deckLinkNotification);
+        }
+        
         if (err1 || err2 || err3 || err4) {
             if (_deckLinkProfileAttributes) _deckLinkProfileAttributes->Release();
             if (_deckLinkConfiguration) _deckLinkConfiguration->Release();
@@ -59,6 +69,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
             _supportFlagW = DLABVideoIOSupportNone;
             if (support & bmdDeviceSupportsCapture) {
                 error = _deckLink->QueryInterface(IID_IDeckLinkInput, (void **)&_deckLinkInput);
+                if (error) { // 11.4
+                    error = _deckLink->QueryInterface(IID_IDeckLinkInput_v11_4, (void **)&_deckLinkInput);
+                }
+                if (error) { // 10.11
+                    error = _deckLink->QueryInterface(IID_IDeckLinkInput_v10_11, (void **)&_deckLinkInput);
+                }
                 if (!error) {
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportCapture);
                     _supportCaptureW = TRUE;
@@ -66,6 +82,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
             }
             if (support & bmdDeviceSupportsPlayback) {
                 error = _deckLink->QueryInterface(IID_IDeckLinkOutput, (void **)&_deckLinkOutput);
+                if (error) { // 11.4
+                    error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v11_4, (void **)&_deckLinkOutput);
+                }
+                if (error) { // 10.11
+                    error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v10_11, (void **)&_deckLinkOutput);
+                }
                 if (!error) {
                     _supportFlagW = (_supportFlagW | DLABVideoIOSupportPlayback);
                     _supportPlaybackW = TRUE;
@@ -540,6 +562,24 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 /* =================================================================================== */
 // MARK: - (Private) - accessor - lazy instantiation
 /* =================================================================================== */
+
+- (int) apiVersion
+{
+    if (_apiVersion == 0) {
+        IDeckLinkAPIInformation* api = CreateDeckLinkAPIInformationInstance();
+        if (api != NULL) {
+            HRESULT result = E_FAIL;
+            BMDDeckLinkAPIInformationID cfgID = DLABDeckLinkAPIInformationVersion;
+            int64_t newIntValue = false;
+            result = api->GetInt(cfgID, &newIntValue);
+            if (!result) {
+                _apiVersion = (int)newIntValue;
+            }
+            api->Release();
+        }
+    }
+    return _apiVersion;
+}
 
 - (DLABInputCallback *)inputCallback
 {

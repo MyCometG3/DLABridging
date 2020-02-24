@@ -585,22 +585,39 @@
 {
     NSParameterAssert(displayMode && pixelFormat);
     
-    __block HRESULT result = E_FAIL;
     DLABVideoSetting* setting = nil;
     IDeckLinkInput *input = self.deckLinkInput;
     if (input) {
+        __block HRESULT result = E_FAIL;
+        __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
+        __block bool pre1105 = (self.apiVersion < 0x0b050000); // 10.11, 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
         [self capture_sync:^{
-            result = input->DoesSupportVideoMode(videoConnection,           // BMDVideoConnection = DLABVideoConnection
-                                                 displayMode,               // BMDDisplayMode = DLABDisplayMode
-                                                 pixelFormat,               // BMDPixelFormat = DLABPixelFormat
-                                                 supportedVideoModeFlag,    // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
-                                                 &supported);               // bool
+            if (!pre1105) {
+                BMDVideoInputConversionMode convertMode = bmdNoVideoInputConversion;
+                result = input->DoesSupportVideoMode(videoConnection,           // BMDVideoConnection = DLABVideoConnection
+                                                     displayMode,               // BMDDisplayMode = DLABDisplayMode
+                                                     pixelFormat,               // BMDPixelFormat = DLABPixelFormat
+                                                     convertMode,               // BMDVideoInputConversionMode = DLABVideoInputConversionMode
+                                                     supportedVideoModeFlag,    // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                     &actualMode,               // BMDDisplayMode = DLABDisplayMode
+                                                     &supported);               // bool
+            } else
+            if (pre1105) {
+                IDeckLinkInput_v11_4 *input1104 = (IDeckLinkInput_v11_4*)input;
+                result = input1104->DoesSupportVideoMode(videoConnection,           // BMDVideoConnection = DLABVideoConnection
+                                                         displayMode,               // BMDDisplayMode = DLABDisplayMode
+                                                         pixelFormat,               // BMDPixelFormat = DLABPixelFormat
+                                                         supportedVideoModeFlag,    // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                         &supported);               // bool
+            }
         }];
         if (!result) {
             if (supported) {
-                IDeckLinkDisplayMode* displayModeObj = NULL;
-                input->GetDisplayMode(displayMode, &displayModeObj);
+                __block IDeckLinkDisplayMode* displayModeObj = NULL;
+                [self capture_sync:^{
+                    input->GetDisplayMode(displayMode, &displayModeObj);
+                }];
                 setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                                pixelFormat:pixelFormat
                                                             videoInputFlag:videoInputFlag];
