@@ -55,6 +55,8 @@
 		164C82EE1F51488A001208BD /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 164C82ED1F51488A001208BD /* CoreVideo.framework */; };
 		164C82F01F514898001208BD /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 164C82EF1F514898001208BD /* CoreMedia.framework */; };
 		164C82F21F5148E3001208BD /* DeckLinkAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 164C82F11F5148E3001208BD /* DeckLinkAPI.framework */; };
+		1656BF02240692E500E95D3B /* DLABAncillaryPacket.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1656BF00240692E500E95D3B /* DLABAncillaryPacket.mm */; };
+		1656BF03240692E500E95D3B /* DLABAncillaryPacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 1656BF01240692E500E95D3B /* DLABAncillaryPacket.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -108,6 +110,8 @@
 		164C82ED1F51488A001208BD /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		164C82EF1F514898001208BD /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		164C82F11F5148E3001208BD /* DeckLinkAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeckLinkAPI.framework; path = ../../../../../../Library/Frameworks/DeckLinkAPI.framework; sourceTree = "<group>"; };
+		1656BF00240692E500E95D3B /* DLABAncillaryPacket.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = DLABAncillaryPacket.mm; sourceTree = "<group>"; };
+		1656BF01240692E500E95D3B /* DLABAncillaryPacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABAncillaryPacket.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +228,8 @@
 				164C82BF1F514687001208BD /* DLABNotificationCallback.mm */,
 				164C82C01F514687001208BD /* DLABOutputCallback.h */,
 				164C82C11F514687001208BD /* DLABOutputCallback.mm */,
+				1656BF01240692E500E95D3B /* DLABAncillaryPacket.h */,
+				1656BF00240692E500E95D3B /* DLABAncillaryPacket.mm */,
 			);
 			path = "C++ Class";
 			sourceTree = "<group>";
@@ -249,6 +255,7 @@
 				164C82D21F514687001208BD /* DLABAudioSetting.h in Headers */,
 				164C82E61F514687001208BD /* DLABTimecodeSetting.h in Headers */,
 				164C82E91F514687001208BD /* DLABVideoSetting.h in Headers */,
+				1656BF03240692E500E95D3B /* DLABAncillaryPacket.h in Headers */,
 				164C82D11F514687001208BD /* DLABAudioSetting+Internal.h in Headers */,
 				163CF46024023A7B00732F8C /* DeckLinkAPIConfiguration_v10_11.h in Headers */,
 				164C82D41F514687001208BD /* DLABBrowser+Internal.h in Headers */,
@@ -345,6 +352,7 @@
 				164C82DA1F514687001208BD /* DLABDevice+Output.mm in Sources */,
 				164C82EA1F514687001208BD /* DLABVideoSetting.mm in Sources */,
 				164C82DC1F514687001208BD /* DLABDevice.mm in Sources */,
+				1656BF02240692E500E95D3B /* DLABAncillaryPacket.mm in Sources */,
 				164C82E41F514687001208BD /* DLABOutputCallback.mm in Sources */,
 				164C82D81F514687001208BD /* DLABDevice+Input.mm in Sources */,
 				163CF46324023A7B00732F8C /* DeckLinkAPIDispatch.cpp in Sources */,

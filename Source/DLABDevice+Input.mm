@@ -107,6 +107,11 @@
             [self callbackInputVANCHandler:videoFrame];
         }
         
+        // Callback VANCPacketHandler block
+        if (sampleBuffer && setting && self.inputVANCPacketHandler) {
+            [self callbackInputVANCPacketHandler:videoFrame];
+        }
+        
         // delegate will handle InputVideoSampleBuffer
         if (sampleBuffer && setting) {
             __weak typeof(self) wself = self;
@@ -523,6 +528,83 @@
                 }
             }
         }];
+    }
+}
+
+// private experimental - VANC Pakcet Capture support
+- (void) callbackInputVANCPacketHandler:(IDeckLinkVideoInputFrame*)inFrame
+{
+    NSParameterAssert(inFrame);
+    
+    // Validate input frame
+    BMDFrameFlags flags = inFrame->GetFlags();
+    if ((flags & bmdFrameHasNoInputSource) != 0) return;
+    
+    BMDTimeValue frameTime = 0;
+    BMDTimeValue frameDuration = 0;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScaleW;
+    HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
+    if (result) return;
+    
+    // Create timinginfo struct
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
+    //
+    InputVANCPacketHandler inHandler = self.inputVANCPacketHandler;
+    if (inHandler) {
+        // Prepare for callback
+        IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
+        result = inFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
+                                         (void**)&frameAncillaryPackets);
+        assert (result == S_OK);
+
+        IDeckLinkAncillaryPacketIterator* iterator = NULL;
+        result = frameAncillaryPackets->GetPacketIterator(&iterator);
+        assert (result == S_OK);
+
+        // Callback in delegate queue
+        [self delegate_sync:^{
+            while (TRUE) {
+                HRESULT ret = S_OK;
+                IDeckLinkAncillaryPacket* packet = NULL;
+                ret = iterator->Next(&packet);
+                if (ret != S_OK) {
+                    if (ret == S_FALSE) {
+                        break; // finished w/o error
+                    } else {
+                        break;
+                    }
+                }
+                
+                BMDAncillaryPacketFormat format = bmdAncillaryPacketFormatUInt8;
+                const void* ptr = NULL;
+                uint32_t size = 0;
+                ret = packet->GetBytes(format, &ptr, &size);
+                if (ret != S_OK) {
+                    break;
+                }
+                
+                uint8_t did = packet->GetDID();
+                uint8_t sdid = packet->GetSDID();
+                uint32_t lineNumber = packet->GetLineNumber();
+                uint8_t dataStreamIndex = packet->GetDataStreamIndex();
+                NSData* data = nil;
+                if (ptr && size)
+                    data = [NSData dataWithBytesNoCopy:(void*)ptr length:(NSUInteger)size];
+                else
+                    data = [NSData data];
+                BOOL result = inHandler(timingInfo, did, sdid, lineNumber, dataStreamIndex,
+                                        data);
+                if (!result) break; // finished w/o error
+            }
+        }];
+        
+        // Clean up
+        iterator->Release();
+        frameAncillaryPackets->Release();
     }
 }
 

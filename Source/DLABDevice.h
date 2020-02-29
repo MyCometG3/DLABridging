@@ -21,13 +21,10 @@
 /* =================================================================================== */
 /*
  : About unsupported feature(s):
- : Following interfaces are not supported. (Section # are from SDK 11.4 pdf)
+ : Following interfaces are not supported. (Section # are from SDK 11.5 pdf)
  :
  : 2.5.8 IDeckLinkVideoFrame3DExtensions
  : 2.5.18 IDeckLinkMemoryAllocator
- : 2.5.21 IDeckLinkVideoFrameAncillaryPackets   // TODO
- : 2.5.22 IDeckLinkAncillaryPacketIterator      // TODO
- : 2.5.23 IDeckLinkAncillaryPacket              // TODO
  : 2.5.26 IDeckLinkGLScreenPreviewHelper
  : 2.5.27 IDeckLinkCocoaScreenPreviewCallback
  : 2.5.28 IDeckLinkDX9ScreenPreviewHelper
@@ -227,6 +224,49 @@ NS_ASSUME_NONNULL_BEGIN
  */
 typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber, void* _Nullable buffer);
 
+/**
+ Experimetal VANC Packet support : VANC Capture callback block
+ 
+ This block is called in sync on delegate queue. You should process immediately.
+ Sequence of callback will be triggered until you returned FALSE (when you finish all of VANC packets).
+ 
+ - input : This block is called prior to inputVideoSample  delegate call is performed
+ 
+ @param timingInfo TimingInfo of Video Input Frame
+ @param did Data ID (DID) for ancillary packet.
+ @param sdid Secondary Data ID (SDID) for ancillary packet.
+ @param lineNumber lineNumber of VANC buffer.
+ @param dataStreamIndex the data stream index for ancillary packet.
+ @param data VANC Packet data encoded in bmdAncillaryPacketFormatUInt8 format.
+ @return Return FALSE if further call is not acceptable.
+ */
+typedef BOOL (^InputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
+                                        uint8_t did,
+                                        uint8_t sdid,
+                                        uint32_t lineNumber,
+                                        uint8_t dataStreamIndex,
+                                        NSData* _Nonnull data);
+
+/**
+ Experimental VANC Packet support : VANC Output callback block
+ 
+ This block is called in sync on delegate queue. You should process immediately.
+ Sequence of callback will be triggered until you returned nil (when you finish all of VANC packets).
+
+ - output : This block is called prior to outputVideoFrame is scheduled
+ 
+ @param timingInfo TimingInfo of Video Input Frame
+ @param did Data ID (DID) for ancillary packet.
+ @param sdid Secondary Data ID (SDID) for ancillary packet.
+ @param lineNumber lineNumber of VANC buffer.
+ @param dataStreamIndex the data stream index for ancillary packet.
+ @return data VANC Packet data encoded in bmdAncillaryPacketFormatUInt8 format.
+ */
+typedef NSData* _Nullable (^OutputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
+                                                      uint8_t* did,
+                                                      uint8_t* sdid,
+                                                      uint32_t* lineNumber,
+                                                      uint8_t* dataStreamIndex);
 NS_ASSUME_NONNULL_END
 
 /* =================================================================================== */
@@ -376,6 +416,16 @@ NS_ASSUME_NONNULL_BEGIN
  Experimental VANC support: Caller should populate VANC callback block.
  */
 @property (nonatomic, copy, nullable) VANCHandler outputVANCHandler;
+
+/**
+ Experimental VANC Packet Capture support: Caller should populate VANC Packet callback block.
+ */
+@property (nonatomic, copy, nullable) InputVANCPacketHandler inputVANCPacketHandler;
+
+/**
+Experimental VANC Packet Output support: Caller should populate VANC Packet callback block.
+*/
+@property (nonatomic, copy, nullable) OutputVANCPacketHandler outputVANCPacketHandler;
 
 /* =================================================================================== */
 // MARK: (Public) - Key/Value

@@ -323,6 +323,65 @@
     }
 }
 
+// private experimental - VANC Packet Output support
+- (void) callbackOutputVANCPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
+                                  atTime:(NSInteger)displayTime
+                                duration:(NSInteger)frameDuration
+                             inTimeScale:(NSInteger)timeScale
+{
+    NSParameterAssert(outFrame && frameDuration && timeScale);
+    
+    //
+    int64_t frameTime = displayTime;
+    
+    // Create timinginfo struct
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
+    //
+    OutputVANCPacketHandler outHandler = self.outputVANCPacketHandler;
+    if (outHandler) {
+        // Prepare for callback
+        IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
+        HRESULT result = outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
+                                                  (void**)&frameAncillaryPackets);
+        assert (result == S_OK);
+        
+        DLABAncillaryPacket* packet = new DLABAncillaryPacket();
+        assert (packet != NULL);
+        
+        // Callback in delegate queue
+        [self delegate_sync:^{
+            while (TRUE) {
+                HRESULT ret = S_OK;
+                uint8_t did = 0;
+                uint8_t sdid = 0;
+                uint32_t lineNumber = 0;
+                uint8_t dataStreamIndex = 0;
+                
+                NSData* data = outHandler(timingInfo, &did, &sdid, &lineNumber, &dataStreamIndex);
+                if (!data) break; // finished w/o error
+                
+                ret = packet->Update(did, sdid, lineNumber, dataStreamIndex, data);
+                if (ret != S_OK) {
+                    break;
+                }
+
+                ret = frameAncillaryPackets->AttachPacket(packet);
+                if (ret != S_OK) {
+                    break;
+                }
+            }
+        }];
+        
+        // Clean up
+        delete packet;
+        frameAncillaryPackets->Release();
+    }
+}
+
 @end
 
 /* =================================================================================== */
@@ -656,6 +715,15 @@
                                 inTimeScale:timeScale];
         }
         
+        // Callback VANCPacketHandler block
+        if (self.outputVANCPacketHandler) {
+            
+            [self callbackOutputVANCPacketHandler:outFrame
+                                           atTime:displayTime
+                                         duration:frameDuration
+                                      inTimeScale:timeScale];
+        }
+        
         // async display
         result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
     }
@@ -731,6 +799,15 @@
                                              atTime:displayTime
                                            duration:frameDuration
                                         inTimeScale:timeScale];
+                }
+                
+                // Callback VANCPacketHandler block
+                if (self.outputVANCPacketHandler) {
+                    
+                    [self callbackOutputVANCPacketHandler:outFrame
+                                                   atTime:displayTime
+                                                 duration:frameDuration
+                                              inTimeScale:timeScale];
                 }
                 
                 // async display
