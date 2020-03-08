@@ -184,35 +184,35 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkPersistentID, &newPersistentID);
     if (!error) _persistentIDW = newPersistentID;
     
-    _deviceGroupID = 0;
+    _deviceGroupIDW = 0;
     int64_t newDeviceGroupID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDeviceGroupID, &newDeviceGroupID);
-    if (!error) _deviceGroupID = newDeviceGroupID;
+    if (!error) _deviceGroupIDW = newDeviceGroupID;
     
     _topologicalIDW = 0;
     int64_t newTopologicalID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkTopologicalID, &newTopologicalID);
     if (!error) _topologicalIDW = newTopologicalID;
     
-    _numberOfSubDevices = 0;
+    _numberOfSubDevicesW = 0;
     int64_t newNumberOfSubDevices = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &newNumberOfSubDevices);
-    if (!error) _numberOfSubDevices = newNumberOfSubDevices;
+    if (!error) _numberOfSubDevicesW = newNumberOfSubDevices;
     
-    _subDeviceIndex = 0;
+    _subDeviceIndexW = 0;
     int64_t newSubDeviceIndex = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkSubDeviceIndex, &newSubDeviceIndex);
-    if (!error) _subDeviceIndex = newSubDeviceIndex;
+    if (!error) _subDeviceIndexW = newSubDeviceIndex;
     
-    _profileID = 0;
+    _profileIDW = 0;
     int64_t newProfileID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkProfileID, &newProfileID);
-    if (!error) _profileID = newProfileID;
+    if (!error) _profileIDW = newProfileID;
     
-    _duplex = 0;
+    _duplexW = 0;
     int64_t newDuplex = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDuplex, &newDuplex);
-    if (!error) _duplex = newDuplex;
+    if (!error) _duplexW = newDuplex;
     
     _supportInputFormatDetectionW = false;
     bool newSupportsInputFormatDetection = false;
@@ -307,12 +307,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize modelNameW = _modelNameW;
 @synthesize displayNameW = _displayNameW;
 @synthesize persistentIDW = _persistentIDW;
-@synthesize deviceGroupID = _deviceGroupID;
+@synthesize deviceGroupIDW = _deviceGroupIDW;
 @synthesize topologicalIDW = _topologicalIDW;
-@synthesize numberOfSubDevices = _numberOfSubDevices;
-@synthesize subDeviceIndex = _subDeviceIndex;
-@synthesize profileID = _profileID;
-@synthesize duplex = _duplex;
+@synthesize numberOfSubDevicesW = _numberOfSubDevicesW;
+@synthesize subDeviceIndexW = _subDeviceIndexW;
+@synthesize profileIDW = _profileIDW;
+@synthesize duplexW = _duplexW;
 @synthesize supportFlagW = _supportFlagW;
 @synthesize supportCaptureW = _supportCaptureW;
 @synthesize supportPlaybackW = _supportPlaybackW;
@@ -329,12 +329,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSString*) modelName { return _modelNameW; }
 - (NSString*) displayName { return _displayNameW; }
 - (int64_t) persistentID { return _persistentIDW; }
-- (int64_t) deviceGroupID { return _deviceGroupID; }
+- (int64_t) deviceGroupID { return _deviceGroupIDW; }
 - (int64_t) topologicalID { return _topologicalIDW; }
-- (int64_t) numberOfSubDevices { return _numberOfSubDevices; }
-- (int64_t) subDeviceIndex { return _subDeviceIndex; }
-- (int64_t) profileID { return _profileID; }
-- (int64_t) duplex { return _duplex; }
+- (int64_t) numberOfSubDevices { return _numberOfSubDevicesW; }
+- (int64_t) subDeviceIndex { return _subDeviceIndexW; }
+- (int64_t) profileID { return _profileIDW; }
+- (int64_t) duplex { return _duplexW; }
 - (DLABVideoIOSupport) supportFlag { return _supportFlagW; }
 - (BOOL) supportCapture { return _supportCaptureW; }
 - (BOOL) supportPlayback { return _supportPlaybackW; }
