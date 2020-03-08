@@ -304,9 +304,34 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) int64_t persistentID;
 
 /**
+ Device's DLABAttributeDeviceGroupID value.
+ */
+@property (nonatomic, assign, readonly) int64_t deviceGroupID;
+
+/**
  Device's DLABAttributeTopologicalID value.
  */
 @property (nonatomic, assign, readonly) int64_t topologicalID;
+
+/**
+ Device's DLABAttributeNumberOfSubDevices value.
+ */
+@property (nonatomic, assign, readonly) int64_t numberOfSubDevices;
+
+/**
+ Device's DLABAttributeSubDeviceIndex value.
+ */
+@property (nonatomic, assign, readonly) int64_t subDeviceIndex;
+
+/**
+ Device's DLABAttributeProfileID value.
+ */
+@property (nonatomic, assign, readonly) int64_t profileID;
+
+/**
+ Device's DLABAttributeDuplex value.
+ */
+@property (nonatomic, assign, readonly) int64_t duplex;
 
 /**
  Detail bitmask of DLABVideoIOSupport. You can examine what kind of keying feature is supported.
