@@ -61,122 +61,167 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _deckLink = newDeckLink;
         _deckLink->AddRef();
         
-        // Validate support feature (capture/playback)
-        HRESULT error = E_FAIL;
-        int64_t support = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkVideoIOSupport, &support);
-        if (!error && support) {
-            _supportFlagW = DLABVideoIOSupportNone;
-            if (support & bmdDeviceSupportsCapture) {
-                error = _deckLink->QueryInterface(IID_IDeckLinkInput, (void **)&_deckLinkInput);
-                if (error) { // 11.4
-                    error = _deckLink->QueryInterface(IID_IDeckLinkInput_v11_4, (void **)&_deckLinkInput);
-                }
-                if (error) { // 10.11
-                    error = _deckLink->QueryInterface(IID_IDeckLinkInput_v10_11, (void **)&_deckLinkInput);
-                }
-                if (!error) {
-                    _supportFlagW = (_supportFlagW | DLABVideoIOSupportCapture);
-                    _supportCaptureW = TRUE;
-                }
-            }
-            if (support & bmdDeviceSupportsPlayback) {
-                error = _deckLink->QueryInterface(IID_IDeckLinkOutput, (void **)&_deckLinkOutput);
-                if (error) { // 11.4
-                    error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v11_4, (void **)&_deckLinkOutput);
-                }
-                if (error) { // 10.11
-                    error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v10_11, (void **)&_deckLinkOutput);
-                }
-                if (!error) {
-                    _supportFlagW = (_supportFlagW | DLABVideoIOSupportPlayback);
-                    _supportPlaybackW = TRUE;
-                }
-            }
-        }
-        
-        // Validate support feature (Internal/External/HD keying)
-        bool keyingInternal = false;
-        err1 = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &keyingInternal);
-        bool keyingExternal = false;
-        err2 = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &keyingExternal);
-        if ( (!err1 && keyingInternal) || (!err2 && keyingExternal) ) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkKeyer, (void **)&_deckLinkKeyer);
-            if (!error) {
-                _supportKeyingW = TRUE;
-                if (keyingInternal)
-                    _supportFlagW = (_supportFlagW | DLABVideoIOSupportInternalKeying);
-                if (keyingExternal)
-                    _supportFlagW = (_supportFlagW | DLABVideoIOSupportExternalKeying);
-            }
-        }
-        
         //
-        _modelNameW = @"Unknown modelName";
-        CFStringRef newModelName = nil;
-        error = _deckLink->GetModelName(&newModelName);
-        if (!error) _modelNameW = CFBridgingRelease(newModelName);
-        
-        _displayNameW = @"Unknown displayName";
-        CFStringRef newDisplayName = nil;
-        error = _deckLink->GetDisplayName(&newDisplayName);
-        if (!error) _displayNameW = CFBridgingRelease(newDisplayName);
-        
-        _persistentIDW = 0;
-        int64_t newPersistentID = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkPersistentID, &newPersistentID);
-        if (!error) _persistentIDW = newPersistentID;
-        
-        _deviceGroupID = 0;
-        int64_t newDeviceGroupID = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDeviceGroupID, &newDeviceGroupID);
-        if (!error) _deviceGroupID = newDeviceGroupID;
-        
-        _topologicalIDW = 0;
-        int64_t newTopologicalID = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkTopologicalID, &newTopologicalID);
-        if (!error) _topologicalIDW = newTopologicalID;
-        
-        _numberOfSubDevices = 0;
-        int64_t newNumberOfSubDevices = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &newNumberOfSubDevices);
-        if (!error) _numberOfSubDevices = newNumberOfSubDevices;
-        
-        _subDeviceIndex = 0;
-        int64_t newSubDeviceIndex = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkSubDeviceIndex, &newSubDeviceIndex);
-        if (!error) _subDeviceIndex = newSubDeviceIndex;
-        
-        _profileID = 0;
-        int64_t newProfileID = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkProfileID, &newProfileID);
-        if (!error) _profileID = newProfileID;
-        
-        _duplex = 0;
-        int64_t newDuplex = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDuplex, &newDuplex);
-        if (!error) _duplex = newDuplex;
-        
-        _supportInputFormatDetectionW = false;
-        bool newSupportsInputFormatDetection = false;
-        error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
-                                             &newSupportsInputFormatDetection);
-        if (!error) _supportInputFormatDetectionW = newSupportsInputFormatDetection;
-        
         outputVideoFrameSet = [NSMutableSet set];
         outputVideoFrameIdleSet = [NSMutableSet set];
         
-        // validate HDMIInputEDID support (optional)
-        error = newDeckLink->QueryInterface(IID_IDeckLinkHDMIInputEDID, (void **)&_deckLinkHDMIInputEDID);
-        if (error) {
-            if (_deckLinkHDMIInputEDID) _deckLinkHDMIInputEDID->Release();
-            _deckLinkHDMIInputEDID = NULL;
-        }
+        //
+        [self validate];
     }
     return self;
 }
 
-- (void) dealloc
+- (void) validate
+{
+    HRESULT error = E_FAIL;
+    
+    // Validate support feature (capture/playback)
+    BOOL supportsCapture = FALSE;
+    BOOL supportsPlayback = FALSE;
+    {
+        int64_t support = 0;
+        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkVideoIOSupport, &support);
+        if (!error) {
+            supportsCapture = (support & bmdDeviceSupportsCapture);
+            supportsPlayback = (support & bmdDeviceSupportsPlayback);
+        }
+    }
+    
+    // Optional c++ objects
+    {
+        // Validate support feature (Capture)
+        if (!_deckLinkInput && supportsCapture) {
+            error = _deckLink->QueryInterface(IID_IDeckLinkInput, (void **)&_deckLinkInput);
+            if (error) { // 11.4
+                error = _deckLink->QueryInterface(IID_IDeckLinkInput_v11_4, (void **)&_deckLinkInput);
+            }
+            if (error) { // 10.11
+                error = _deckLink->QueryInterface(IID_IDeckLinkInput_v10_11, (void **)&_deckLinkInput);
+            }
+            if (error) {
+                if (_deckLinkInput) _deckLinkInput->Release();
+                _deckLinkInput = NULL;
+                supportsCapture = FALSE;
+            }
+        }
+        
+        // Validate support feature (Playback)
+        if (!_deckLinkOutput && supportsPlayback) {
+            error = _deckLink->QueryInterface(IID_IDeckLinkOutput, (void **)&_deckLinkOutput);
+            if (error) { // 11.4
+                error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v11_4, (void **)&_deckLinkOutput);
+            }
+            if (error) { // 10.11
+                error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v10_11, (void **)&_deckLinkOutput);
+            }
+            if (error) {
+                if (_deckLinkOutput) _deckLinkOutput->Release();
+                _deckLinkOutput = NULL;
+                supportsPlayback = FALSE;
+            }
+        }
+        
+        // Validate HDMIInputEDID support (optional)
+        if (!_deckLinkHDMIInputEDID && supportsCapture) {
+            error = _deckLink->QueryInterface(IID_IDeckLinkHDMIInputEDID, (void **)&_deckLinkHDMIInputEDID);
+            if (error) {
+                if (_deckLinkHDMIInputEDID) _deckLinkHDMIInputEDID->Release();
+                _deckLinkHDMIInputEDID = NULL;
+            }
+        }
+        
+        // Validate Keyer support (optional)
+        if (!_deckLinkKeyer && supportsPlayback) {
+            error = _deckLink->QueryInterface(IID_IDeckLinkKeyer, (void **)&_deckLinkKeyer);
+            if (error) {
+                if (_deckLinkKeyer) _deckLinkKeyer->Release();
+                _deckLinkKeyer = NULL;
+            }
+        }
+    }
+    
+    // Validate support feature
+    _supportFlagW = DLABVideoIOSupportNone;
+    _supportCaptureW = FALSE;
+    _supportPlaybackW = FALSE;
+    _supportKeyingW = FALSE;
+    
+    if (supportsCapture) {
+        _supportFlagW = (_supportFlagW | DLABVideoIOSupportCapture);
+        _supportCaptureW = TRUE;
+    }
+    if (supportsPlayback) {
+        _supportFlagW = (_supportFlagW | DLABVideoIOSupportPlayback);
+        _supportPlaybackW = TRUE;
+    }
+    if (_deckLinkKeyer) {
+        bool keyingInternal = false;
+        error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &keyingInternal);
+        if (!error && keyingInternal)
+            _supportFlagW = (_supportFlagW | DLABVideoIOSupportInternalKeying);
+        
+        bool keyingExternal = false;
+        error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &keyingExternal);
+        if (!error && keyingExternal)
+            _supportFlagW = (_supportFlagW | DLABVideoIOSupportExternalKeying);
+        
+        _supportKeyingW = (keyingInternal || keyingExternal);
+    }
+    
+    // Validate attributes
+    _modelNameW = @"Unknown modelName";
+    CFStringRef newModelName = nil;
+    error = _deckLink->GetModelName(&newModelName);
+    if (!error) _modelNameW = CFBridgingRelease(newModelName);
+    
+    _displayNameW = @"Unknown displayName";
+    CFStringRef newDisplayName = nil;
+    error = _deckLink->GetDisplayName(&newDisplayName);
+    if (!error) _displayNameW = CFBridgingRelease(newDisplayName);
+    
+    _persistentIDW = 0;
+    int64_t newPersistentID = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkPersistentID, &newPersistentID);
+    if (!error) _persistentIDW = newPersistentID;
+    
+    _deviceGroupID = 0;
+    int64_t newDeviceGroupID = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDeviceGroupID, &newDeviceGroupID);
+    if (!error) _deviceGroupID = newDeviceGroupID;
+    
+    _topologicalIDW = 0;
+    int64_t newTopologicalID = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkTopologicalID, &newTopologicalID);
+    if (!error) _topologicalIDW = newTopologicalID;
+    
+    _numberOfSubDevices = 0;
+    int64_t newNumberOfSubDevices = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &newNumberOfSubDevices);
+    if (!error) _numberOfSubDevices = newNumberOfSubDevices;
+    
+    _subDeviceIndex = 0;
+    int64_t newSubDeviceIndex = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkSubDeviceIndex, &newSubDeviceIndex);
+    if (!error) _subDeviceIndex = newSubDeviceIndex;
+    
+    _profileID = 0;
+    int64_t newProfileID = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkProfileID, &newProfileID);
+    if (!error) _profileID = newProfileID;
+    
+    _duplex = 0;
+    int64_t newDuplex = 0;
+    error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDuplex, &newDuplex);
+    if (!error) _duplex = newDuplex;
+    
+    _supportInputFormatDetectionW = false;
+    bool newSupportsInputFormatDetection = false;
+    error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
+                                         &newSupportsInputFormatDetection);
+    if (!error) _supportInputFormatDetectionW = newSupportsInputFormatDetection;
+}
+
+- (void) shutdown
 {
     // TODO stop output/input streams
     
@@ -229,6 +274,14 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _deckLinkHDMIInputEDID->Release();
         _deckLinkHDMIInputEDID = NULL;
     }
+}
+
+- (void) dealloc
+{
+    // Shutdown
+    [self shutdown];
+    
+    // Release c++ objects
     if (_deckLinkStatus) {
         _deckLinkStatus->Release();
         //_deckLinkStatus = NULL;

@@ -282,6 +282,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype) init NS_UNAVAILABLE;
 
+/**
+ Revalidate device attributes. Use this while profileActivated callback.
+ */
+- (void) validate;
+
+/**
+ Shutdown device. Use this while profileChanging callback. Stream should be stopped first.
+ */
+- (void) shutdown;
+
 /* =================================================================================== */
 // MARK: (Public) - Readonly
 /* =================================================================================== */
