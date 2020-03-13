@@ -202,6 +202,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, nullable) IDeckLinkKeyer *deckLinkKeyer;
 
+/**
+ IDeckLinkProfileManager object.
+ */
+@property (nonatomic, assign, nullable) IDeckLinkProfileManager *deckLinkProfileManager;
+
 // lazy instantiation
 
 /**

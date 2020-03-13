@@ -39,9 +39,6 @@
  : 2.5.41 IDeckLinkEncoderConfiguration
  : 2.5.43 IDeckLinkVideoFrameMetadataExtensions // TODO
  : 2.5.44 IDeckLinkVideoConversion
- : 2.5.46 IDeckLinkProfileManager               // TODO
- : 2.5.47 IDeckLinkProfileIterator              // TODO
- : 2.5.48 IDeckLinkProfile                      // TODO
  : 2.5.49 IDeckLinkProfileCallback              // TODO
  : 2.6.x Any Streaming Interface APIs
  */
@@ -661,6 +658,29 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 - (nullable NSMutableData*) dataValueForStatus:(DLABDeckLinkStatus)statusID
                                         ofSize:(NSUInteger) requestSize
                                          error:(NSError * _Nullable * _Nullable)error;
+
+/* =================================================================================== */
+// MARK: (Public) - Profile support
+/* =================================================================================== */
+
+/**
+ Array of available DLABProfile.
+ 
+ @return Array of DLABProfile. nil when no profile support is available.
+ */
+- (nullable NSArray<NSNumber*>*) availableProfiles;
+
+/**
+ Activate specified DLABProfile.
+ FALSE always if no profile support is available.
+ */
+- (BOOL)activateProfile:(NSNumber*) newProfileID;
+
+/**
+ Query if DLABProfile is active or not.
+ FALSE always if no profile support is available.
+ */
+- (BOOL)runningProfileIs:(NSNumber*) profileID;
 
 @end
 
