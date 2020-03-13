@@ -250,6 +250,10 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     if (_statusChangeCallback) {
         [self subscribeStatusChangeNotification:NO];
     }
+    if (_profileCallback) {
+        _profileCallback->Release();
+        _profileCallback = NULL;
+    }
     if (_outputPreviewCallback) {
         _outputPreviewCallback->Release();
         _outputPreviewCallback = NULL;
@@ -790,6 +794,19 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     }
 }
 
+- (void) setProfileCallback:(IDeckLinkProfileCallback *)newProfileCallback
+{
+    if (_profileCallback == newProfileCallback) return;
+    if (_profileCallback) {
+        _profileCallback->Release();
+        _profileCallback = NULL;
+    }
+    if (newProfileCallback) {
+        _profileCallback = newProfileCallback;
+        _profileCallback->AddRef();
+    }
+}
+
 /* =================================================================================== */
 // MARK: - getter attributeID
 /* =================================================================================== */
@@ -1150,86 +1167,6 @@ configurationID error:(NSError**)error
                 to:error];
         return nil;
     }
-}
-
-/* =================================================================================== */
-// MARK: (Public) - Profile support
-/* =================================================================================== */
-
-- (nullable NSArray<NSNumber*>*) availableProfiles
-{
-    IDeckLinkProfileManager *mgr = self.deckLinkProfileManager;
-    if (mgr) {
-        HRESULT result = E_FAIL;
-        IDeckLinkProfileIterator *itr = NULL;
-        result = mgr->GetProfiles(&itr);
-        if (result == S_OK && itr) {
-            NSMutableArray* array = [NSMutableArray new];
-            
-            IDeckLinkProfile* profile = NULL;
-            while (itr->Next(&profile) == S_OK && profile) {
-                IDeckLinkProfileAttributes *attr = NULL;
-                result = profile->QueryInterface(IID_IDeckLinkProfileAttributes, (void **)&attr);
-                if (result == S_OK && attr) {
-                    int64_t profileID = 0;
-                    result = attr->GetInt(BMDDeckLinkProfileID, &profileID);
-                    if (result == S_OK && profileID) {
-                        [array addObject:@(profileID)];
-                    }
-                    attr->Release();
-                }
-                profile->Release();
-                profile = NULL;
-            }
-            itr->Release();
-            
-            if (array.count) {
-                return [array copy];
-            }
-        }
-    }
-    return nil;
-}
-
-- (BOOL) activateProfile:(NSNumber *)targetProfileID
-{
-    IDeckLinkProfileManager *mgr = self.deckLinkProfileManager;
-    if (mgr) {
-        HRESULT result = E_FAIL;
-        BMDProfileID profileID = targetProfileID.unsignedIntValue;
-        IDeckLinkProfile* profile = NULL;
-        result = mgr->GetProfile(profileID, &profile);
-        if (result == S_OK && profile) {
-            result = profile->SetActive();
-            profile->Release();
-            
-            if (result == S_OK) {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
-}
-
-- (BOOL) runningProfileIs:(NSNumber *)targetProfileID
-{
-    IDeckLinkProfileManager *mgr = self.deckLinkProfileManager;
-    if (mgr) {
-        HRESULT result = E_FAIL;
-        BMDProfileID profileID = targetProfileID.unsignedIntValue;
-        IDeckLinkProfile* profile = NULL;
-        result = mgr->GetProfile(profileID, &profile);
-        if (result == S_OK && profile) {
-            bool isActive = false;
-            result = profile->IsActive(&isActive);
-            profile->Release();
-            
-            if (result == S_OK && isActive) {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
 }
 
 @end

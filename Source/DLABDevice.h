@@ -17,6 +17,7 @@
 @class DLABVideoSetting;
 @class DLABAudioSetting;
 @class DLABTimecodeSetting;
+@class DLABProfileAttributes;
 
 /* =================================================================================== */
 /*
@@ -39,7 +40,6 @@
  : 2.5.41 IDeckLinkEncoderConfiguration
  : 2.5.43 IDeckLinkVideoFrameMetadataExtensions // TODO
  : 2.5.44 IDeckLinkVideoConversion
- : 2.5.49 IDeckLinkProfileCallback              // TODO
  : 2.6.x Any Streaming Interface APIs
  */
 /* =================================================================================== */
@@ -191,6 +191,40 @@ NS_ASSUME_NONNULL_BEGIN
  Called when preference update is detected.
  */
 - (void)prefsChangedOfDevice:(DLABDevice*)sender;
+@optional
+@end
+
+NS_ASSUME_NONNULL_END
+
+/* =================================================================================== */
+// MARK: -
+/* =================================================================================== */
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ DLABProfileChangeDelegate protocol provides caller to know when profile update is detected.
+ */
+@protocol DLABProfileChangeDelegate <NSObject>
+@required
+/**
+ Called when profile is about to update.
+ 
+ @param attributesObj DLABProfileAttributes
+ @param device DLABDevice
+ @param streamsWillBeForcedToStop streamsWillBeForcedToStop
+ */
+- (void) willApplyProfileAttributes:(DLABProfileAttributes*) attributesObj
+                           toDevice:(DLABDevice*) device
+                           stopping:(BOOL)streamsWillBeForcedToStop;
+/**
+ Called when profile is updated.
+ 
+ @param attributesObj DLABProfileAttributes
+ @param device DLABDevice
+ */
+- (void) didApplyProfileAttributes:(DLABProfileAttributes*) attributesObj
+                          toDevice:(DLABDevice*) device;
 @optional
 @end
 
@@ -425,6 +459,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, weak, nullable) id<DLABPrefsChangeDelegate> prefsDelegate;
 
+/**
+ Caller should populate to receive DLABProfileChangeDelegate call.
+ */
+@property (nonatomic, weak, nullable) id<DLABProfileChangeDelegate> profileDelegate;
+
 /* =================================================================================== */
 // MARK: (Public) - VANC support (experimental)
 /* =================================================================================== */
@@ -658,29 +697,6 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 - (nullable NSMutableData*) dataValueForStatus:(DLABDeckLinkStatus)statusID
                                         ofSize:(NSUInteger) requestSize
                                          error:(NSError * _Nullable * _Nullable)error;
-
-/* =================================================================================== */
-// MARK: (Public) - Profile support
-/* =================================================================================== */
-
-/**
- Array of available DLABProfile.
- 
- @return Array of DLABProfile. nil when no profile support is available.
- */
-- (nullable NSArray<NSNumber*>*) availableProfiles;
-
-/**
- Activate specified DLABProfile.
- FALSE always if no profile support is available.
- */
-- (BOOL)activateProfile:(NSNumber*) newProfileID;
-
-/**
- Query if DLABProfile is active or not.
- FALSE always if no profile support is available.
- */
-- (BOOL)runningProfileIs:(NSNumber*) profileID;
 
 @end
 
@@ -1359,6 +1375,53 @@ NS_ASSUME_NONNULL_BEGIN
  @return YES if no error, NO if failed
  */
 - (BOOL) writeToHDMIInputEDIDWithError:(NSError * _Nullable * _Nullable)error;
+
+@end
+
+NS_ASSUME_NONNULL_END
+
+/* =================================================================================== */
+// MARK: - profile (public)
+/* =================================================================================== */
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface DLABDevice (Profile)
+
+/**
+ Array of available DLABProfileAttributes.
+ 
+ @return Array of DLABProfileAttributes. nil when no profile support is available.
+ */
+- (nullable NSArray<DLABProfileAttributes*>*) availableProfileAttributes;
+
+/**
+ Activate specified DLABProfile.
+ 
+ @return FALSE always if no profile support is available.
+ */
+- (BOOL)activateProfile:(NSNumber*)targetProfileID;
+
+/**
+ Query if specified DLABProfile is active or not.
+ 
+ @return FALSE always if no profile support is available.
+ */
+- (BOOL)checkRunningProfile:(NSNumber*)targetProfileID;
+
+/**
+ Activate DLABProfile associated with DLABProfileAttributes.
+ 
+ @return FALSE always if no profile support is available.
+ */
+- (BOOL)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes;
+
+/**
+ Query if DLABProfile associated with DLABProfileAttributes is active or not.
+ 
+ @return FALSE always if no profile support is available.
+ */
+- (BOOL)checkRunningProfileUsingAttributes:(DLABProfileAttributes*)attributes;
 
 @end
 

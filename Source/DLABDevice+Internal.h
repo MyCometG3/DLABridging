@@ -27,6 +27,8 @@
 #import "DLABVideoSetting+Internal.h"
 #import "DLABAudioSetting+Internal.h"
 #import "DLABTimecodeSetting+Internal.h"
+#import "DLABProfileCallback.h"
+#import "DLABProfileAttributes+Internal.h"
 
 const int maxOutputVideoFrameCount = 8;
 
@@ -242,6 +244,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, nullable) IDeckLinkScreenPreviewCallback* inputPreviewCallback;
 
 // dispatch_queue_t - lazy instantiation
+
+/**
+ IDeckLinkProfileCallback object for profile change.
+ */
+@property (nonatomic, assign, nullable) IDeckLinkProfileCallback* profileCallback;
 
 /**
  private dispatch queue for input processing.
@@ -610,6 +617,37 @@ NS_ASSUME_NONNULL_BEGIN
  @param inFrame IDeckLinkVideoInputFrame
  */
 - (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame;
+
+@end
+
+NS_ASSUME_NONNULL_END
+
+/* =================================================================================== */
+// MARK: - profile (internal)
+/* =================================================================================== */
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface DLABDevice (ProfileInternal) <DLABProfileCallbackPrivateDelegate>
+
+/* =================================================================================== */
+// MARK: DLABProfileCallbackPrivateDelegate
+/* =================================================================================== */
+
+/**
+ Handle IDeckLinkProfileCallback::ProfileChanging
+ 
+ @param profile IDeckLinkProfile*
+ @param streamsWillBeForcedToStop streamsWillBeForcedToStop
+ */
+- (void) willApplyProfile:(IDeckLinkProfile*)profile stopping:(BOOL)streamsWillBeForcedToStop;
+
+/**
+ Handle IDeckLinkProfileCallback::ProfileActivated
+ 
+ @param profile IDeckLinkProfile*
+ */
+- (void) didApplyProfile:(IDeckLinkProfile*)profile;
 
 @end
 
