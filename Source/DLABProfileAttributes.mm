@@ -58,7 +58,44 @@
     }
 }
 
-//
+// public hash - NSObject
+- (NSUInteger) hash
+{
+    NSUInteger value = (NSUInteger)_attributes ^ (NSUInteger) _profile;
+    return value;
+}
+
+// public comparison - NSObject
+- (BOOL) isEqual:(id)object
+{
+    if (self == object) return YES;
+    if (!object || ![object isKindOfClass:[self class]]) return NO;
+    
+    return [self isEqualToProfileAttributes:(DLABProfileAttributes*)object];
+}
+
+// private comparison - DLABProfileAttributes
+- (BOOL) isEqualToProfileAttributes:(DLABProfileAttributes*)object
+{
+    if (self == object) return YES;
+    if (!object || ![object isKindOfClass:[self class]]) return NO;
+    
+    if (!( self.attributes == object.attributes )) return NO;
+    if (!( self.profile == object.profile )) return NO;
+    
+    return YES;
+}
+
+// NSCopying protocol
+- (instancetype) copyWithZone:(NSZone *)zone
+{
+    DLABProfileAttributes* obj = [[DLABProfileAttributes alloc] initWithProfile:self.profile];
+    return obj;
+}
+
+/* =================================================================================== */
+// MARK: - query attributes
+/* =================================================================================== */
 
 - (NSNumber*) profileIDWithError:(NSError**)error
 {
