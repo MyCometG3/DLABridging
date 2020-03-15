@@ -228,6 +228,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
                                          &newSupportsInputFormatDetection);
     if (!error) _supportInputFormatDetectionW = newSupportsInputFormatDetection;
+    
+    _supportHDRMetadataW = false;
+    bool newSupportsHDRMetadata = false;
+    error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsHDRMetadata,
+                                                &newSupportsHDRMetadata);
+    if (!error) _supportHDRMetadataW = newSupportsHDRMetadata;
 }
 
 - (void) shutdown
@@ -335,6 +341,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize supportPlaybackW = _supportPlaybackW;
 @synthesize supportKeyingW = _supportKeyingW;
 @synthesize supportInputFormatDetectionW = _supportInputFormatDetectionW;
+@synthesize supportHDRMetadataW = _supportHDRMetadataW;
 
 @synthesize outputVideoSettingArrayW = _outputVideoSettingArrayW;
 @synthesize inputVideoSettingArrayW = _inputVideoSettingArrayW;
@@ -357,6 +364,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (BOOL) supportPlayback { return _supportPlaybackW; }
 - (BOOL) supportKeying { return _supportKeyingW; }
 - (BOOL) supportInputFormatDetection { return _supportInputFormatDetectionW; }
+- (BOOL) supportHDRMetadata { return _supportHDRMetadataW; }
 
 //- (NSArray*) outputVideoSettingArray { return _outputVideoSettingArrayW; } // defined lator
 //- (NSArray*) inputVideoSettingArray { return _inputVideoSettingArrayW; } // defined lator

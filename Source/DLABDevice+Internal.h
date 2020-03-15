@@ -341,6 +341,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL supportInputFormatDetectionW;
 
+/**
+ Device's DLABAttributeSupportsHDRMetadata value.
+ */
+@property (nonatomic, assign) BOOL supportHDRMetadataW;
+
 // lazy instantiation
 
 /**
