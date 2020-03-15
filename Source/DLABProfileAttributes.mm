@@ -28,7 +28,7 @@
     self = [super init];
     if (self) {
         // Retain
-        _profile->AddRef();
+        profile->AddRef();
 
         // validate property support (attributes)
         HRESULT result = E_FAIL;
