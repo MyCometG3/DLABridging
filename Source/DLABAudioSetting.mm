@@ -45,6 +45,13 @@
     }
 }
 
+// public hash - NSObject
+- (NSUInteger) hash
+{
+    NSUInteger value = (NSUInteger)(_sampleSizeW^_channelCountW^_sampleTypeW^_sampleRateW);
+    return value;
+}
+
 // public comparison - NSObject
 - (BOOL) isEqual:(id)object
 {

@@ -175,6 +175,13 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     }
 }
 
+// public hash - NSObject
+- (NSUInteger) hash
+{
+    NSUInteger value = (NSUInteger)(_widthW^_heightW) ^ (NSUInteger)(_displayModeW^_pixelFormatW);
+    return value;
+}
+
 // public comparison - NSObject
 - (BOOL) isEqual:(id)object
 {

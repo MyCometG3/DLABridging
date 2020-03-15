@@ -114,6 +114,13 @@
                                userBits:userBits];
 }
 
+// public hash - NSObject
+- (NSUInteger) hash
+{
+    NSUInteger value = (NSUInteger)(_format^_flags) ^ (NSUInteger)(_hour^_minute^_second^_frame);
+    return value;
+}
+
 // public comparison - NSObject
 - (BOOL) isEqual:(id)object
 {
