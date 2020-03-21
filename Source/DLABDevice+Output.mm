@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017-2020年 MyCometG3. All rights reserved.
+//  Copyright © 2017-2020 MyCometG3. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -299,15 +299,15 @@
     
     int64_t frameTime = displayTime;
     
+    // Create timinginfo struct
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
     //
     VANCHandler outHandler = self.outputVANCHandler;
     if (outHandler) {
-        // Create timinginfo struct
-        CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
-        CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
-        CMTime decodeTimeStamp = kCMTimeInvalid;
-        CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
-        
         // Callback in delegate queue
         [self delegate_sync:^{
             NSArray<NSNumber*>* lines = self.outputVANCLines;
@@ -396,15 +396,15 @@
     
     int64_t frameTime = displayTime;
     
+    // Create timinginfo struct
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
     //
     OutputFrameMetadataHandler outHandler = self.outputFrameMetadataHandler;
     if (outHandler) {
-        // Create timinginfo struct
-        CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
-        CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
-        CMTime decodeTimeStamp = kCMTimeInvalid;
-        CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
-        
         // Create FrameMetadata for outFrame
         __block BOOL apply = FALSE;
         DLABFrameMetadata* frameMetadata = [[DLABFrameMetadata alloc] initWithOutputFrame:outFrame];

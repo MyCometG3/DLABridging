@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017-2020年 MyCometG3. All rights reserved.
+//  Copyright © 2017-2020 MyCometG3. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -512,15 +512,15 @@
     HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
     if (result) return;
     
+    // Create timinginfo struct
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
     //
     VANCHandler inHandler = self.inputVANCHandler;
     if (inHandler) {
-        // Create timinginfo struct
-        CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
-        CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
-        CMTime decodeTimeStamp = kCMTimeInvalid;
-        CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
-        
         // Callback in delegate queue
         [self delegate_sync:^{
             NSArray<NSNumber*>* lines = self.inputVANCLines;
@@ -628,14 +628,14 @@
     HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
     if (result) return nil;
     
+    // Create timinginfo struct
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
     InputFrameMetadataHandler inHandler = self.inputFrameMetadataHandler;
     if (inHandler) {
-        // Create timinginfo struct
-        CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
-        CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
-        CMTime decodeTimeStamp = kCMTimeInvalid;
-        CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
-        
         // Create FrameMetadata for inFrame
         DLABFrameMetadata* frameMetadata = [[DLABFrameMetadata alloc] initWithInputFrame:inFrame];
         if (frameMetadata) {
