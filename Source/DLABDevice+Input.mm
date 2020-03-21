@@ -112,6 +112,11 @@
             [self callbackInputVANCPacketHandler:videoFrame];
         }
         
+        // Callback InputFrameMetadataHandler block
+        if (sampleBuffer && setting && self.inputFrameMetadataHandler) {
+            [self callbackInputFrameMetadataHandler:videoFrame];
+        }
+        
         // delegate will handle InputVideoSampleBuffer
         if (sampleBuffer && setting) {
             __weak typeof(self) wself = self;
@@ -606,6 +611,42 @@
         iterator->Release();
         frameAncillaryPackets->Release();
     }
+}
+
+/* =================================================================================== */
+// MARK: HDR Metadata support
+/* =================================================================================== */
+
+// private experimental - Input FrameMetadata support
+- (DLABFrameMetadata*) callbackInputFrameMetadataHandler:(IDeckLinkVideoInputFrame*)inFrame
+{
+    NSParameterAssert(inFrame);
+    
+    BMDTimeValue frameTime = 0;
+    BMDTimeValue frameDuration = 0;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScaleW;
+    HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
+    if (result) return nil;
+    
+    InputFrameMetadataHandler inHandler = self.inputFrameMetadataHandler;
+    if (inHandler) {
+        // Create timinginfo struct
+        CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+        CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+        CMTime decodeTimeStamp = kCMTimeInvalid;
+        CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+        
+        // Create FrameMetadata for inFrame
+        DLABFrameMetadata* frameMetadata = [[DLABFrameMetadata alloc] initWithInputFrame:inFrame];
+        if (frameMetadata) {
+            // Callback in delegate queue
+            [self delegate_sync:^{
+                inHandler(timingInfo, frameMetadata);
+            }];
+            return frameMetadata;
+        }
+    }
+    return nil;
 }
 
 @end

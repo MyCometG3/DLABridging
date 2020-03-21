@@ -29,6 +29,7 @@
 #import "DLABTimecodeSetting+Internal.h"
 #import "DLABProfileCallback.h"
 #import "DLABProfileAttributes+Internal.h"
+#import "DLABFrameMetadata+Internal.h"
 
 const int maxOutputVideoFrameCount = 8;
 

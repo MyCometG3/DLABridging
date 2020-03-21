@@ -9,6 +9,8 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <Cocoa/Cocoa.h>
+#import <CoreMedia/CoreMedia.h>
+#import <CoreVideo/CoreVideo.h>
 
 //! Project version number for DLABridging.
 FOUNDATION_EXPORT double DLABridgingVersionNumber;
@@ -24,6 +26,5 @@ FOUNDATION_EXPORT const unsigned char DLABridgingVersionString[];
 #import "DLABAudioSetting.h"
 #import "DLABVideoSetting.h"
 #import "DLABTimecodeSetting.h"
-
-#import <CoreMedia/CoreMedia.h>
-#import <CoreVideo/CoreVideo.h>
+#import "DLABProfileAttributes.h"
+#import "DLABFrameMetadata.h"

@@ -18,6 +18,7 @@
 @class DLABAudioSetting;
 @class DLABTimecodeSetting;
 @class DLABProfileAttributes;
+@class DLABFrameMetadata;
 
 /* =================================================================================== */
 /*
@@ -38,7 +39,6 @@
  : 2.5.39 IDeckLinkEncoderAudioPacket
  : 2.5.40 IDeckLinkH265NALPacket
  : 2.5.41 IDeckLinkEncoderConfiguration
- : 2.5.43 IDeckLinkVideoFrameMetadataExtensions // TODO
  : 2.5.44 IDeckLinkVideoConversion
  : 2.6.x Any Streaming Interface APIs
  */
@@ -307,6 +307,50 @@ NS_ASSUME_NONNULL_END
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ Experimental HDR metadata support: frame metadata callback block
+ 
+ This block is called in sync on delegate queue. You should update HDR metadata for output frame immediately.
+ 
+ - output: This block is called prior to outputVideoFrame is scheduled
+
+ @param timingInfo TimingInfo of Output Video Frame
+ @param frameMetadata The FrameMetadata for output frame to be embeded.
+ @return Return FALSE if frameMetadata is not required for this frame.
+ */
+typedef BOOL (^OutputFrameMetadataHandler) (CMSampleTimingInfo timingInfo,
+                                            DLABFrameMetadata* frameMetadata);
+
+NS_ASSUME_NONNULL_END
+
+
+/* =================================================================================== */
+// MARK: -
+/* =================================================================================== */
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ Experimental HDR metadata support: frame metadata callback block
+ 
+ This block is called in sync on delegate queue. You should process HDR metadata for input frame immediately.
+ 
+ - input : This block is called prior to inputVideoSample  delegate call is performed
+ 
+ @param timingInfo TimingInfo of Input Video Frame
+ @param frameMetadata The FrameMetadata from input frame.
+ */
+typedef void (^InputFrameMetadataHandler) (CMSampleTimingInfo timingInfo,
+                                           DLABFrameMetadata* frameMetadata);
+
+NS_ASSUME_NONNULL_END
+
+/* =================================================================================== */
+// MARK: -
+/* =================================================================================== */
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
  General DeckLink Device object, wrapper of multiple original DeckLink API C++ objects.
  */
 @interface DLABDevice : NSObject
@@ -502,6 +546,21 @@ NS_ASSUME_NONNULL_BEGIN
 Experimental VANC Packet Output support: Caller should populate VANC Packet callback block.
 */
 @property (nonatomic, copy, nullable) OutputVANCPacketHandler outputVANCPacketHandler;
+
+/* =================================================================================== */
+// MARK: (Public) - HDR Metadata support (experimental)
+/* =================================================================================== */
+
+/**
+ Experimental Input FrameMetadataHDR support: Caller should populate FrameMetadataHandler block for input.
+ */
+@property (nonatomic, copy, nullable) InputFrameMetadataHandler inputFrameMetadataHandler;
+
+/**
+ Experimental Output FrameMetadataHDR support: Caller should populate FrameMetadataHandler block for output.
+*/
+@property (nonatomic, copy, nullable) OutputFrameMetadataHandler outputFrameMetadataHandler;
+
 
 /* =================================================================================== */
 // MARK: (Public) - Key/Value

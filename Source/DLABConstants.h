@@ -11,7 +11,7 @@
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
- NOTE: This constants are converted from DekLink API "11.2.x"
+ NOTE: This constants are converted from DekLink API "11.5.x"
  NOTE: Basic renaming rules are:
  1. each enum type name BMDtypename => DLABtypename (DeckLink API bridging)
  1a. remove "s" at end of typename

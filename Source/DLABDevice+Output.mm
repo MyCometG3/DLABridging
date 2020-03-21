@@ -382,6 +382,45 @@
     }
 }
 
+/* =================================================================================== */
+// MARK: HDR Metadata support
+/* =================================================================================== */
+
+// private experimental - Output FrameMetadata support
+- (DLABFrameMetadata*) callbackOutputFrameMetadataHandler:(IDeckLinkMutableVideoFrame*)outFrame
+                                                   atTime:(NSInteger)displayTime
+                                                 duration:(NSInteger)frameDuration
+                                              inTimeScale:(NSInteger)timeScale
+{
+    NSParameterAssert(outFrame && frameDuration && timeScale);
+    
+    int64_t frameTime = displayTime;
+    
+    //
+    OutputFrameMetadataHandler outHandler = self.outputFrameMetadataHandler;
+    if (outHandler) {
+        // Create timinginfo struct
+        CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+        CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+        CMTime decodeTimeStamp = kCMTimeInvalid;
+        CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+        
+        // Create FrameMetadata for outFrame
+        __block BOOL apply = FALSE;
+        DLABFrameMetadata* frameMetadata = [[DLABFrameMetadata alloc] initWithOutputFrame:outFrame];
+        if (frameMetadata) {
+            // Callback in delegate queue
+            [self delegate_sync:^{
+                apply = outHandler(timingInfo, frameMetadata);
+            }];
+        }
+        if (apply) {
+            return frameMetadata;
+        }
+    }
+    return nil;
+}
+
 @end
 
 /* =================================================================================== */
@@ -666,8 +705,42 @@
     }
     
     if (outFrame) {
+        // dummy Time/Duration/TimeScale values
+        NSInteger displayTime = 0;
+        NSInteger frameDuration = self.outputVideoSetting.durationW;
+        NSInteger timeScale = self.outputVideoSetting.timeScaleW;
+        
+        // Callback VANCHandler block
+        if (self.outputVANCHandler) {
+            [self callbackOutputVANCHandler:outFrame
+                                     atTime:displayTime
+                                   duration:frameDuration
+                                inTimeScale:timeScale];
+        }
+        
+        // Callback VANCPacketHandler block
+        if (self.outputVANCPacketHandler) {
+            [self callbackOutputVANCPacketHandler:outFrame
+                                           atTime:displayTime
+                                         duration:frameDuration
+                                      inTimeScale:timeScale];
+        }
+        
+        // Callback OutputFrameMetadataHandler block
+        DLABFrameMetadata* frameMetadata = nil;
+        if (self.outputFrameMetadataHandler) {
+            frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
+                                                              atTime:displayTime
+                                                            duration:frameDuration
+                                                         inTimeScale:timeScale];
+        }
+        
         // sync display - blocking operation
-        result = output->DisplayVideoFrameSync(outFrame);
+        if (!frameMetadata) {
+            result = output->DisplayVideoFrameSync(outFrame);
+        } else {
+            result = output->DisplayVideoFrameSync(frameMetadata.metaframe);
+        }
         
         // free output frame
         [self releaseOutputVideoFrame:outFrame];
@@ -717,15 +790,27 @@
         
         // Callback VANCPacketHandler block
         if (self.outputVANCPacketHandler) {
-            
             [self callbackOutputVANCPacketHandler:outFrame
                                            atTime:displayTime
                                          duration:frameDuration
                                       inTimeScale:timeScale];
         }
         
+        // Callback OutputFrameMetadataHandler block
+        DLABFrameMetadata* frameMetadata = nil;
+        if (self.outputFrameMetadataHandler) {
+            frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
+                                                              atTime:displayTime
+                                                            duration:frameDuration
+                                                         inTimeScale:timeScale];
+        }
+        
         // async display
-        result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
+        if (!frameMetadata) {
+            result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
+        } else {
+            result = output->ScheduleVideoFrame(frameMetadata.metaframe, displayTime, frameDuration, timeScale);
+        }
     }
     
     if (!result) {
@@ -803,15 +888,27 @@
                 
                 // Callback VANCPacketHandler block
                 if (self.outputVANCPacketHandler) {
-                    
                     [self callbackOutputVANCPacketHandler:outFrame
                                                    atTime:displayTime
                                                  duration:frameDuration
                                               inTimeScale:timeScale];
                 }
                 
+                // Callback OutputFrameMetadataHandler block
+                DLABFrameMetadata* frameMetadata = nil;
+                if (self.outputFrameMetadataHandler) {
+                    frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
+                                                                      atTime:displayTime
+                                                                    duration:frameDuration
+                                                                 inTimeScale:timeScale];
+                }
+                
                 // async display
-                result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
+                if (!frameMetadata) {
+                    result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
+                } else {
+                    result = output->ScheduleVideoFrame(frameMetadata.metaframe, displayTime, frameDuration, timeScale);
+                }
                 if (result) {
                     reason = @"IDeckLinkOutput::ScheduleVideoFrame failed";
                 }
