@@ -11,6 +11,7 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
+#import <Accelerate/Accelerate.h>
 
 //! Project version number for DLABridging.
 FOUNDATION_EXPORT double DLABridgingVersionNumber;

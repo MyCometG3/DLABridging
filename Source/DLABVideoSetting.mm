@@ -23,6 +23,15 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         case bmdFormat8BitBGRA:
             stride = width * 32 / 8;
             break;
+        case bmdFormat10BitRGB:
+        case bmdFormat10BitRGBXLE:
+        case bmdFormat10BitRGBX:
+            stride = ((width + 63) / 64) * 256;
+            break;
+        case bmdFormat12BitRGB:
+        case bmdFormat12BitRGBLE:
+            stride = ((width * 36) / 8);
+            break;
         default:
             break;
     }
@@ -440,6 +449,11 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
                     break;
                 case bmdFormat8BitARGB:
                 case bmdFormat8BitBGRA:
+                case bmdFormat10BitRGB:
+                case bmdFormat10BitRGBXLE:
+                case bmdFormat10BitRGBX:
+                case bmdFormat12BitRGB:
+                case bmdFormat12BitRGBLE:
                     yuvColorSpace = false;
                     ready = true;
                     break;
@@ -453,15 +467,18 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         if (ready && yuvColorSpace) {
             // Color space
             NSString* keyMatrix = (__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix;
+            NSString* matrix2020 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_2020;
             NSString* matrix709 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2;
             NSString* matrix601 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4;
             
             NSString* keyPrimary = (__bridge NSString*)kCMFormatDescriptionExtension_ColorPrimaries;
+            NSString* primITUR2020 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_2020;
             NSString* primITUR709 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_709_2;
             NSString* primSMPTEC = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_SMPTE_C;
             NSString* primEBU3213 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_EBU_3213;
             
             NSString* keyXfer = (__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction;
+            NSString* xfer2020 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_2020;
             NSString* xfer709 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
             
             // prefer displayModeFlag's colorspace information if specified
@@ -473,6 +490,9 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
             if (displayModeFlag & bmdDisplayModeColorspaceRec709) {
                 frameMatrix = matrix709;
             }
+            if (displayModeFlag & bmdDisplayModeColorspaceRec2020) {
+                frameMatrix = matrix2020;
+            }
             
             // apply color information (primary/transfer function/YCbCrMatrix)
             if (height <= 525) {
@@ -483,10 +503,14 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
                 extensions[keyPrimary] = primEBU3213;
                 extensions[keyXfer] = xfer709;
                 extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix601);
-            } else {
+            } else if (width <= 1920) {
                 extensions[keyPrimary] = primITUR709;
                 extensions[keyXfer] = xfer709;
                 extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix709);
+            } else {
+                extensions[keyPrimary] = primITUR2020;
+                extensions[keyXfer] = xfer2020;
+                extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix2020);
             }
         }
         

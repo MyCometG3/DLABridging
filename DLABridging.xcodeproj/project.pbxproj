@@ -68,6 +68,10 @@
 		16996D382424482C00878D02 /* DLABMetaFrame.mm in Sources */ = {isa = PBXBuildFile; fileRef = 16996D362424482C00878D02 /* DLABMetaFrame.mm */; };
 		16996D392424482C00878D02 /* DLABMetaFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = 16996D372424482C00878D02 /* DLABMetaFrame.h */; };
 		16996D3A2425AB2D00878D02 /* DLABFrameMetadata+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164EC8B7241E524C002FBF36 /* DLABFrameMetadata+Internal.h */; };
+		16B0BF19243BEE12004C2BDF /* DLABVideoConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = 16B0BF17243BEE12004C2BDF /* DLABVideoConverter.h */; };
+		16B0BF1A243BEE12004C2BDF /* DLABVideoConverter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */; };
+		16B0BF1C243DC8CC004C2BDF /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */; };
+		16B0BF1E243DC93A004C2BDF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16B0BF1D243DC93A004C2BDF /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -134,6 +138,10 @@
 		1656BF10241C6C2000E95D3B /* DLABProfileAttributes+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DLABProfileAttributes+Internal.h"; sourceTree = "<group>"; };
 		16996D362424482C00878D02 /* DLABMetaFrame.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABMetaFrame.mm; sourceTree = "<group>"; };
 		16996D372424482C00878D02 /* DLABMetaFrame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABMetaFrame.h; sourceTree = "<group>"; };
+		16B0BF17243BEE12004C2BDF /* DLABVideoConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABVideoConverter.h; sourceTree = "<group>"; };
+		16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABVideoConverter.mm; sourceTree = "<group>"; };
+		16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		16B0BF1D243DC93A004C2BDF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,7 +150,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				164C82F21F5148E3001208BD /* DeckLinkAPI.framework in Frameworks */,
+				16B0BF1C243DC8CC004C2BDF /* Accelerate.framework in Frameworks */,
 				164C82F01F514898001208BD /* CoreMedia.framework in Frameworks */,
+				16B0BF1E243DC93A004C2BDF /* CoreGraphics.framework in Frameworks */,
 				164C82EE1F51488A001208BD /* CoreVideo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -232,6 +242,8 @@
 				164EC8B3241E522F002FBF36 /* DLABFrameMetadata.h */,
 				164EC8B7241E524C002FBF36 /* DLABFrameMetadata+Internal.h */,
 				164EC8B4241E522F002FBF36 /* DLABFrameMetadata.mm */,
+				16B0BF17243BEE12004C2BDF /* DLABVideoConverter.h */,
+				16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -239,6 +251,8 @@
 		164C82EC1F51488A001208BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				16B0BF1D243DC93A004C2BDF /* CoreGraphics.framework */,
+				16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */,
 				164C82F11F5148E3001208BD /* DeckLinkAPI.framework */,
 				164C82EF1F514898001208BD /* CoreMedia.framework */,
 				164C82ED1F51488A001208BD /* CoreVideo.framework */,
@@ -286,6 +300,7 @@
 				163CF46124023A7B00732F8C /* DeckLinkAPIDeckControl.h in Headers */,
 				16996D3A2425AB2D00878D02 /* DLABFrameMetadata+Internal.h in Headers */,
 				163CF45E24023A7B00732F8C /* DeckLinkAPI_v10_11.h in Headers */,
+				16B0BF19243BEE12004C2BDF /* DLABVideoConverter.h in Headers */,
 				164C82DB1F514687001208BD /* DLABDevice.h in Headers */,
 				164C82D21F514687001208BD /* DLABAudioSetting.h in Headers */,
 				164C82E61F514687001208BD /* DLABTimecodeSetting.h in Headers */,
@@ -402,6 +417,7 @@
 				1656BF06241B6B4700E95D3B /* DLABProfileCallback.mm in Sources */,
 				164C82DE1F514687001208BD /* DLABDeviceNotificationCallback.mm in Sources */,
 				1656BF0F241C6B5B00E95D3B /* DLABProfileAttributes.mm in Sources */,
+				16B0BF1A243BEE12004C2BDF /* DLABVideoConverter.mm in Sources */,
 				164C82D61F514687001208BD /* DLABBrowser.mm in Sources */,
 				164C82E71F514687001208BD /* DLABTimecodeSetting.mm in Sources */,
 			);
