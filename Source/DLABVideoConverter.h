@@ -16,9 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DLABVideoConverter : NSObject
 
 /*
-This converter supports RGBtoRGB conversion between DeckLink VideoFrame
-and CoreVideo PixelBuffer. (No yuv support)
-BMDPixelFormat12BitRGB/BMDPixelFormat12BitRGBLE are not supported yet.
+This converter supports colorspace conversion between DeckLink VideoFrame
+and CoreVideo PixelBuffer.
+NOTE: BMDPixelFormat12BitRGB/BMDPixelFormat12BitRGBLE are not supported.
 */
 
 /// init + prepare videoConverter for capture
@@ -37,15 +37,18 @@ BMDPixelFormat12BitRGB/BMDPixelFormat12BitRGBLE are not supported yet.
 /* ================================================================ */
 
 /// CGColorspaceRef for IDeckLinkVideoFrame in kCGColorSpaceModelRGB
-/// @discussion For example: CGColorSpaceCreateWithName(kCGColorSpaceITUR_2020)
-@property (nonatomic, assign, readonly, nullable) CGColorSpaceRef dlColorSpace;
+/// @discussion To use default colorspace, set null before prepare.
+/// @discussion To override default colorspace, set this before prepare.
+@property (nonatomic, assign, nullable) CGColorSpaceRef dlColorSpace;
 
 /// CGColorspaceRef for CVPixelBuffer in kCGColorSpaceModelRGB
-/// @discussion For example: CGColorSpaceCreateWithName(kCGColorSpaceITUR_2020)
-@property (nonatomic, assign, readonly, nullable) CGColorSpaceRef cvColorSpace;
+/// @discussion To use default colorspace, set null before prepare.
+/// @discussion To override default colorspace, set this before prepare.
+@property (nonatomic, assign, nullable) CGColorSpaceRef cvColorSpace;
 
-/// Control strict color space conversion or suppose both ColorSpace are same.
-/// @discussion use both cvColorSpace and dlColorSpace for colorSpace conversion
+/// Allow colorspace conversion
+/// @discussion Set true to respect both cvColorSpace and dlColorSpace
+/// @discussion Set false to suppose both in same colorspace.
 @property (nonatomic, assign) BOOL useDLColorSpace;
 
 /// For Debugging purpose only; Set this before prepare.

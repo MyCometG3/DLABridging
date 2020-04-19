@@ -161,20 +161,13 @@
 {
     NSParameterAssert(pixelBuffer);
     
-    HRESULT result = E_FAIL;
     BOOL ready = false;
-    
+    OSType cvPixelFormat = self.inputVideoSettingW.cvPixelFormatType;
+    assert(cvPixelFormat);
+
     // take out free output frame from frame pool
     IDeckLinkMutableVideoFrame* videoFrame = [self reserveOutputVideoFrame];
     if (videoFrame) {
-        // Check videoFrame
-        void *buffer = NULL;
-        result = videoFrame->GetBytes(&buffer);
-        if (result) {
-            [self releaseOutputVideoFrame:videoFrame];
-            return NULL;
-        }
-        
         // Simply check if width, height are same
         size_t pbWidth = CVPixelBufferGetWidth(pixelBuffer);
         size_t pbHeight = CVPixelBufferGetHeight(pixelBuffer);
@@ -187,14 +180,18 @@
         size_t ofRowByte = (size_t)videoFrame->GetRowBytes();
         BOOL rowByteOK = (pbRowByte == ofRowByte);
         
-        if (sizeOK) {
-            CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+        BMDPixelFormat pixelFormat = videoFrame->GetPixelFormat();
+        BOOL sameFormat = (pixelFormat == cvPixelFormat);
+        if (sameFormat && sizeOK) {
+            // Copy pixel data from CVPixelBuffer to outputVideoFrame
+            CVReturn err = kCVReturnError;
+            err = CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
             if (!err) {
                 // get buffer address for src and dst
-                void* dst = buffer;
+                void* dst = NULL;
                 void* src = CVPixelBufferGetBaseAddress(pixelBuffer);
+                videoFrame->GetBytes(&dst);
                 
-                // copy pixel data from CVPixelBuffer to outputVideoFrame
                 if (dst && src) {
                     if (rowByteOK) { // bulk copy
                         memcpy(dst, src, ofRowByte * ofHeight);
@@ -210,15 +207,27 @@
                 }
                 CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
             }
+        } else {
+            // Use DLABVideoConverter/vImage to convert video image
+            DLABVideoConverter *converter = self.outputVideoConverter;
+            if (!converter) {
+                converter = [[DLABVideoConverter alloc] initWithCV:pixelBuffer
+                                                              toDL:videoFrame];
+                self.outputVideoConverter = converter;
+            }
+            if (converter) {
+                ready = [converter convertCV:pixelBuffer toDL:videoFrame];
+            }
         }
     }
     
-    if (ready) {
+    if (videoFrame && ready) {
         return videoFrame;
-    } else if (videoFrame) {
-        [self releaseOutputVideoFrame:videoFrame];
+    } else {
+        if (videoFrame)
+            [self releaseOutputVideoFrame:videoFrame];
+        return NULL;
     }
-    return NULL;
 }
 
 - (BOOL) validateTimecodeFormat:(DLABTimecodeFormat)format
@@ -517,6 +526,7 @@
                 setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                                pixelFormat:pixelFormat
                                                            videoOutputFlag:videoOutputFlag];
+                [setting buildVideoFormatDescription];
                 displayModeObj->Release();
             }
         } else {

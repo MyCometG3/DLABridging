@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  //   CoreVideo compatible pixelformats are limited to following:
  //     bmdFormat8BitYUV, bmdFormat10BitYUV,
  //     bmdFormat8BitARGB, bmdFormat8BitBGRA
- //   10bit/12Bit RGB formats are not compatible - manual conversion is required
+ //   For 10bit/12Bit RGB formats conversion is required
  */
 @interface DLABVideoSetting : NSObject <NSCopying>
 
@@ -138,6 +138,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) long rowBytes;
 
+/**
+ Preferred CVPixelFormatType for CVPixelBuffer. Use buildVideoFormatDescription again after update.
+ */
+@property (nonatomic, assign, readwrite) OSType cvPixelFormatType;
+
 /* =================================================================================== */
 // MARK: Property - populate by buildVideoFormatDescription
 /* =================================================================================== */
@@ -164,6 +169,14 @@ NS_ASSUME_NONNULL_BEGIN
  @return YES if successfully populated. NO if failed with supplied parameters.
  */
 - (BOOL) buildVideoFormatDescription;
+
+/**
+ Prepare Video FormatDescription CFObject from current parameters.
+ 
+ @param error Error description if failed.
+ @return YES if successfully populated. NO if failed with supplied parameters.
+*/
+- (BOOL) buildVideoFormatDescriptionWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
  Add clean aperture (clap) VideoFormatDescriptionExtension to CVPixelBuffer.

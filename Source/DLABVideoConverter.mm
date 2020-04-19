@@ -17,17 +17,18 @@
 @property (nonatomic, assign) OSType cvFormat;
 @property (nonatomic, assign) vImagePixelCount cvWidth;
 @property (nonatomic, assign) vImagePixelCount cvHeight;
-@property (nonatomic, assign) uint32_t cvPixelBits;
-@property (nonatomic, assign) BOOL cvEndianBig;
 
 @property (nonatomic, assign) BMDPixelFormat dlFormat;
 @property (nonatomic, assign) vImagePixelCount dlWidth;
 @property (nonatomic, assign) vImagePixelCount dlHeight;
-@property (nonatomic, assign) uint32_t dlPixelBits;
-@property (nonatomic, assign) BOOL dlEndianBig;
+@property (nonatomic, assign) size_t dlRowBytes;
+@property (nonatomic, assign) BOOL dlEndianSwap;
 
 @property (nonatomic, assign) int32_t dlRangeMin;
 @property (nonatomic, assign) int32_t dlRangeMax;
+@property (nonatomic, assign) BOOL dlDefault16Q12;
+
+@property (nonatomic, assign) BOOL dlUseXRGB16U;
 
 @property (nonatomic, assign) vImage_Buffer dlHostBuffer; // dlBuffer in HostEndian
 @property (nonatomic, assign) vImage_Buffer interimBuffer; // interim XRGB16U format (RGB444)
@@ -35,6 +36,9 @@
 @property (nonatomic, assign) vImageConverterRef convCGtoCV; // for input converter from XRGB16U to CV;
 @property (nonatomic, assign) void* tempBuffer;
 @property (nonatomic, assign) BOOL queryTempBuffer;
+
+@property (nonatomic, assign) vImage_YpCbCrToARGB infoToARGB;
+@property (nonatomic, assign) vImage_ARGBToYpCbCr infoToYpCbCr;
 
 @end
 
@@ -70,32 +74,57 @@
 }
 
 /* =================================================================================== */
-// MARK: - Public accessor
+// MARK: - Accessor -
+/* =================================================================================== */
+
+/* =================================================================================== */
+// MARK: Public accessor
 /* =================================================================================== */
 
 @synthesize dlColorSpace = dlColorSpace, cvColorSpace = cvColorSpace;
 @synthesize useDLColorSpace = useDLColorSpace;
+@synthesize useGammaSubstitute = useGammaSubstitute;
+
+- (void)setDlColorSpace:(CGColorSpaceRef)newColorSpace
+{
+    if (dlColorSpace != newColorSpace) {
+        CGColorSpaceRelease(dlColorSpace);
+        CGColorSpaceRetain(newColorSpace);
+        dlColorSpace = newColorSpace;
+    }
+}
+
+- (void)setCvColorSpace:(CGColorSpaceRef)newColorSpace
+{
+    if (cvColorSpace != newColorSpace) {
+        CGColorSpaceRelease(cvColorSpace);
+        CGColorSpaceRetain(newColorSpace);
+        cvColorSpace = newColorSpace;
+    }
+}
 
 /* =================================================================================== */
-// MARK: - Private accessor
+// MARK: Private accessor
 /* =================================================================================== */
 
-@synthesize cvFormat = cvFormat, cvPixelBits = cvPixelBits, cvEndianBig = cvEndianBig;
-@synthesize cvWidth = cvWidth,   cvHeight = cvHeight;
-@synthesize dlFormat = dlFormat, dlPixelBits = dlPixelBits, dlEndianBig = dlEndianBig;
-@synthesize dlWidth = dlWidth,   dlHeight = dlHeight;
+@synthesize cvFormat = cvFormat, cvWidth = cvWidth, cvHeight = cvHeight;
+@synthesize dlFormat = dlFormat, dlWidth = dlWidth, dlHeight = dlHeight;
+@synthesize dlRowBytes = dlRowBytes, dlEndianSwap = dlEndianSwap;
 @synthesize dlRangeMin = dlRangeMin, dlRangeMax = dlRangeMax;
+@synthesize dlDefault16Q12 = dlDefault16Q12;
+
+@synthesize dlUseXRGB16U = dlUseXRGB16U;
+@synthesize infoToARGB = infoToARGB, infoToYpCbCr = infoToYpCbCr;
 
 @synthesize dlHostBuffer = dlHostBuffer, interimBuffer = interimBuffer;
 @synthesize convCVtoCG = convCVtoCG, convCGtoCV = convCGtoCV;
-@synthesize queryTempBuffer = queryTempBuffer, tempBuffer = tempBuffer;
-
-@synthesize useGammaSubstitute = useGammaSubstitute;
+@synthesize tempBuffer = tempBuffer, queryTempBuffer = queryTempBuffer;
 
 /* =================================================================================== */
-// MARK: - Private methods
+// MARK: - Functions -
 /* =================================================================================== */
 
+// MARK: Interim vImage Format
 /*
  NOTE: vImage_Utilities.h
  65  *      vImage_CGImageFormat format = {
@@ -112,7 +141,7 @@
  */
 
 NS_INLINE vImage_CGImageFormat formatXRGB16U(CGColorSpaceRef colorspace) {
-    vImage_CGImageFormat formatXRGB16U = {
+    const vImage_CGImageFormat formatXRGB16U = {
         .bitsPerComponent = 16,
         .bitsPerPixel = 64,
         .colorSpace = colorspace,
@@ -124,7 +153,33 @@ NS_INLINE vImage_CGImageFormat formatXRGB16U(CGColorSpaceRef colorspace) {
     return formatXRGB16U;
 }
 
-// MARK: -
+NS_INLINE vImage_CGImageFormat formatXRGB16Q12(CGColorSpaceRef colorspace) {
+    const vImage_CGImageFormat formatXRGB16Q12 = {
+        .bitsPerComponent = 16,
+        .bitsPerPixel = 64,
+        .colorSpace = colorspace,
+        .bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder16Little,
+        .version = 0,
+        .decode = kvImageDecodeArray_16Q12Format,
+        .renderingIntent = kCGRenderingIntentDefault
+    };
+    return formatXRGB16Q12;
+}
+
+NS_INLINE vImage_CGImageFormat formatXRGB8888(CGColorSpaceRef colorspace) {
+    const vImage_CGImageFormat formatXRGB8888 = {
+        .bitsPerComponent = 8,
+        .bitsPerPixel = 32,
+        .colorSpace = colorspace,
+        .bitmapInfo = kCGImageAlphaNoneSkipFirst,
+        .version = 0,
+        .decode = NULL,
+        .renderingIntent = kCGRenderingIntentDefault
+    };
+    return formatXRGB8888;
+}
+
+// MARK: Transfer functions
 
 /*
  NOTE: vImage_CVUtilities.h
@@ -139,14 +194,14 @@ NS_INLINE vImage_CGImageFormat formatXRGB16U(CGColorSpaceRef colorspace) {
  335  *
  336  *                              This may be NULL. However, you will eventually be forced to set set a colorspace for all image types, before
  337  *                              a vImageConvertRef can be made with this object.
-
+ 
  830 typedef struct vImageTransferFunction
  831 {
  832     CGFloat c0, c1, c2, c3, gamma;          // R' = c0 * pow( c1 * R + c2, gamma ) + c3,    (R >= cutoff)
  833     CGFloat cutoff;                         // See immediately above and below.  For no linear region (no below segment), pass -INFINITY here.
  834     CGFloat c4, c5;                         // R' = c4 * R + c5                             (R < cutoff)
  835 }vImageTransferFunction;
-
+ 
  844  * @function vImageCreateRGBColorSpaceWithPrimariesAndTransferFunction
  845  *
  846  * @abstract Create a RGB colorspace based on primitives typically found in Y'CbCr specifications
@@ -156,7 +211,7 @@ NS_INLINE vImage_CGImageFormat formatXRGB16U(CGColorSpaceRef colorspace) {
  850  * colorspace and a conversion matrix from RGB to Y'CbCr.) The color primaries give the extent of a colorspace
  851  * in x,y,z space and the transfer function gives the transformation from linear color to non-linear color that
  852  * the pixels actually reside in.
-
+ 
  896  *      Note: This low level function does not conform to CoreVideo practice of automatically substituting gamma 1/1.961
  897  *      for kCVImageBufferTransferFunction_ITU_R_709_2 and kCVImageBufferTransferFunction_SMPTE_240M_1995 instead of using
  898  *      the ITU-R BT.709-5 specified transfer function. (vImageBuffer_InitWithCVPixelBuffer and vImageBuffer_CopyToCVPixelBuffer
@@ -189,7 +244,6 @@ NS_INLINE vImageTransferFunction tfCoreVideo(void)
 
 NS_INLINE vImageTransferFunction tfHD12(void)
 {
-    // ITU-R 2020 12bit
     const vImageTransferFunction f2020_12 = {
         .c0 =       1.0993,
         .c1 =       1.0,
@@ -205,7 +259,6 @@ NS_INLINE vImageTransferFunction tfHD12(void)
 
 NS_INLINE vImageTransferFunction tfHD(void)
 {
-    // ITU-R 709 8bit/10bit, ITU-R 2020 10bit
     const vImageTransferFunction f709 = {
         .c0 =       1.099,
         .c1 =       1.0,
@@ -221,7 +274,6 @@ NS_INLINE vImageTransferFunction tfHD(void)
 
 NS_INLINE vImageTransferFunction tfSD(void)
 {
-    // ITU-R 601
     const vImageTransferFunction f601 = {
         .c0 =       1.099,
         .c1 =       1.0,
@@ -254,6 +306,8 @@ NS_INLINE vImageTransferFunction func601(BOOL strict)
 {
     return (strict ? tfSD() : tfCoreVideo());
 }
+
+// MARK: Color primaries
 
 NS_INLINE vImageRGBPrimaries prim2020(void)
 {
@@ -299,7 +353,118 @@ NS_INLINE vImageRGBPrimaries prim601_525(void)
     return p601_525;
 }
 
-// MARK: -
+// MARK: Color matrices
+
+NS_INLINE vImage_YpCbCrToARGBMatrix matrixToRGB2020(void)
+{
+    const vImage_YpCbCrToARGBMatrix matrix = {
+        .Yp     = 1.0,
+        .Cr_R   = 1.4746,
+        .Cr_G   = (-1.4746 * 0.2627 / 0.6780),
+        .Cb_G   = (-1.8814 * 0.0593 / 0.6780),
+        .Cb_B   = 1.8814
+    };
+    return matrix;
+}
+
+NS_INLINE vImage_YpCbCrToARGBMatrix matrixToRGB709(void)
+{
+    return *kvImage_YpCbCrToARGBMatrix_ITU_R_709_2;
+}
+
+NS_INLINE vImage_YpCbCrToARGBMatrix matrixToRGB601(void)
+{
+    return *kvImage_YpCbCrToARGBMatrix_ITU_R_601_4;
+}
+
+NS_INLINE vImage_ARGBToYpCbCrMatrix matrixToYpCbCr2020(void)
+{
+    const vImage_ARGBToYpCbCrMatrix matrix = {
+        .R_Yp   = 0.2627,
+        .G_Yp   = 0.6780,
+        .B_Yp   = 0.0593,
+        .R_Cb   = (-0.2627/1.8814),
+        .G_Cb   = (-0.6780/1.8814),
+        .B_Cb_R_Cr = 0.5,
+        .G_Cr   = (-0.6780/1.4746),
+        .B_Cr   = (-0.0593/1.4746)
+    };
+    return matrix;
+}
+
+NS_INLINE vImage_ARGBToYpCbCrMatrix matrixToYpCbCr709(void)
+{
+    return *kvImage_ARGBToYpCbCrMatrix_ITU_R_709_2;
+}
+
+NS_INLINE const vImage_ARGBToYpCbCrMatrix matrixToYpCbCr601(void)
+{
+    return *kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4;
+}
+
+NS_INLINE vImage_ARGBToYpCbCrMatrix matrixToYpCbCrFor(size_t w, size_t h)
+{
+    vImage_ARGBToYpCbCrMatrix matrix = {0};
+    if (h <= 525) {
+        matrix = matrixToYpCbCr601();
+    } else if (h <= 625) {
+        matrix = matrixToYpCbCr601();
+    } else if (h <= 1125) {
+        matrix = matrixToYpCbCr709();
+    } else { //if (w > 1920)
+        matrix = matrixToYpCbCr2020();
+    }
+    return matrix;
+}
+
+NS_INLINE vImage_YpCbCrToARGBMatrix matrixToRGBFor(size_t w, size_t h)
+{
+    vImage_YpCbCrToARGBMatrix matrix = {0};
+    if (h <= 525) {
+        matrix = matrixToRGB601();
+    } else if (h <= 625) {
+        matrix = matrixToRGB601();
+    } else if (h <= 1125) {
+        matrix = matrixToRGB709();
+    } else { //if (w > 1920)
+        matrix = matrixToRGB2020();
+    }
+    return matrix;
+}
+
+// MARK: Quantization
+
+NS_INLINE vImage_YpCbCrPixelRange videoRange8Clamped(void)
+{
+    const vImage_YpCbCrPixelRange pixelRange = {
+        .Yp_bias = 16,
+        .CbCr_bias = 128,
+        .YpRangeMax = 235,
+        .CbCrRangeMax = 240,
+        .YpMax = 235,
+        .YpMin = 16,
+        .CbCrMax = 240,
+        .CbCrMin = 16
+    };
+    return pixelRange;
+}
+
+NS_INLINE vImage_YpCbCrPixelRange videoRange10Clamped(void)
+{
+    const vImage_YpCbCrPixelRange pixelRange = {
+        .Yp_bias = 64,
+        .CbCr_bias = 512,
+        .YpRangeMax = 940,
+        .CbCrRangeMax = 960,
+        .YpMax = 940,
+        .YpMin = 64,
+        .CbCrMax = 960,
+        .CbCrMin = 64
+    };
+    return pixelRange;
+}
+
+// MARK: ColorSpace generation
 
 NS_INLINE CGColorSpaceRef createColorSpaceForITUR_2020(BOOL strict, BOOL for12bits)
 {
@@ -391,32 +556,6 @@ NS_INLINE CGColorSpaceRef createColorSpaceSubstitutedFor(size_t w, size_t h, BOO
     return cs;
 }
 
-/*
-NS_INLINE CGColorSpaceRef createColorSpaceNamedFor(size_t w, size_t h)
-{
-    // Use predefined CGColorSpace in CGColorSpace.h.
-    CGColorSpaceRef cs = NULL;
-    {
-        CFStringRef csName = NULL;
-        if (h <= 525) {
-            //csName = notAvailableInHeader; // SD-525
-        } else if (h <= 625) {
-            //csName = notAvailableInHeader; // SD-625
-        } else if (h <= 1125) {
-            csName = kCGColorSpaceITUR_709; // HD (2K), 8 or 10 bits
-        } else { //if (w > 1920) {
-            csName = kCGColorSpaceITUR_2020; // HDR (4K/8K), 10 or 12 bits
-        }
-        if (csName) {
-            cs = CGColorSpaceCreateWithName(csName); // owned - inferred
-        }
-    }
-    return cs;
-}
-*/
-
-// MARK: -
-
 NS_INLINE BOOL dl12bits(IDeckLinkVideoFrame* videoFrame)
 {
     // Check if format is high bit depth (12bits and more)
@@ -441,8 +580,6 @@ CGColorSpaceRef createColorSpaceForVideoFrame(IDeckLinkVideoFrame* videoFrame, B
     
     CGColorSpaceRef cs = NULL;
     if (!tfSubstitute) {
-        // cs = createColorSpaceNamedFor(w, h);
-        // if (!cs)
         {
             cs = createColorSpaceITURFor(w, h, dl12bits(videoFrame));
         }
@@ -461,6 +598,10 @@ NS_INLINE BOOL cv12bits(CVPixelBufferRef pixelBuffer)
     BOOL componentIn12bits = FALSE;
     OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
     switch (format) {
+        case kCVPixelFormatType_4444AYpCbCr16:
+        case kCVPixelFormatType_422YpCbCr16:
+            componentIn12bits = TRUE;
+            break;
         case kCVPixelFormatType_64ARGB:
         case kCVPixelFormatType_48RGB:
         case kCVPixelFormatType_64RGBAHalf:
@@ -496,8 +637,6 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             }
         }
         if (!cs) {
-            // cs = createColorSpaceNamedFor(w, h);
-            // if (!cs)
             {
                 cs = createColorSpaceITURFor(w, h, cv12bits(pixelBuffer));
             }
@@ -511,72 +650,71 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
     return cs;
 }
 
+/* =================================================================================== */
+// MARK: - Methods -
+/* =================================================================================== */
+
+/* =================================================================================== */
+// MARK: Private methods
+/* =================================================================================== */
+
 - (BOOL)applyFormatCV:(CVPixelBufferRef)pixelBuffer
 {
-    BOOL error = false;
     size_t width  = CVPixelBufferGetWidth(pixelBuffer);
     size_t height = CVPixelBufferGetHeight(pixelBuffer);
-    uint32_t pixelBits = 32;
-    BOOL endianBig = false;
     OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
-    switch (format) {
+    BOOL supported = (width * height > 0);
+    switch (format) { // ordered same as CVPixelBuffer.h
+        case kCVPixelFormatType_16BE555:
         case kCVPixelFormatType_16LE555:
         case kCVPixelFormatType_16LE5551:
-        case kCVPixelFormatType_16LE565:
-            pixelBits = 16; endianBig = false;
-            break;
-        case kCVPixelFormatType_30RGBLEPackedWideGamut: // (384-895)
-        case kCVPixelFormatType_ARGB2101010LEPacked:
-            pixelBits = 32; endianBig = false;
-            break;
-        case kCVPixelFormatType_14Bayer_GRBG:
-        case kCVPixelFormatType_14Bayer_RGGB:
-        case kCVPixelFormatType_14Bayer_BGGR:
-        case kCVPixelFormatType_14Bayer_GBRG:
-            pixelBits = 32; endianBig = false;
-            break;
-        case kCVPixelFormatType_16BE555:
         case kCVPixelFormatType_16BE565:
-            pixelBits = 16; endianBig = true;
-            break;
-        case kCVPixelFormatType_30RGB:
-            pixelBits = 32; endianBig = true;
-            break;
-        case kCVPixelFormatType_48RGB:
-            pixelBits = 48; endianBig = true;
-            break;
-        case kCVPixelFormatType_64ARGB:
-        case kCVPixelFormatType_64RGBAHalf:
-            pixelBits = 64; endianBig = true;
-            break;
-        case kCVPixelFormatType_128RGBAFloat:
-            pixelBits = 128; endianBig = true;
-            break;
+        case kCVPixelFormatType_16LE565:
         case kCVPixelFormatType_24RGB:
         case kCVPixelFormatType_24BGR:
-            pixelBits = 24; // 8bits per component
-            break;
         case kCVPixelFormatType_32ARGB:
         case kCVPixelFormatType_32BGRA:
         case kCVPixelFormatType_32ABGR:
         case kCVPixelFormatType_32RGBA:
-            pixelBits = 32; // 8bits per component
+        case kCVPixelFormatType_64ARGB:
+        case kCVPixelFormatType_48RGB:
+            break;
+        case kCVPixelFormatType_30RGB:
+        case kCVPixelFormatType_422YpCbCr8:
+        case kCVPixelFormatType_4444YpCbCrA8:
+        case kCVPixelFormatType_4444YpCbCrA8R:
+        case kCVPixelFormatType_4444AYpCbCr8:
+        case kCVPixelFormatType_4444AYpCbCr16:
+        case kCVPixelFormatType_444YpCbCr8:
+        case kCVPixelFormatType_422YpCbCr16:
+        case kCVPixelFormatType_422YpCbCr10:
+        case kCVPixelFormatType_444YpCbCr10:
+            break;
+        case kCVPixelFormatType_422YpCbCr8_yuvs:
+        case kCVPixelFormatType_422YpCbCr8FullRange:
+            break;
+        case kCVPixelFormatType_30RGBLEPackedWideGamut: // (384-895)
+        case kCVPixelFormatType_ARGB2101010LEPacked:
+            break;
+        case kCVPixelFormatType_64RGBAHalf:
+        case kCVPixelFormatType_128RGBAFloat:
+        case kCVPixelFormatType_14Bayer_GRBG:
+        case kCVPixelFormatType_14Bayer_RGGB:
+        case kCVPixelFormatType_14Bayer_BGGR:
+        case kCVPixelFormatType_14Bayer_GBRG:
             break;
         default:
-            error = true;
+            supported = false;
             break;
     }
-    if (!error && width * height > 0) {
-        CGColorSpaceRef cs = createColorSpaceForPixelBuffer(pixelBuffer, useGammaSubstitute);
-        if (cs) {
-            CGColorSpaceRelease(cvColorSpace);
-            cvColorSpace = cs;
-
+    if (supported) {
+        if (!cvColorSpace) {
+            cvColorSpace = createColorSpaceForPixelBuffer(pixelBuffer, useGammaSubstitute);
+        }
+        if (cvColorSpace) {
             cvFormat = format;
             cvWidth = width;
             cvHeight = height;
-            cvPixelBits = pixelBits;
-            cvEndianBig = endianBig;
             
             return TRUE;
         }
@@ -586,52 +724,68 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
 
 - (BOOL)applyFormatDL:(IDeckLinkVideoFrame*)videoFrame
 {
-    BOOL error = false;
     long width  = videoFrame->GetWidth();
     long height = videoFrame->GetHeight();
-    uint32_t pixelBits = 32;
-    BOOL endianBig = false;
+    long rowBytes = videoFrame->GetRowBytes();
+    BOOL endianSwap = false;
     int32_t rangeMin = 64;
     int32_t rangeMax = 940;
+    BOOL default16Q12 = true;
+    BOOL supported = (width * height > 0);
     BMDPixelFormat format = videoFrame->GetPixelFormat();
     switch (format) {
+        case bmdFormat8BitYUV:
+            endianSwap = false;
+            rangeMin = 1; rangeMax = 255; // luma uses [16,235], chroma uses [16,240]
+            default16Q12 = false; // use ARGB8888 for interimBuffer
+            break;
+        case bmdFormat10BitYUV:
+            endianSwap = false;
+            rangeMin = 1; rangeMax = 1023; // luma uses [64,940], chroma uses [64,960]
+            default16Q12 = true; // use ARGB16Q12 for interimBuffer
+            break;
         case bmdFormat8BitARGB:
-            pixelBits = 32; endianBig = false;
+            endianSwap = false;
             rangeMin = 0; rangeMax = 255;
+            default16Q12 = false;
             break;
         case bmdFormat8BitBGRA:
-            pixelBits = 32; endianBig = false;
+            endianSwap = false;
             rangeMin = 0; rangeMax = 255;
+            default16Q12 = false;
             break;
         case bmdFormat10BitRGB:     // 2101010 xRGB BigEndian
-            pixelBits = 32; endianBig = true;
+            endianSwap = true;
             rangeMin = 64; rangeMax = 960;
+            default16Q12 = true;
             break;
         case bmdFormat10BitRGBX:    // 1010102 RGBx BigEndian
-            pixelBits = 32; endianBig = true;
+            endianSwap = true;
             rangeMin = 64; rangeMax = 940;
+            default16Q12 = true;
             break;
         case bmdFormat10BitRGBXLE:  // 1010102 RGBx LittleEndian
-            pixelBits = 32; endianBig = false;
+            endianSwap = false;
             rangeMin = 64; rangeMax = 940;
+            default16Q12 = true;
             break;
         default:
-            error = true;
+            supported = false;
             break;
     }
-    if (!error && width * height > 0) {
-        CGColorSpaceRef cs = createColorSpaceForVideoFrame(videoFrame, useGammaSubstitute);
-        if (cs) {
-            CGColorSpaceRelease(dlColorSpace);
-            dlColorSpace = cs;
-
+    if (supported) {
+        if (!dlColorSpace) {
+            dlColorSpace = createColorSpaceForVideoFrame(videoFrame, useGammaSubstitute);
+        }
+        if (dlColorSpace) {
             dlFormat = format;
             dlWidth = width;
             dlHeight = height;
-            dlPixelBits = pixelBits;
-            dlEndianBig = endianBig;
+            dlRowBytes = rowBytes;
+            dlEndianSwap = endianSwap;
             dlRangeMin = rangeMin;
             dlRangeMax = rangeMax;
+            dlDefault16Q12 = default16Q12;
             
             return TRUE;
         }
@@ -640,16 +794,27 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
 }
 
 /* =================================================================================== */
-// MARK: - Public methods
+// MARK: Public methods
 /* =================================================================================== */
 
 - (void)cleanup
 {
     @synchronized (self) {
+        // public
         CGColorSpaceRelease(dlColorSpace); dlColorSpace = NULL;
         CGColorSpaceRelease(cvColorSpace); cvColorSpace = NULL;
         useDLColorSpace = FALSE;
         useGammaSubstitute = FALSE;
+        
+        // private
+        cvFormat = 0; cvWidth = 0; cvHeight = 0;
+        dlFormat = 0; dlWidth = 0; dlHeight = 0;
+        dlRowBytes = 0; dlEndianSwap = FALSE;
+        dlRangeMin = 0; dlRangeMax = 0;
+        dlDefault16Q12 = FALSE;
+        
+        dlUseXRGB16U = FALSE;
+        infoToARGB = {0}; infoToYpCbCr = {0};
         
         free(dlHostBuffer.data); dlHostBuffer = {0};
         free(interimBuffer.data); interimBuffer = {0};
@@ -702,7 +867,7 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
         formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
     }
     if (!formatOK) return false;
-
+    
     @synchronized (self) {
         {
             free(dlHostBuffer.data); dlHostBuffer = {0};
@@ -713,18 +878,48 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
         vImage_Error dlHostErr = kvImageInternalError;
         vImage_Error interimErr = kvImageInternalError;
         vImage_Error errCGtoCV = kvImageInternalError;
-        vImage_CGImageFormat interimFormat = {0};
-        if (useDLColorSpace) {
-            interimFormat = formatXRGB16U(dlColorSpace); // colorspace conversion may occur
-        } else {
-            interimFormat = formatXRGB16U(cvColorSpace); // treat as same colorspace
-        }
+        vImage_Error matrixErr = kvImageInternalError;
         {
-            dlHostErr = vImageBuffer_Init(&dlHostBuffer,
-                                          dlHeight, dlWidth,
-                                          dlPixelBits, kvImageNoFlags);
+            vImage_YpCbCrToARGB info = {0};
+            vImage_YpCbCrToARGBMatrix matrix = matrixToRGBFor(dlWidth, dlHeight);
+            if (dlFormat == bmdFormat10BitYUV) {
+                vImage_YpCbCrPixelRange pixelRange = videoRange10Clamped();
+                matrixErr = vImageConvert_YpCbCrToARGB_GenerateConversion(&matrix,
+                                                                          &pixelRange,
+                                                                          &info,
+                                                                          kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10,
+                                                                          kvImageARGB16Q12,
+                                                                          kvImageNoFlags);
+            } else if (dlFormat == bmdFormat8BitYUV) {
+                vImage_YpCbCrPixelRange pixelRange = videoRange8Clamped();
+                matrixErr = vImageConvert_YpCbCrToARGB_GenerateConversion(&matrix,
+                                                                          &pixelRange,
+                                                                          &info,
+                                                                          kvImage422CbYpCrYp8,
+                                                                          kvImageARGB8888,
+                                                                          kvImageNoFlags);
+            } else {
+                matrixErr = kvImageNoError;
+            }
+            if (matrixErr == kvImageNoError) {
+                infoToARGB = info;
+            }
+        }
+        vImage_CGImageFormat interimFormat = {0};
+        if (matrixErr == kvImageNoError) {
+            void* ptr = NULL;
+            if (posix_memalign(&ptr, 16, (size_t)dlRowBytes) == 0 && ptr != NULL) {
+                dlHostBuffer.data = ptr;
+                dlHostBuffer.width = dlWidth;
+                dlHostBuffer.height = dlHeight;
+                dlHostBuffer.rowBytes = dlRowBytes;
+                dlHostErr = kvImageNoError;
+            }
         }
         if (dlHostErr == kvImageNoError) {
+            CGColorSpaceRef cs = (useDLColorSpace? dlColorSpace : cvColorSpace);
+            interimFormat = (dlDefault16Q12 ? formatXRGB16Q12(cs) : formatXRGB8888(cs));
+            interimFormat = (dlUseXRGB16U ? formatXRGB16U(cs) : interimFormat);
             interimErr = vImageBuffer_Init(&interimBuffer,
                                            dlHeight, dlWidth, // rect of VideoFrame
                                            interimFormat.bitsPerPixel, kvImageNoFlags);
@@ -739,6 +934,9 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
                                                                         kvImageNoFlags,
                                                                         &errCGtoCV);
                 vImageCVImageFormat_Release(outFormat);
+                
+                queryTempBuffer = TRUE;
+                free(tempBuffer); tempBuffer = NULL;
             }
         }
         
@@ -755,17 +953,17 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
 - (BOOL)convertDL:(IDeckLinkVideoFrame*)videoFrame toCV:(CVPixelBufferRef)pixelBuffer
 {
     NSParameterAssert(videoFrame != NULL && pixelBuffer != NULL);
-
+    
     //
     BOOL formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
-    BOOL converterOK = (dlHostBuffer.data != NULL && interimBuffer.data != NULL && convCVtoCG != NULL);
+    BOOL converterOK = (dlHostBuffer.data != NULL && interimBuffer.data != NULL && convCGtoCV != NULL);
     if (!(formatOK && converterOK)) {
         return FALSE; // unsupported conversion
     }
     
     @synchronized (self) {
         /* ================================================================ */
-        // VideoFrame (permute) dlHostBuffer (xfer) XRGB16U (convCGtoCV) CVPixelBuffer
+        // VideoFrame [(permute) dlHostBuffer] (xfer) interimBuffer (convCGtoCV) CVPixelBuffer
         /* ================================================================ */
         
         vImage_Error convErr = kvImageNoError;
@@ -775,62 +973,104 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             HRESULT result = videoFrame->GetBytes(&ptr);
             assert (result == S_OK && ptr != NULL);
             
-            vImage_Buffer sourceBuffer = {0};
-            sourceBuffer.data = ptr;
-            sourceBuffer.width = (vImagePixelCount)videoFrame->GetWidth();
-            sourceBuffer.height = (vImagePixelCount)videoFrame->GetHeight();
-            sourceBuffer.rowBytes = (size_t)videoFrame->GetRowBytes();
+            vImage_Buffer sourceBuffer = {
+                .data = ptr,
+                .width = dlWidth,
+                .height = dlHeight,
+                .rowBytes = dlRowBytes
+            };
             
             // Read from VideoFrame
-            if (dlEndianBig) {
+            if (dlEndianSwap) {
+                // Permute BigToHost
                 {
-                    // Permute BigToHost
                     uint8_t permuteMap[4] = {3,2,1,0};
                     convErr = vImagePermuteChannels_ARGB8888(&sourceBuffer, &dlHostBuffer,
                                                              permuteMap, kvImageNoFlags);
                 }
+                // Convert VideoFrame format (in hostEndian) to interimBuffer
                 if (convErr == kvImageNoError) {
-                    // Convert VideoFrame format (in hostEndian) to XRGB16U
                     if (dlFormat == bmdFormat10BitRGBX) { // 1010102 BE
                         uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                        convErr = vImageConvert_RGBA1010102ToARGB16U(&dlHostBuffer, &interimBuffer,
-                                                                     dlRangeMin, dlRangeMax,
-                                                                     permuteMap, kvImageNoFlags);
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageConvert_RGBA1010102ToARGB16Q12(&dlHostBuffer, &interimBuffer,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           permuteMap, kvImageNoFlags);
+                        } else {
+                            convErr = vImageConvert_RGBA1010102ToARGB16U(&dlHostBuffer, &interimBuffer,
+                                                                         dlRangeMin, dlRangeMax,
+                                                                         permuteMap, kvImageNoFlags);
+                        }
                     } else if (dlFormat == bmdFormat10BitRGB) { // 2101010 BE
                         uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                        convErr = vImageConvert_ARGB2101010ToARGB16U(&dlHostBuffer, &interimBuffer,
-                                                                     dlRangeMin, dlRangeMax,
-                                                                     permuteMap, kvImageNoFlags);
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageConvert_ARGB2101010ToARGB16Q12(&dlHostBuffer, &interimBuffer,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           permuteMap, kvImageNoFlags);
+                        } else {
+                            convErr = vImageConvert_ARGB2101010ToARGB16U(&dlHostBuffer, &interimBuffer,
+                                                                         dlRangeMin, dlRangeMax,
+                                                                         permuteMap, kvImageNoFlags);
+                        }
                     } else {
                         convErr = kvImageInternalError;
                     }
                 }
             } else {
-                // Convert VideoFrame format to XRGB16U
-                if (dlFormat == bmdFormat10BitRGBXLE) { // 1010102 LE
-                    uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                    convErr = vImageConvert_RGBA1010102ToARGB16U(&sourceBuffer, &interimBuffer,
-                                                                 dlRangeMin, dlRangeMax,
-                                                                 permuteMap, kvImageNoFlags);
-                } else if (dlFormat == bmdFormat8BitARGB) {
-                    uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                    Pixel_ARGB_16U bgColor = {0,0,0,0};
-                    convErr = vImageConvert_ARGB8888ToARGB16U(&sourceBuffer, &interimBuffer,
-                                                              permuteMap, 0x0,
-                                                              bgColor, kvImageNoFlags);
-                } else if (dlFormat == bmdFormat8BitBGRA) {
-                    uint8_t permuteMap[4] = {3,2,1,0}; // componentOrder: B3, G2, R1, A0
-                    Pixel_ARGB_16U bgColor = {0,0,0,0};
-                    convErr = vImageConvert_ARGB8888ToARGB16U(&sourceBuffer, &interimBuffer,
-                                                              permuteMap, 0x0,
-                                                              bgColor, kvImageNoFlags);
-                } else {
-                    convErr = kvImageInternalError;
+                // Convert VideoFrame format to interimBuffer
+                {
+                    if (dlFormat == bmdFormat10BitRGBXLE) { // 1010102 LE
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageConvert_RGBA1010102ToARGB16Q12(&sourceBuffer, &interimBuffer,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           permuteMap, kvImageNoFlags);
+                        } else {
+                            convErr = vImageConvert_RGBA1010102ToARGB16U(&sourceBuffer, &interimBuffer,
+                                                                         dlRangeMin, dlRangeMax,
+                                                                         permuteMap, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat8BitARGB) {
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageCopyBuffer(&sourceBuffer, &interimBuffer, 4, kvImageNoFlags);
+                        } else {
+                            uint8_t copyMask = 0b0000;
+                            Pixel_ARGB_16U bgColor = {0,0,0,0};
+                            convErr = vImageConvert_ARGB8888ToARGB16U(&sourceBuffer, &interimBuffer,
+                                                                      permuteMap, copyMask,
+                                                                      bgColor, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat8BitBGRA) {
+                        uint8_t permuteMap[4] = {3,2,1,0}; // componentOrder: B3, G2, R1, A0
+                        if (!dlUseXRGB16U) {
+                            convErr = vImagePermuteChannels_ARGB8888(&sourceBuffer, &interimBuffer,
+                                                                     permuteMap, kvImageNoFlags);
+                        } else {
+                            uint8_t copyMask = 0b0000;
+                            Pixel_ARGB_16U bgColor = {0,0,0,0};
+                            convErr = vImageConvert_ARGB8888ToARGB16U(&sourceBuffer, &interimBuffer,
+                                                                      permuteMap, copyMask,
+                                                                      bgColor, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat10BitYUV) { // v210
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        convErr = vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB16Q12(&sourceBuffer, &interimBuffer,
+                                                                                         &infoToARGB, permuteMap,
+                                                                                         4096, kvImageNoFlags);
+                    } else if (dlFormat == bmdFormat8BitYUV) { // 2vuy
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        convErr = vImageConvert_422CbYpCrYp8ToARGB8888(&sourceBuffer, &interimBuffer,
+                                                                       &infoToARGB, permuteMap,
+                                                                       255, kvImageNoFlags);
+                    } else {
+                        convErr = kvImageInternalError;
+                    }
                 }
             }
         }
         if (convErr == kvImageNoError) {
-            // Convert XRGB16U to CVPixelBuffer format
+            // Convert interimBuffer to CVPixelBuffer format
             CVPixelBufferLockBaseAddress(pixelBuffer, 0);
             
             // target vImage_Buffer
@@ -875,7 +1115,7 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
         formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
     }
     if (!formatOK) return false;
-
+    
     @synchronized (self) {
         {
             free(dlHostBuffer.data); dlHostBuffer = {0};
@@ -886,20 +1126,50 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
         vImage_Error dlHostErr = kvImageInternalError;
         vImage_Error interimErr = kvImageInternalError;
         vImage_Error errCVtoCG = kvImageInternalError;
-        vImage_CGImageFormat interimFormat = {0};
-        if (useDLColorSpace) {
-            interimFormat = formatXRGB16U(dlColorSpace); // colorspace conversion may occur
-        } else {
-            interimFormat = formatXRGB16U(cvColorSpace); // treat as same colorspace
-        }
+        vImage_Error matrixErr = kvImageInternalError;
         {
-            dlHostErr = vImageBuffer_Init(&dlHostBuffer,
-                                          dlHeight, dlWidth,
-                                          dlPixelBits, kvImageNoFlags);
+            vImage_ARGBToYpCbCr info = {0};
+            vImage_ARGBToYpCbCrMatrix matrix = matrixToYpCbCrFor(dlWidth, dlHeight);
+            if (dlFormat == bmdFormat10BitYUV) {
+                vImage_YpCbCrPixelRange pixelRange = videoRange10Clamped();
+                matrixErr = vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix,
+                                                                          &pixelRange,
+                                                                          &info,
+                                                                          kvImageARGB16Q12,
+                                                                          kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10,
+                                                                          kvImageNoFlags);
+            } else if (dlFormat == bmdFormat8BitYUV) {
+                vImage_YpCbCrPixelRange pixelRange = videoRange8Clamped();
+                matrixErr = vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix,
+                                                                          &pixelRange,
+                                                                          &info,
+                                                                          kvImageARGB8888,
+                                                                          kvImage422CbYpCrYp8,
+                                                                          kvImageNoFlags);
+            } else {
+                matrixErr = kvImageNoError;
+            }
+            if (matrixErr == kvImageNoError) {
+                infoToYpCbCr = info;
+            }
+        }
+        vImage_CGImageFormat interimFormat = {0};
+        if (matrixErr == kvImageNoError) {
+            void* ptr = NULL;
+            if (posix_memalign(&ptr, 16, (size_t)dlRowBytes) == 0 && ptr != NULL) {
+                dlHostBuffer.data = ptr;
+                dlHostBuffer.width = dlWidth;
+                dlHostBuffer.height = dlHeight;
+                dlHostBuffer.rowBytes = dlRowBytes;
+                dlHostErr = kvImageNoError;
+            }
         }
         if (dlHostErr == kvImageNoError) {
+            CGColorSpaceRef cs = (useDLColorSpace? dlColorSpace : cvColorSpace);
+            interimFormat = (dlDefault16Q12 ? formatXRGB16Q12(cs) : formatXRGB8888(cs));
+            interimFormat = (dlUseXRGB16U ? formatXRGB16U(cs) : interimFormat);
             interimErr = vImageBuffer_Init(&interimBuffer,
-                                           cvHeight, cvWidth, // rect of pixelBuffer
+                                           dlHeight, dlWidth, // rect of VideoFrame
                                            interimFormat.bitsPerPixel, kvImageNoFlags);
         }
         if (interimErr == kvImageNoError) {
@@ -912,6 +1182,9 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
                                                                         kvImageNoFlags,
                                                                         &errCVtoCG);
                 vImageCVImageFormat_Release(inFormat);
+                
+                queryTempBuffer = TRUE;
+                free(tempBuffer); tempBuffer = NULL;
             }
         }
         
@@ -938,12 +1211,12 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
     
     @synchronized (self) {
         /* ================================================================ */
-        // CVPixelBuffer (convCVtoCG) XRGB16U (xfer) dlHostBuffer (permute) VideoFrame
+        // CVPixelBuffer (convCVtoCG) interimBuffer (xfer) [dlHostBuffer (permute)] VideoFrame
         /* ================================================================ */
         
         vImage_Error convErr = kvImageNoError;
         {
-            // Convert CVPixelBuffer format to XRGB16U
+            // Convert CVPixelBuffer format to interimBuffer
             CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
             
             // source vImage_Buffer
@@ -974,55 +1247,102 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             HRESULT result = videoFrame->GetBytes(&ptr);
             assert (result == S_OK && ptr != NULL);
             
-            vImage_Buffer targetBuffer = {0};
-            targetBuffer.data = ptr;
-            targetBuffer.width = (vImagePixelCount)videoFrame->GetWidth();
-            targetBuffer.height = (vImagePixelCount)videoFrame->GetHeight();
-            targetBuffer.rowBytes = (size_t)videoFrame->GetRowBytes();
+            vImage_Buffer targetBuffer = {
+                .data = ptr,
+                .width = dlWidth,
+                .height = dlHeight,
+                .rowBytes = dlRowBytes
+            };
             
             // Write into VideoFrame
-            if (dlEndianBig) {
-                // Convert XRGB16U to VideoFrame format (in hostEndian)
-                if (dlFormat == bmdFormat10BitRGBX) { // 1010102 BE
-                    uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                    convErr = vImageConvert_ARGB16UToRGBA1010102(&interimBuffer, &dlHostBuffer,
-                                                                 dlRangeMin, dlRangeMax,
-                                                                 permuteMap, kvImageNoFlags);
-                } else if (dlFormat == bmdFormat10BitRGB) { // 2101010 BE
-                    uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                    convErr = vImageConvert_ARGB16UToARGB2101010(&interimBuffer, &dlHostBuffer,
-                                                                 dlRangeMin, dlRangeMax,
-                                                                 permuteMap, kvImageNoFlags);
-                } else {
-                    convErr = kvImageInternalError;
+            if (dlEndianSwap) {
+                // Convert interimBuffer to VideoFrame format (in hostEndian)
+                {
+                    if (dlFormat == bmdFormat10BitRGBX) { // 1010102 BE
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageConvert_ARGB16Q12ToRGBA1010102(&interimBuffer, &dlHostBuffer,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           permuteMap, kvImageNoFlags);
+                        } else {
+                            convErr = vImageConvert_ARGB16UToRGBA1010102(&interimBuffer, &dlHostBuffer,
+                                                                         dlRangeMin, dlRangeMax,
+                                                                         permuteMap, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat10BitRGB) { // 2101010 BE
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageConvert_ARGB16Q12ToARGB2101010(&interimBuffer, &dlHostBuffer,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           permuteMap, kvImageNoFlags);
+                        } else {
+                            convErr = vImageConvert_ARGB16UToARGB2101010(&interimBuffer, &dlHostBuffer,
+                                                                         dlRangeMin, dlRangeMax,
+                                                                         permuteMap, kvImageNoFlags);
+                        }
+                    } else {
+                        convErr = kvImageInternalError;
+                    }
                 }
+                // Permute HostToBig
                 if (convErr == kvImageNoError) {
-                    // Permute HostToBig
                     uint8_t permuteMap[4] = {3,2,1,0};
                     convErr = vImagePermuteChannels_ARGB8888(&dlHostBuffer, &targetBuffer,
                                                              permuteMap, kvImageNoFlags);
                 }
             } else {
-                // Convert XRGB16U to VideoFrame format
-                if (dlFormat == bmdFormat10BitRGBXLE) { // 1010102 LE
-                    uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                    convErr = vImageConvert_ARGB16UToRGBA1010102(&interimBuffer, &targetBuffer,
-                                                                 dlRangeMin, dlRangeMax,
-                                                                 permuteMap, kvImageNoFlags);
-                } else if (dlFormat == bmdFormat8BitARGB) {
-                    uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-                    Pixel_8888 bgColor = {0,0,0,0};
-                    convErr = vImageConvert_ARGB16UToARGB8888(&interimBuffer, &targetBuffer,
-                                                              permuteMap, 0x0,
-                                                              bgColor, kvImageNoFlags);
-                } else if (dlFormat == bmdFormat8BitBGRA) {
-                    uint8_t permuteMap[4] = {3,2,1,0}; // componentOrder: B3, G2, R1, A0
-                    Pixel_8888 bgColor = {0,0,0,0};
-                    convErr = vImageConvert_ARGB16UToARGB8888(&interimBuffer, &targetBuffer,
-                                                              permuteMap, 0x0,
-                                                              bgColor, kvImageNoFlags);
-                } else {
-                    convErr = kvImageInternalError;
+                // Convert interimBuffer to VideoFrame format
+                {
+                    if (dlFormat == bmdFormat10BitRGBXLE) { // 1010102 LE
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageConvert_ARGB16Q12ToRGBA1010102(&interimBuffer, &targetBuffer,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           dlRangeMin, dlRangeMax,
+                                                                           permuteMap, kvImageNoFlags);
+                        } else {
+                            convErr = vImageConvert_ARGB16UToRGBA1010102(&interimBuffer, &targetBuffer,
+                                                                         dlRangeMin, dlRangeMax,
+                                                                         permuteMap, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat8BitARGB) {
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        if (!dlUseXRGB16U) {
+                            convErr = vImageCopyBuffer(&interimBuffer, &targetBuffer, 4, kvImageNoFlags);
+                        } else {
+                            uint8_t copyMask = 0b0000;
+                            Pixel_8888 bgColor = {0,0,0,0};
+                            convErr = vImageConvert_ARGB16UToARGB8888(&interimBuffer, &targetBuffer,
+                                                                      permuteMap, copyMask,
+                                                                      bgColor, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat8BitBGRA) {
+                        uint8_t permuteMap[4] = {3,2,1,0}; // componentOrder: B3, G2, R1, A0
+                        if (!dlUseXRGB16U) {
+                            convErr = vImagePermuteChannels_ARGB8888(&interimBuffer, &targetBuffer,
+                                                                     permuteMap, kvImageNoFlags);
+                        } else {
+                            uint8_t copyMask = 0b0000;
+                            Pixel_8888 bgColor = {0,0,0,0};
+                            convErr = vImageConvert_ARGB16UToARGB8888(&interimBuffer, &targetBuffer,
+                                                                      permuteMap, copyMask,
+                                                                      bgColor, kvImageNoFlags);
+                        }
+                    } else if (dlFormat == bmdFormat10BitYUV) { // v210
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        convErr = vImageConvert_ARGB16Q12To422CrYpCbYpCbYpCbYpCrYpCrYp10(&interimBuffer, &targetBuffer,
+                                                                                         &infoToYpCbCr, permuteMap,
+                                                                                         kvImageNoFlags);
+                    } else if (dlFormat == bmdFormat8BitYUV) { // 2vuy
+                        uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
+                        convErr = vImageConvert_ARGB8888To422CbYpCrYp8(&interimBuffer, &targetBuffer,
+                                                                                        &infoToYpCbCr, permuteMap,
+                                                                                        kvImageNoFlags);
+                    } else {
+                        convErr = kvImageInternalError;
+                    }
                 }
             }
         }

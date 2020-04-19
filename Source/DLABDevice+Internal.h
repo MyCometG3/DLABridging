@@ -30,6 +30,7 @@
 #import "DLABProfileCallback.h"
 #import "DLABProfileAttributes+Internal.h"
 #import "DLABFrameMetadata+Internal.h"
+#import "DLABVideoConverter.h"
 
 const int maxOutputVideoFrameCount = 8;
 
@@ -405,6 +406,16 @@ NS_ASSUME_NONNULL_BEGIN
  BLACKMAGIC_DECKLINK_API_VERSION from current runtime
  */
 @property (nonatomic, assign) int apiVersion;
+
+/**
+ DLABVideoConverter for video format conversion
+ */
+@property (nonatomic, strong, nullable) DLABVideoConverter* inputVideoConverter;
+
+/**
+ DLABVideoConverter for video format conversion
+ */
+@property (nonatomic, strong, nullable) DLABVideoConverter* outputVideoConverter;
 
 @end
 

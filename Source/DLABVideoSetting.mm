@@ -38,6 +38,163 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     return stride;
 }
 
+NS_INLINE OSType preferredCVPixelFormatFor(BMDPixelFormat dlFormat) {
+    OSType cvFormat = 0;
+    switch (dlFormat) {
+        case bmdFormat8BitYUV: // '2vuy'
+            cvFormat = kCVPixelFormatType_422YpCbCr8; // '2vuy'
+            break;
+        case bmdFormat10BitYUV: // 'v210'
+            cvFormat = kCVPixelFormatType_422YpCbCr10; // 'v210'
+            break;
+        case bmdFormat8BitARGB: // 32
+            cvFormat = kCVPixelFormatType_32ARGB; // 32
+            break;
+        case bmdFormat8BitBGRA: // 'BGRA'
+            cvFormat = kCVPixelFormatType_32BGRA; // 'BGRA'
+            break;
+        case bmdFormat10BitRGB: // 'r210' (64-960)
+        case bmdFormat10BitRGBXLE: // 'R10l' (64-960)
+        case bmdFormat10BitRGBX: // 'R10b' (64-960)
+            // cvFormat = kCVPixelFormatType_30RGBLEPackedWideGamut; // 'w30r' (384-895)
+            // cvFormat = kCVPixelFormatType_ARGB2101010LEPacked; // 'l10r' (0-4095 LE)
+            // cvFormat = kCVPixelFormatType_64RGBAHalf; // 'RGhA' (16bit float LE)
+            cvFormat = kCVPixelFormatType_48RGB; // 'b48r' (0-65535 BE)
+            break;
+        case bmdFormat12BitRGB: // 'R12B'
+        case bmdFormat12BitRGBLE: // 'R12L'
+            // cvFormat = kCVPixelFormatType_64RGBAHalf; // 'RGhA' (16bit float LE)
+            cvFormat = kCVPixelFormatType_48RGB; // 'b48r' (0-65535 BE)
+            break;
+        default:
+            cvFormat = kCVPixelFormatType_422YpCbCr8; // '2vuy'
+            break;
+    }
+    /*
+     ### @ macOS 10.15.4 Catalina
+     Filtered: ContainsRGB = 1 && IOSurfaceCoreAnimationCompatibility = 1
+     => 'BGRA', 'RGhA', 'RGfA', 'w30r'
+     Filtered: ContainsYCbCr = 1 && IOSurfaceCoreAnimationCompatibility = 1
+     => 'r408', 'v408', 'y408', 'v308', 'v210', 'v410', 'r4fl',
+     => '411v', '411f', '444v', '444f', 'y420', 'f420', 'a2vy',
+     => 'x44p', 'xw4p', 'xf4p', 'x22p', 'xf2p', 'p420', 'p422',
+     => 'p444', 'pf20', 'pf22', 'pf44', 'pw20', 'pw22', 'pw44',
+     => '===1', '===2', '===3', 'ptv0', 'ptv2', 'ptv4', 'ptf0',
+     => 'ptf2', 'ptf4', 'ptw0', 'ptw2', 'ptw4'
+     */
+    return cvFormat;
+}
+
+NS_INLINE NSString* nameForCVPixelFormatType(OSType cvPixelFormat)
+{
+    NSString* name = nil;
+    switch (cvPixelFormat) {
+        case kCVPixelFormatType_422YpCbCr8:         name = @"422YpCbCr8"; break;
+        case kCVPixelFormatType_4444YpCbCrA8:       name = @"4444YpCbCrA8"; break;
+        case kCVPixelFormatType_4444YpCbCrA8R:      name = @"4444YpCbCrA8R"; break;
+        case kCVPixelFormatType_4444AYpCbCr8:       name = @"4444AYpCbCr8"; break;
+        case kCVPixelFormatType_4444AYpCbCr16:      name = @"4444AYpCbCr16"; break;
+        case kCVPixelFormatType_444YpCbCr8:         name = @"444YpCbCr8"; break;
+        case kCVPixelFormatType_422YpCbCr16:        name = @"422YpCbCr16"; break;
+        case kCVPixelFormatType_422YpCbCr10:        name = @"422YpCbCr10"; break;
+        case kCVPixelFormatType_444YpCbCr10:        name = @"444YpCbCr10"; break;
+        case kCVPixelFormatType_422YpCbCr8_yuvs:    name = @"422YpCbCr8_yuvs"; break;
+        case kCVPixelFormatType_422YpCbCr8FullRange:    name = @"422YpCbCr8FullRange"; break;
+            
+        case kCVPixelFormatType_16LE555:            name = @"16LE555"; break;
+        case kCVPixelFormatType_16LE5551:           name = @"16LE5551"; break;
+        case kCVPixelFormatType_16LE565:            name = @"16LE565"; break;
+        case kCVPixelFormatType_16BE555:            name = @"16BE555"; break;
+        case kCVPixelFormatType_16BE565:            name = @"16BE565"; break;
+        case kCVPixelFormatType_24RGB:              name = @"24RGB"; break;
+        case kCVPixelFormatType_24BGR:              name = @"24BGR"; break;
+        case kCVPixelFormatType_32ARGB:             name = @"32ARGB"; break;
+        case kCVPixelFormatType_32BGRA:             name = @"32BGRA"; break;
+        case kCVPixelFormatType_32ABGR:             name = @"32ABGR"; break;
+        case kCVPixelFormatType_32RGBA:             name = @"32RGBA"; break;
+        case kCVPixelFormatType_64ARGB:             name = @"64ARGB"; break;
+        case kCVPixelFormatType_48RGB:              name = @"48RGB"; break;
+        case kCVPixelFormatType_30RGB:              name = @"30RGB"; break;
+        case kCVPixelFormatType_30RGBLEPackedWideGamut: name = @"30RGBLEPackedWideGamut"; break;
+        case kCVPixelFormatType_ARGB2101010LEPacked:    name = @"ARGB2101010LEPacked"; break;
+        case kCVPixelFormatType_64RGBAHalf:         name = @"64RGBAHalf"; break;
+        case kCVPixelFormatType_128RGBAFloat:       name = @"128RGBAFloat"; break;
+        case kCVPixelFormatType_14Bayer_GRBG:       name = @"14Bayer_GRBG"; break;
+        case kCVPixelFormatType_14Bayer_RGGB:       name = @"14Bayer_RGGB"; break;
+        case kCVPixelFormatType_14Bayer_BGGR:       name = @"14Bayer_BGGR"; break;
+        case kCVPixelFormatType_14Bayer_GBRG:       name = @"14Bayer_GBRG"; break;
+        default:                                    break;
+    }
+    return name;
+}
+
+NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelFormat)
+{
+    BOOL dlReady = FALSE;
+    switch (dlPixelFormat) {
+        case bmdFormat8BitYUV:
+        case bmdFormat10BitYUV:
+            dlReady = true;
+            break;
+        case bmdFormat8BitARGB:
+        case bmdFormat8BitBGRA:
+        case bmdFormat10BitRGB:
+        case bmdFormat10BitRGBXLE:
+        case bmdFormat10BitRGBX:
+        case bmdFormat12BitRGB:
+        case bmdFormat12BitRGBLE:
+            dlReady = true;
+            break;
+        default:
+            dlReady = false;
+            break;
+    }
+    
+    BOOL cvReady = FALSE;
+    switch (cvPixelFormat) {
+        case kCVPixelFormatType_422YpCbCr8:
+        case kCVPixelFormatType_4444YpCbCrA8:
+        case kCVPixelFormatType_4444YpCbCrA8R:
+        case kCVPixelFormatType_4444AYpCbCr8:
+        case kCVPixelFormatType_4444AYpCbCr16:
+        case kCVPixelFormatType_444YpCbCr8:
+        case kCVPixelFormatType_422YpCbCr16:
+        case kCVPixelFormatType_422YpCbCr10:
+        case kCVPixelFormatType_444YpCbCr10:
+        case kCVPixelFormatType_422YpCbCr8_yuvs:
+        case kCVPixelFormatType_422YpCbCr8FullRange:
+            cvReady = true;
+            break;
+        case kCVPixelFormatType_16LE555:
+        case kCVPixelFormatType_16LE5551:
+        case kCVPixelFormatType_16LE565:
+        case kCVPixelFormatType_16BE555:
+        case kCVPixelFormatType_16BE565:
+        case kCVPixelFormatType_24RGB:
+        case kCVPixelFormatType_24BGR:
+        case kCVPixelFormatType_32ARGB:
+        case kCVPixelFormatType_32BGRA:
+        case kCVPixelFormatType_32ABGR:
+        case kCVPixelFormatType_32RGBA:
+        case kCVPixelFormatType_64ARGB:
+        case kCVPixelFormatType_48RGB:
+        case kCVPixelFormatType_30RGB:
+        case kCVPixelFormatType_30RGBLEPackedWideGamut:
+        case kCVPixelFormatType_ARGB2101010LEPacked:
+        case kCVPixelFormatType_64RGBAHalf:
+        case kCVPixelFormatType_128RGBAFloat:
+        case kCVPixelFormatType_14Bayer_GRBG:
+        case kCVPixelFormatType_14Bayer_RGGB:
+        case kCVPixelFormatType_14Bayer_BGGR:
+        case kCVPixelFormatType_14Bayer_GBRG:
+            cvReady = true;
+            break;
+        default:
+            cvReady = false;
+            break;
+    }
+    return (dlReady && cvReady);
+}
 @implementation DLABVideoSetting
 
 - (instancetype) init
@@ -78,6 +235,8 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         
         _useVITCW = !_isHDW;
         _useRP188W = _isHDW;
+        
+        _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
     }
     return self;
 }
@@ -112,6 +271,8 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         
         _useVITCW = !_isHDW && (_outputFlagW & bmdVideoOutputVITC);
         _useRP188W = _isHDW && (_outputFlagW & bmdVideoOutputRP188);
+        
+        _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
     }
     return self;
 }
@@ -242,6 +403,8 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     
     if (!( self.rowBytesW == object.rowBytesW )) return NO;
     
+    if (!( self.cvPixelFormatType == object.cvPixelFormatType )) return NO;
+    
     if (!CFEqual(self.videoFormatDescriptionW, object.videoFormatDescriptionW)) return NO;
     
     return YES;
@@ -276,6 +439,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         obj.outputFlagW = self.outputFlagW;
         obj.displayModeSupportW = self.displayModeSupportW; // TODO: deprecated
         obj.rowBytesW = self.rowBytesW;
+        obj.cvPixelFormatType = self.cvPixelFormatType;
         
         // private properties
         if (obj.videoFormatDescription) {
@@ -420,8 +584,11 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
 
 - (BOOL) buildVideoFormatDescription
 {
-    OSStatus err = noErr;
-    CMFormatDescriptionRef formatDescription = NULL;
+    return [self buildVideoFormatDescriptionWithError:nil];
+}
+
+- (BOOL) buildVideoFormatDescriptionWithError:(NSError**)error
+{
     {
         // long
         long width = self.widthW;
@@ -429,42 +596,31 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         long rowBytes = self.rowBytesW;
         
         // pixel format
-        BMDPixelFormat pixelFormat = self.pixelFormatW;    //uint32_t
+        BMDPixelFormat pixelFormat = self.pixelFormatW; //uint32_t
+        OSType cvPixelFormat = self.cvPixelFormatType;  // uint32_t
         
         //
-        BOOL ready = false;
-        if (width && height && rowBytes && pixelFormat) {
-            ready = true;
-        } else {
-            NSLog(@"ERROR: Unsupported setting detected.");
+        BOOL ready = (width && height && rowBytes && pixelFormat && cvPixelFormat);
+        if (!ready) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Unsupported settings detected."
+                  code:E_INVALIDARG
+                    to:error];
         }
         
-        BOOL yuvColorSpace = false;
         if (ready) {
-            switch (pixelFormat) {
-                case bmdFormat8BitYUV:
-                case bmdFormat10BitYUV:
-                    yuvColorSpace = true;
-                    ready = true;
-                    break;
-                case bmdFormat8BitARGB:
-                case bmdFormat8BitBGRA:
-                case bmdFormat10BitRGB:
-                case bmdFormat10BitRGBXLE:
-                case bmdFormat10BitRGBX:
-                case bmdFormat12BitRGB:
-                case bmdFormat12BitRGBLE:
-                    yuvColorSpace = false;
-                    ready = true;
-                    break;
-                default:
-                    ready = false;
-                    break;
+            ready = checkPixelFormat(pixelFormat, cvPixelFormat);
+            if (!ready) {
+                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                    reason:@"Unsupported pixel format(s) detected."
+                      code:E_INVALIDARG
+                        to:error];
             }
         }
         
+        
         NSMutableDictionary *extensions = [NSMutableDictionary dictionary];
-        if (ready && yuvColorSpace) {
+        if (ready) {
             // Color space
             NSString* keyMatrix = (__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix;
             NSString* matrix2020 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_2020;
@@ -561,7 +717,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         if (ready) {
             // format name (either rgb or yuv related name)
             NSString* keyFormatName = (__bridge NSString*)kCMFormatDescriptionExtension_FormatName;
-            NSString* name = self.nameW;
+            NSString* name = nameForCVPixelFormatType(cvPixelFormat);
             extensions[keyFormatName] = name;
             
             // stride (bytes per row)
@@ -610,23 +766,27 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         
         if (ready) {
             // create format description
-            err = CMVideoFormatDescriptionCreate(NULL,
-                                                 (CMVideoCodecType)pixelFormat,
-                                                 (int32_t)width,
-                                                 (int32_t)height,
-                                                 (__bridge CFDictionaryRef)extensions,
-                                                 &formatDescription);
-            if (!err) {
+            OSStatus result = noErr;
+            CMFormatDescriptionRef formatDescription = NULL;
+            result = CMVideoFormatDescriptionCreate(NULL,
+                                                    (CMVideoCodecType)cvPixelFormat,
+                                                    (int32_t)width,
+                                                    (int32_t)height,
+                                                    (__bridge CFDictionaryRef)extensions,
+                                                    &formatDescription);
+            if (!result && formatDescription) {
                 self.videoFormatDescriptionW = formatDescription;
+                CFRelease(formatDescription);
+                return TRUE;
+            } else {
+                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                    reason:@"Failed to create CMVideoFormatDescription."
+                      code:E_INVALIDARG
+                        to:error];
             }
         }
     }
-    if (formatDescription) {
-        CFRelease(formatDescription);
-        return TRUE;
-    } else {
-        return FALSE;    // TODO handle err
-    }
+    return FALSE;
 }
 
 - (BOOL) addClapExtOfWidthN:(int32_t)clapWidthN
@@ -747,6 +907,7 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
         self.heightW = height;
         self.rowBytesW = rowBytes;
         self.pixelFormatW = (DLABPixelFormat)pixelFormat;
+        // NOTE: Preserve specified CVPixelFormatType as is
         
         // update videoFormatDescription using new values from videoFrame
         ready = [self buildVideoFormatDescription];

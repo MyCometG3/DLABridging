@@ -220,16 +220,12 @@
 {
     NSParameterAssert(videoFrame);
     
-    // Check videoFrame
-    long width = videoFrame->GetWidth();
-    long height = videoFrame->GetHeight();
-    long rowBytes = videoFrame->GetRowBytes();
-    CMPixelFormatType pixelFormat = videoFrame->GetPixelFormat();
-    
+    BOOL ready = false;
+    OSType cvPixelFormat = self.inputVideoSettingW.cvPixelFormatType;
+    assert(cvPixelFormat);
+
     // Check pool, and create if required
-    CVReturn err = kCVReturnError;
     CVPixelBufferPoolRef pool = self.inputPixelBufferPool;
-    
     if (pool == NULL) {
         // create new one using videoFrame parameters (lazy instatiation)
         NSString* minimunCountKey = (__bridge NSString *)kCVPixelBufferPoolMinimumBufferCountKey;
@@ -238,13 +234,14 @@
         NSString* pixelFormatKey = (__bridge NSString *)kCVPixelBufferPixelFormatTypeKey;
         NSString* widthKey = (__bridge NSString *)kCVPixelBufferWidthKey;
         NSString* heightKey = (__bridge NSString *)kCVPixelBufferHeightKey;
-        NSString* bytesPerRowKey = (__bridge NSString *)kCVPixelBufferBytesPerRowAlignmentKey;
+        NSString* bytesPerRowAlignmentKey = (__bridge NSString *)kCVPixelBufferBytesPerRowAlignmentKey;
         NSMutableDictionary* pbAttributes = [NSMutableDictionary dictionary];
-        pbAttributes[pixelFormatKey] = @(pixelFormat);
-        pbAttributes[widthKey] = @(width);
-        pbAttributes[heightKey] = @(height);
-        pbAttributes[bytesPerRowKey] = @(rowBytes);
+        pbAttributes[pixelFormatKey] = @(cvPixelFormat);
+        pbAttributes[widthKey] = @(videoFrame->GetWidth());
+        pbAttributes[heightKey] = @(videoFrame->GetHeight());
+        pbAttributes[bytesPerRowAlignmentKey] = @(16); // = 2^4 = 2 * sizeof(void*)
         
+        CVReturn err = kCVReturnError;
         err = CVPixelBufferPoolCreate(NULL, (__bridge CFDictionaryRef)poolAttributes,
                                       (__bridge CFDictionaryRef)pbAttributes,
                                       &pool);
@@ -256,26 +253,28 @@
     }
     
     // Create new pixelBuffer and copy image
-    BOOL ready = false;
     CVPixelBufferRef pixelBuffer = NULL;
     if (pool) {
+        CVReturn err = kCVReturnError;
         err = CVPixelBufferPoolCreatePixelBuffer(NULL, pool, &pixelBuffer);
         if (!err && pixelBuffer) {
             // Simply check if width, height are same
             size_t pbWidth = CVPixelBufferGetWidth(pixelBuffer);
             size_t pbHeight = CVPixelBufferGetHeight(pixelBuffer);
-            size_t ifWidth = width;
-            size_t ifHeight = height;
+            size_t ifWidth = videoFrame->GetWidth();
+            size_t ifHeight = videoFrame->GetHeight();
             BOOL sizeOK = (pbWidth == ifWidth && pbHeight == ifHeight);
             
             // Simply check if stride is same
             size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
-            size_t ifRowByte = rowBytes;
+            size_t ifRowByte = videoFrame->GetRowBytes();
             BOOL rowByteOK = (pbRowByte == ifRowByte);
             
-            // Copy pixel data from inputVideoFrame to CVPixelBuffer
-            if (sizeOK) {
-                CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+            BMDPixelFormat pixelFormat = videoFrame->GetPixelFormat();
+            BOOL sameFormat = (pixelFormat == cvPixelFormat);
+            if (sameFormat && sizeOK) {
+                // Copy pixel data from inputVideoFrame to CVPixelBuffer
+                err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
                 if (!err) {
                     // get buffer address for src and dst
                     void* dst = CVPixelBufferGetBaseAddress(pixelBuffer);
@@ -283,11 +282,9 @@
                     videoFrame->GetBytes(&src);
                     
                     if (dst && src) {
-                        if (rowByteOK) {
-                            // bulk copy
+                        if (rowByteOK) { // bulk copy
                             memcpy(dst, src, ifRowByte * ifHeight);
-                        } else {
-                            // copy each line b/w different stride
+                        } else { // line copy with different stride
                             size_t length = MIN(pbRowByte, ifRowByte);
                             for (size_t line = 0; line < ifHeight; line++) {
                                 char* srcAddr = (char*)src + pbRowByte * line;
@@ -299,11 +296,22 @@
                     }
                     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
                 }
+            } else {
+                // Use DLABVideoConverter/vImage to convert video image
+                DLABVideoConverter *converter = self.inputVideoConverter;
+                if (!converter) {
+                    converter = [[DLABVideoConverter alloc] initWithDL:videoFrame
+                                                                  toCV:pixelBuffer];
+                    self.inputVideoConverter = converter;
+                }
+                if (converter) {
+                    ready = [converter convertDL:videoFrame toCV:pixelBuffer];
+                }
             }
         }
     }
     
-    if (!err && pixelBuffer && ready) {
+    if (pixelBuffer && ready) {
         return pixelBuffer;
     } else {
         if (pixelBuffer)
