@@ -21,21 +21,23 @@ NS_ASSUME_NONNULL_BEGIN
  - createOutputVideoSettingOfDisplayMode:pixelFormat:outputFlag:supportedAs:error:
  - createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
  
- // pixel format
- //   CoreVideo compatible pixelformats are limited to following:
- //     bmdFormat8BitYUV, bmdFormat10BitYUV,
- //     bmdFormat8BitARGB, bmdFormat8BitBGRA
- //   For 10bit/12Bit RGB formats conversion is required
+ # CoreVideo compatible without conversion:
+ DLABPixelFormat(8BitYUV/10BitYUV/8BitARGB/8BitBGRA)
+ # Corevideo compatible with conversion: (experimental)
+ DLABPixelFormat(10BitRGB/10BitRGBXLE/10BitRGBX)
+ # Unsupported:
+ DLABPixelFormat(12BitRGB/12BitRGBLE) and others
+ 
  */
 @interface DLABVideoSetting : NSObject <NSCopying>
 
 - (instancetype) init NS_UNAVAILABLE;
 
 /* =================================================================================== */
-// MARK: Property - Ready on init
+// MARK: - Properties -
 /* =================================================================================== */
 
-// long - Ready on init
+// MARK: long
 
 /**
  Rectangle horizontal size in pixel.
@@ -46,14 +48,19 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) long height;
 
-// NSString - Ready on init
+/**
+ Length of row buffer in bytes.
+ */
+@property (nonatomic, assign, readonly) long rowBytes;
+
+// MARK: NSString*
 
 /**
  IDeckLinkDisplayMode::GetName
  */
 @property (nonatomic, copy, readonly) NSString* name;
 
-// int64_t - Ready on init
+// MARK: int64_t
 
 /**
  Duration value of one sample in timeScale.
@@ -65,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) DLABTimeScale timeScale;
 
-// uint32_t - Ready on init
+// MARK: uint32_t
 
 /**
  Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
@@ -83,29 +90,6 @@ NS_ASSUME_NONNULL_BEGIN
  Additional flag of displayMode (i.e. DLABDisplayModeFlagColorspaceRec709)
  */
 @property (nonatomic, assign, readonly) DLABDisplayModeFlag displayModeFlag;
-
-// BOOL - Ready on init
-
-/**
- Convenience property if it represents HD resolution.
- */
-@property (nonatomic, assign, readonly) BOOL isHD;
-
-/**
- Convenience property if preferred timecode type is VITC.
- */
-@property (nonatomic, assign, readonly) BOOL useVITC;
-
-/**
- Convenience property if preferred timecode type is RP188.
- */
-@property (nonatomic, assign, readonly) BOOL useRP188;
-
-/* =================================================================================== */
-// MARK: Property - Ready on enabled
-/* =================================================================================== */
-
-// uint32_t - Ready on enabled
 
 /**
  Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
@@ -127,24 +111,30 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) DLABDisplayModeSupportFlag1011 displayModeSupport __attribute__((deprecated));
 
-/* =================================================================================== */
-// MARK: Property - Ready on streaming
-/* =================================================================================== */
-
-// long - ready on streaming
-
-/**
- Length of row buffer in bytes.
- */
-@property (nonatomic, assign, readonly) long rowBytes;
-
 /**
  Preferred CVPixelFormatType for CVPixelBuffer. Use buildVideoFormatDescription again after update.
  */
 @property (nonatomic, assign, readwrite) OSType cvPixelFormatType;
 
+// MARK: BOOL
+
+/**
+ Convenience property if it represents HD resolution.
+ */
+@property (nonatomic, assign, readonly) BOOL isHD;
+
+/**
+ Convenience property if preferred timecode type is VITC.
+ */
+@property (nonatomic, assign, readonly) BOOL useVITC;
+
+/**
+ Convenience property if preferred timecode type is RP188.
+ */
+@property (nonatomic, assign, readonly) BOOL useRP188;
+
 /* =================================================================================== */
-// MARK: Property - populate by buildVideoFormatDescription
+// MARK: Other - populate by buildVideoFormatDescription
 /* =================================================================================== */
 
 /**
@@ -153,7 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly, nullable) CMVideoFormatDescriptionRef videoFormatDescription;
 
 /* =================================================================================== */
-// MARK: Public methods
+// MARK: - Public methods
 /* =================================================================================== */
 
 /**
