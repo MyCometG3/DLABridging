@@ -675,6 +675,21 @@
     }
 }
 
+- (BOOL) enableVideoOutputWithVideoSetting:(DLABVideoSetting*)setting
+                              onConnection:(DLABVideoConnection)connection
+                                     error:(NSError **)error
+{
+    NSError *err = nil;
+    BOOL result = [self setIntValue:connection
+                   forConfiguration:DLABConfigurationVideoOutputConnection
+                              error:&err];
+    if (!result) {
+        *error = err;
+        return NO;
+    }
+    return [self enableVideoOutputWithVideoSetting:setting error:error];
+}
+
 - (BOOL) disableVideoOutputWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
@@ -1002,6 +1017,22 @@
         return NO;
     }
 }
+
+- (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
+                                  onSwitch:(DLABAudioOutputSwitch)audioOutputSwitch
+                                     error:(NSError**)error
+{
+    NSError *err = nil;
+    BOOL result = [self setIntValue:audioOutputSwitch
+                   forConfiguration:DLABConfigurationAudioOutputAESAnalogSwitch
+                              error:&err];
+    if (!result) {
+        *error = err;
+        return NO;
+    }
+    return [self enableAudioOutputWithAudioSetting:setting error:error];
+}
+
 
 - (BOOL) disableAudioOutputWithError:(NSError**)error
 {

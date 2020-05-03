@@ -875,6 +875,18 @@ NS_ASSUME_NONNULL_BEGIN
                                      error:(NSError * _Nullable * _Nullable)error;
 
 /**
+Wrapper of IDeckLinkOutput::EnableVideoOutput
+
+@param setting Output Video Setting created by createOutputVideoSettingOfDisplayMode:pixelFormat:outputFlag:supportedAs:error:
+@param connection Specify DLABVideoConnection for output
+@param error Error description if failed
+@return YES if no error, NO if failed
+*/
+- (BOOL) enableVideoOutputWithVideoSetting:(DLABVideoSetting*)setting
+                              onConnection:(DLABVideoConnection)connection
+                                     error:(NSError * _Nullable * _Nullable)error;
+
+/**
  Wrapper of IDeckLinkOutput::DisableVideoOutput
 
  @param error Error description if failed
@@ -946,6 +958,18 @@ NS_ASSUME_NONNULL_BEGIN
  @return YES if no error, NO if failed
  */
 - (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
+                                     error:(NSError * _Nullable * _Nullable)error;
+
+/**
+Wrapper of IDeckLinkOutput::EnableAudioOutput
+
+@param setting Output Audio Setting created by createOutputAudioSettingOfSampleType:channelCount:sampleRate:error:
+@param audioOutputSwitch Specify DLABAudioOutputSwitch for output
+@param error Error description if failed
+@return YES if no error, NO if failed
+*/
+- (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
+                                  onSwitch:(DLABAudioOutputSwitch)audioOutputSwitch
                                      error:(NSError * _Nullable * _Nullable)error;
 
 /**
@@ -1304,6 +1328,19 @@ NS_ASSUME_NONNULL_BEGIN
                                     error:(NSError * _Nullable * _Nullable)error;
 
 /**
+Wrapper of IDeckLinkInput::EnableVideoInput
+
+@param setting Input Video Setting created by
+createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
+@param connection Specify DLABVideoConnection for input
+@param error Error description if failed
+@return YES if no error, NO if failed
+*/
+- (BOOL) enableVideoInputWithVideoSetting:(DLABVideoSetting*)setting
+                             onConnection:(DLABVideoConnection)connection
+                                    error:(NSError * _Nullable * _Nullable)error;
+
+/**
  Wrapper of IDeckLinkInput::GetAvailableVideoFrameCount
 
  @param error Error description if failed
@@ -1332,6 +1369,19 @@ NS_ASSUME_NONNULL_BEGIN
  @return YES if no error, NO if failed
  */
 - (BOOL) enableAudioInputWithSetting:(DLABAudioSetting*)setting
+                               error:(NSError * _Nullable * _Nullable)error;
+
+/**
+Wrapper of IDeckLinkInput::EnableAudioInput
+
+@param setting Input Audio Setting created by
+createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
+@param connection Specify DLABAudioConnection for input
+@param error Error description if failed
+@return YES if no error, NO if failed
+*/
+- (BOOL) enableAudioInputWithSetting:(DLABAudioSetting*)setting
+                        onConnection:(DLABAudioConnection)connection
                                error:(NSError * _Nullable * _Nullable)error;
 
 /**

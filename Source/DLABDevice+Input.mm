@@ -881,6 +881,21 @@
     }
 }
 
+- (BOOL) enableVideoInputWithVideoSetting:(DLABVideoSetting*)setting
+                             onConnection:(DLABVideoConnection)connection
+                                    error:(NSError **)error
+{
+    NSError *err = nil;
+    BOOL result = [self setIntValue:connection
+                   forConfiguration:DLABConfigurationVideoInputConnection
+                              error:&err];
+    if (!result) {
+        *error = err;
+        return NO;
+    }
+    return [self enableVideoInputWithVideoSetting:setting error:error];
+}
+
 - (NSNumber*) getAvailableVideoFrameCountWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
@@ -959,6 +974,21 @@
                 to:error];
         return NO;
     }
+}
+
+- (BOOL) enableAudioInputWithSetting:(DLABAudioSetting*)setting
+                        onConnection:(DLABAudioConnection)connection
+                               error:(NSError **)error
+{
+    NSError *err = nil;
+    BOOL result = [self setIntValue:connection
+                   forConfiguration:DLABConfigurationAudioInputConnection
+                              error:&err];
+    if (!result) {
+        *error = err;
+        return NO;
+    }
+    return [self enableAudioInputWithSetting:setting error:error];
 }
 
 - (BOOL) disableAudioInputWithError:(NSError**)error
