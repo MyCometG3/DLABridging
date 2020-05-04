@@ -62,7 +62,7 @@
         tmpSetting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                           pixelFormat:pixelFormat
                                                        videoInputFlag:inputFlag];
-        [tmpSetting buildVideoFormatDescription];
+        [tmpSetting buildVideoFormatDescriptionWithError:nil]; // TODO Handle error
     } else {
         // do nothing. let delegate handle the error.
     }
@@ -758,8 +758,10 @@
                 setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                                pixelFormat:pixelFormat
                                                             videoInputFlag:videoInputFlag];
-                [setting buildVideoFormatDescription];
+                BOOL result = TRUE;
+                result = [setting buildVideoFormatDescriptionWithError:error];
                 displayModeObj->Release();
+                if (!result) return nil;
             }
         } else {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]

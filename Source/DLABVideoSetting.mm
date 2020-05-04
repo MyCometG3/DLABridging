@@ -471,7 +471,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         
         // private properties
         if (obj.videoFormatDescription) {
-            [obj buildVideoFormatDescription];
+            [obj buildVideoFormatDescriptionWithError:nil];
         }
     }
     return obj;
@@ -614,11 +614,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     return displayModeDictionary;
 }
 
-- (BOOL) buildVideoFormatDescription
-{
-    return [self buildVideoFormatDescriptionWithError:nil];
-}
-
 - (BOOL) buildVideoFormatDescriptionWithError:(NSError**)error
 {
     {
@@ -726,10 +721,11 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         self.clapVOffsetN = clapVOffsetN; self.clapVOffsetD = clapVOffsetD;
         self.clapReady = TRUE;
         
+        BOOL result = TRUE;
         if (self.videoFormatDescription) {
-            [self buildVideoFormatDescription];
+            result = [self buildVideoFormatDescriptionWithError:error];
         }
-        return TRUE;
+        return result;
     } else {
         self.clapReady = FALSE;
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -749,10 +745,11 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         self.paspVSpacing = paspVSpacing;
         self.paspReady = TRUE;
         
+        BOOL result = TRUE;
         if (self.videoFormatDescription) {
-            [self buildVideoFormatDescription];
+            result = [self buildVideoFormatDescriptionWithError:error];
         }
-        return TRUE;
+        return result;
     } else {
         self.paspReady = FALSE;
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -814,9 +811,12 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         // NOTE: Preserve specified CVPixelFormatType as is
         
         // update videoFormatDescription using new values from videoFrame
-        ready = [self buildVideoFormatDescription];
+        NSError *error = nil;
+        ready = [self buildVideoFormatDescriptionWithError:&error];
         
         if (!ready) {
+            NSLog(@"ERROR: Failed to buildVideoFormatDescriptionWithError: %@", error);
+            
             // revert parameters
             self.widthW = widthOrg;
             self.heightW = heightOrg;

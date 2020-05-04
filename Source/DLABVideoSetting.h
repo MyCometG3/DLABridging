@@ -170,13 +170,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Prepare Video FormatDescription CFObject from current parameters.
-
- @return YES if successfully populated. NO if failed with supplied parameters.
- */
-- (BOOL) buildVideoFormatDescription;
-
-/**
- Prepare Video FormatDescription CFObject from current parameters.
  
  @param error Error description if failed.
  @return YES if successfully populated. NO if failed with supplied parameters.
