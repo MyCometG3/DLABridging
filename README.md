@@ -8,10 +8,11 @@ Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 - __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh_11.4 or later.
 
 NOTE: This framework is under development.
+NOTE: Compressed capture is not supported.
 
 #### About unsupported feature(s):
+
     : Following interfaces are not supported. (Section # are from SDK 11.5 pdf)
-    :
     : 2.5.8 IDeckLinkVideoFrame3DExtensions
     : 2.5.18 IDeckLinkMemoryAllocator
     : 2.5.26 IDeckLinkGLScreenPreviewHelper
@@ -65,15 +66,21 @@ NOTE: This framework is under development.
                                 vSpacing: 33)
       }
 
+      // rebuild formatDescription with new CVPixelFormat
+      // vSetting.cvPixelFormatType = cvPixelFormat
+      // try vSetting.buildVideoFormatDescription()
+
       if let vSetting = vSetting, let aSetting = aSetting {
         device.inputDelegate = self
-        try device.enableVideoInput(with: vSetting)
-        try device.enableAudioInput(with: aSetting)
+        try device.enableVideoInput(with: vSetting, on: .HDMI)
+        try device.enableAudioInput(with: aSetting, on: audioConnection)
         try device.startStreams()
         running = true
       }
     } catch {
       print("ERROR!!")
+      :
+    }
 
 
 ###### 3. Handle CMSampleBuffer (Video/Audio)
@@ -98,7 +105,6 @@ NOTE: This framework is under development.
       try device.disableVideoInput()
       try device.disableAudioInput()
       device.inputDelegate = nil
-
       try device.setInputScreenPreviewTo(nil)
     } catch {
       print("ERROR!!")
@@ -106,9 +112,9 @@ NOTE: This framework is under development.
     device = nil
 
 #### Development environment
-- MacOS X 10.15.3 Catalina
-- Xcode 11.3.1
-- Objective-C++, Swift 5.1.3
+- MacOS X 10.15.4 Catalina
+- Xcode 11.4.1
+- Objective-C++, Swift 5.2
 
 #### License
 - The MIT License
