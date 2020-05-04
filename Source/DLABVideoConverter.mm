@@ -862,10 +862,7 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
         if (!(dlReady && cvReady)) return false;
     }
     
-    BOOL formatOK = false;
-    if (cvColorSpace && dlColorSpace) {
-        formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
-    }
+    BOOL formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
     if (!formatOK) return false;
     
     @synchronized (self) {
@@ -875,34 +872,36 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             vImageConverter_Release(convCGtoCV); convCGtoCV = NULL;
         }
         
+        vImage_Error matrixErr = kvImageInternalError;
         vImage_Error dlHostErr = kvImageInternalError;
         vImage_Error interimErr = kvImageInternalError;
         vImage_Error errCGtoCV = kvImageInternalError;
-        vImage_Error matrixErr = kvImageInternalError;
         {
-            vImage_YpCbCrToARGB info = {0};
-            vImage_YpCbCrToARGBMatrix matrix = matrixToRGBFor(dlWidth, dlHeight);
             if (dlFormat == bmdFormat10BitYUV) {
+                vImage_YpCbCrToARGBMatrix matrix = matrixToRGBFor(dlWidth, dlHeight);
                 vImage_YpCbCrPixelRange pixelRange = videoRange10Clamped();
+                vImage_YpCbCrToARGB info = {0};
                 matrixErr = vImageConvert_YpCbCrToARGB_GenerateConversion(&matrix,
                                                                           &pixelRange,
                                                                           &info,
                                                                           kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10,
                                                                           kvImageARGB16Q12,
                                                                           kvImageNoFlags);
+                if (matrixErr == kvImageNoError) infoToARGB = info;
             } else if (dlFormat == bmdFormat8BitYUV) {
+                vImage_YpCbCrToARGBMatrix matrix = matrixToRGBFor(dlWidth, dlHeight);
                 vImage_YpCbCrPixelRange pixelRange = videoRange8Clamped();
+                vImage_YpCbCrToARGB info = {0};
                 matrixErr = vImageConvert_YpCbCrToARGB_GenerateConversion(&matrix,
                                                                           &pixelRange,
                                                                           &info,
                                                                           kvImage422CbYpCrYp8,
                                                                           kvImageARGB8888,
                                                                           kvImageNoFlags);
+                if (matrixErr == kvImageNoError) infoToARGB = info;
             } else {
+                // RGBtoRGB conversion
                 matrixErr = kvImageNoError;
-            }
-            if (matrixErr == kvImageNoError) {
-                infoToARGB = info;
             }
         }
         vImage_CGImageFormat interimFormat = {0};
@@ -928,11 +927,14 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             vImageCVImageFormatRef outFormat = vImageCVImageFormat_CreateWithCVPixelBuffer(pixelBuffer);
             if (outFormat) {
                 vImageCVImageFormat_SetColorSpace(outFormat, cvColorSpace);
+                vImageCVImageFormat_SetChromaSiting(outFormat, kCVImageBufferChromaLocation_Center);
+                CGFloat bgColor[3] = {0,0,0};
                 convCGtoCV = vImageConverter_CreateForCGToCVImageFormat(&interimFormat,
                                                                         outFormat,
-                                                                        NULL, // CGFloat[3]
+                                                                        bgColor,
                                                                         kvImageNoFlags,
                                                                         &errCGtoCV);
+                assert (!errCGtoCV);
                 vImageCVImageFormat_Release(outFormat);
                 
                 queryTempBuffer = TRUE;
@@ -1110,10 +1112,7 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
         if (!(dlReady && cvReady)) return false;
     }
     
-    BOOL formatOK = false;
-    if (cvColorSpace && dlColorSpace) {
-        formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
-    }
+    BOOL formatOK = [self compatibleWithDL:videoFrame andCV:pixelBuffer];
     if (!formatOK) return false;
     
     @synchronized (self) {
@@ -1123,34 +1122,36 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             vImageConverter_Release(convCVtoCG); convCVtoCG = NULL;
         }
         
+        vImage_Error matrixErr = kvImageInternalError;
         vImage_Error dlHostErr = kvImageInternalError;
         vImage_Error interimErr = kvImageInternalError;
         vImage_Error errCVtoCG = kvImageInternalError;
-        vImage_Error matrixErr = kvImageInternalError;
         {
-            vImage_ARGBToYpCbCr info = {0};
-            vImage_ARGBToYpCbCrMatrix matrix = matrixToYpCbCrFor(dlWidth, dlHeight);
             if (dlFormat == bmdFormat10BitYUV) {
+                vImage_ARGBToYpCbCrMatrix matrix = matrixToYpCbCrFor(dlWidth, dlHeight);
                 vImage_YpCbCrPixelRange pixelRange = videoRange10Clamped();
+                vImage_ARGBToYpCbCr info = {0};
                 matrixErr = vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix,
                                                                           &pixelRange,
                                                                           &info,
                                                                           kvImageARGB16Q12,
                                                                           kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10,
                                                                           kvImageNoFlags);
+                if (matrixErr == kvImageNoError) infoToYpCbCr = info;
             } else if (dlFormat == bmdFormat8BitYUV) {
+                vImage_ARGBToYpCbCrMatrix matrix = matrixToYpCbCrFor(dlWidth, dlHeight);
                 vImage_YpCbCrPixelRange pixelRange = videoRange8Clamped();
+                vImage_ARGBToYpCbCr info = {0};
                 matrixErr = vImageConvert_ARGBToYpCbCr_GenerateConversion(&matrix,
                                                                           &pixelRange,
                                                                           &info,
                                                                           kvImageARGB8888,
                                                                           kvImage422CbYpCrYp8,
                                                                           kvImageNoFlags);
+                if (matrixErr == kvImageNoError) infoToYpCbCr = info;
             } else {
+                // RGBtoTGB conversion
                 matrixErr = kvImageNoError;
-            }
-            if (matrixErr == kvImageNoError) {
-                infoToYpCbCr = info;
             }
         }
         vImage_CGImageFormat interimFormat = {0};
@@ -1176,11 +1177,14 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
             vImageCVImageFormatRef inFormat = vImageCVImageFormat_CreateWithCVPixelBuffer(pixelBuffer);
             if (inFormat) {
                 vImageCVImageFormat_SetColorSpace(inFormat, cvColorSpace);
+                vImageCVImageFormat_SetChromaSiting(inFormat, kCVImageBufferChromaLocation_Center);
+                CGFloat bgColor[3] = {0,0,0};
                 convCVtoCG = vImageConverter_CreateForCVToCGImageFormat(inFormat,
                                                                         &interimFormat,
-                                                                        NULL, // CGFloat[3],
+                                                                        bgColor,
                                                                         kvImageNoFlags,
                                                                         &errCVtoCG);
+                assert (!errCVtoCG);
                 vImageCVImageFormat_Release(inFormat);
                 
                 queryTempBuffer = TRUE;
@@ -1338,8 +1342,8 @@ CGColorSpaceRef createColorSpaceForPixelBuffer(CVPixelBufferRef pixelBuffer, BOO
                     } else if (dlFormat == bmdFormat8BitYUV) { // 2vuy
                         uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
                         convErr = vImageConvert_ARGB8888To422CbYpCrYp8(&interimBuffer, &targetBuffer,
-                                                                                        &infoToYpCbCr, permuteMap,
-                                                                                        kvImageNoFlags);
+                                                                       &infoToYpCbCr, permuteMap,
+                                                                       kvImageNoFlags);
                     } else {
                         convErr = kvImageInternalError;
                     }

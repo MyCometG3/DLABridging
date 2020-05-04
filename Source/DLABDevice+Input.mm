@@ -258,6 +258,12 @@
         CVReturn err = kCVReturnError;
         err = CVPixelBufferPoolCreatePixelBuffer(NULL, pool, &pixelBuffer);
         if (!err && pixelBuffer) {
+            // Attach formatDescriptionExtensions to new PixelBuffer
+            CFDictionaryRef dict = (__bridge CFDictionaryRef)self.inputVideoSettingW.extensions;
+            assert(dict);
+            CVBufferSetAttachments(pixelBuffer, dict, kCVAttachmentMode_ShouldPropagate);
+        }
+        if (!err && pixelBuffer) {
             // Simply check if width, height are same
             size_t pbWidth = CVPixelBufferGetWidth(pixelBuffer);
             size_t pbHeight = CVPixelBufferGetHeight(pixelBuffer);
@@ -747,7 +753,7 @@
             if (supported) {
                 __block IDeckLinkDisplayMode* displayModeObj = NULL;
                 [self capture_sync:^{
-                    input->GetDisplayMode(displayMode, &displayModeObj);
+                    input->GetDisplayMode((actualMode > 0 ? actualMode : displayMode), &displayModeObj);
                 }];
                 setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                                pixelFormat:pixelFormat

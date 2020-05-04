@@ -38,6 +38,34 @@ NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     return stride;
 }
 
+NS_INLINE size_t cvBytesPerRow(OSType format, long width, long height)
+{
+    size_t rowBytes = 0;
+    NSMutableDictionary* pbAttributes = [NSMutableDictionary dictionary];
+    {
+        NSString* pixelFormatKey = (__bridge NSString *)kCVPixelBufferPixelFormatTypeKey;
+        NSString* widthKey = (__bridge NSString *)kCVPixelBufferWidthKey;
+        NSString* heightKey = (__bridge NSString *)kCVPixelBufferHeightKey;
+        NSString* bytesPerRowAlignmentKey = (__bridge NSString *)kCVPixelBufferBytesPerRowAlignmentKey;
+        pbAttributes[pixelFormatKey] = @(format);
+        pbAttributes[widthKey] = @(width);
+        pbAttributes[heightKey] = @(height);
+        pbAttributes[bytesPerRowAlignmentKey] = @(16); // = 2^4 = 2 * sizeof(void*)
+    }
+    {
+        CVPixelBufferRef pixelBuffer = nil;
+        CVReturn err = CVPixelBufferCreate(kCFAllocatorDefault,
+                                           width, height, format,
+                                           (__bridge CFDictionaryRef)pbAttributes,
+                                           &pixelBuffer);
+        if (!err && pixelBuffer) {
+            rowBytes = CVPixelBufferGetBytesPerRow(pixelBuffer);
+            CVPixelBufferRelease(pixelBuffer);
+        }
+    }
+    return rowBytes;
+}
+
 NS_INLINE OSType preferredCVPixelFormatFor(BMDPixelFormat dlFormat) {
     OSType cvFormat = 0;
     switch (dlFormat) {
@@ -476,6 +504,10 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 // MARK: - synthesized accessors
 /* =================================================================================== */
 
+// public sysnthesize
+@synthesize extensions = _extensions;
+@synthesize extensionsNoClap = _extensionsNoClap;
+
 // private synthesize
 @synthesize widthW = _widthW;
 @synthesize heightW = _heightW;
@@ -618,153 +650,25 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
             }
         }
         
-        
-        NSMutableDictionary *extensions = [NSMutableDictionary dictionary];
-        if (ready) {
-            // Color space
-            NSString* keyMatrix = (__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix;
-            NSString* matrix2020 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_2020;
-            NSString* matrix709 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2;
-            NSString* matrix601 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4;
-            
-            NSString* keyPrimary = (__bridge NSString*)kCMFormatDescriptionExtension_ColorPrimaries;
-            NSString* primITUR2020 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_2020;
-            NSString* primITUR709 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_709_2;
-            NSString* primSMPTEC = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_SMPTE_C;
-            NSString* primEBU3213 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_EBU_3213;
-            
-            NSString* keyXfer = (__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction;
-            NSString* xfer2020 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_2020;
-            NSString* xfer709 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
-            
-            // prefer displayModeFlag's colorspace information if specified
-            BMDDisplayModeFlags displayModeFlag = self.displayModeFlagW;
-            NSString* frameMatrix = nil;
-            if (displayModeFlag & bmdDisplayModeColorspaceRec601) {
-                frameMatrix = matrix601;
-            }
-            if (displayModeFlag & bmdDisplayModeColorspaceRec709) {
-                frameMatrix = matrix709;
-            }
-            if (displayModeFlag & bmdDisplayModeColorspaceRec2020) {
-                frameMatrix = matrix2020;
-            }
-            
-            // apply color information (primary/transfer function/YCbCrMatrix)
-            if (height <= 525) {
-                extensions[keyPrimary] = primSMPTEC;
-                extensions[keyXfer] = xfer709;
-                extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix601);
-            } else if (height <= 625) {
-                extensions[keyPrimary] = primEBU3213;
-                extensions[keyXfer] = xfer709;
-                extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix601);
-            } else if (width <= 1920) {
-                extensions[keyPrimary] = primITUR709;
-                extensions[keyXfer] = xfer709;
-                extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix709);
+        //
+        if (pixelFormat != cvPixelFormat) {
+            size_t cvRowBytes = cvBytesPerRow(cvPixelFormat, width, height);
+            if (cvRowBytes > 0) {
+                rowBytes = cvRowBytes;
+                _cvRowBytes = cvRowBytes;
             } else {
-                extensions[keyPrimary] = primITUR2020;
-                extensions[keyXfer] = xfer2020;
-                extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix2020);
+                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                    reason:@"Unsupported CoreVideo pixel format detected."
+                      code:E_INVALIDARG
+                        to:error];
+                return NO;
             }
         }
         
-        if (ready && self.clapReady) {
-            // Clean Aperture
-            NSString* keyClap = (__bridge NSString*)kCMFormatDescriptionExtension_CleanAperture;
-            
-            NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
-            NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
-            NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;
-            NSString* keyClapVOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational;
-            
-            NSNumber* clapWidthN = @(self.clapWidthN);
-            NSNumber* clapWidthD = @(self.clapWidthD);
-            NSNumber* clapHeightN = @(self.clapHeightN);
-            NSNumber* clapHeightD = @(self.clapHeightD);
-            NSNumber* clapHOffsetN = @(self.clapHOffsetN);
-            NSNumber* clapHOffsetD = @(self.clapHOffsetD);
-            NSNumber* clapVOffsetN = @(self.clapVOffsetN);
-            NSNumber* clapVOffsetD = @(self.clapVOffsetD);
-            
-            NSDictionary* valueClap = @{
-                                        keyClapWidthR   : @[clapWidthN, clapWidthD],
-                                        keyClapHeightR  : @[clapHeightN, clapHeightD],
-                                        keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
-                                        keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
-                                        };
-            extensions[keyClap] = valueClap;
-        }
+        [self buildFormatDescriptionExtensionsOf:cvPixelFormat width:width height:height rowBytes:rowBytes];
+        NSDictionary* extensions = self.extensions;
         
-        if (ready && self.paspReady) {
-            // Pixel Aspect Ratio
-            NSString* keyPasp = (__bridge NSString*)kCMFormatDescriptionExtension_PixelAspectRatio;
-            
-            NSString* keyPaspHSpacing = (__bridge NSString*)kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing;
-            NSString* keyPaspVSpacing = (__bridge NSString*)kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing;
-            
-            NSNumber* paspHSpacing = @(self.paspHSpacing);
-            NSNumber* paspVSpacing = @(self.paspVSpacing);
-            
-            NSDictionary* valuePasp = @{
-                                        keyPaspHSpacing : paspHSpacing,
-                                        keyPaspVSpacing : paspVSpacing,
-                                        };
-            extensions[keyPasp] = valuePasp;
-        }
-        
-        if (ready) {
-            // format name (either rgb or yuv related name)
-            NSString* keyFormatName = (__bridge NSString*)kCMFormatDescriptionExtension_FormatName;
-            NSString* name = nameForCVPixelFormatType(cvPixelFormat);
-            extensions[keyFormatName] = name;
-            
-            // stride (bytes per row)
-            NSString* keyStride = (__bridge NSString*)kCMFormatDescriptionExtension_BytesPerRow;
-            extensions[keyStride] = @(rowBytes);
-            
-            // gamma level (legacy)
-            NSString* keyGamma = (__bridge NSString*)kCMFormatDescriptionExtension_GammaLevel;
-            extensions[keyGamma] = @(2.2);
-            
-            // field dominance
-            NSString* keyFieldCount = (__bridge NSString*)kCMFormatDescriptionExtension_FieldCount;
-            NSString* keyFieldDetail = (__bridge NSString*)kCMFormatDescriptionExtension_FieldDetail;
-            NSString* tempTopFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalTopFirst;
-            //NSString* tempBottomFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalBottomFirst;
-            NSString* spatTopEarly = (__bridge NSString*)kCMFormatDescriptionFieldDetail_SpatialFirstLineEarly;
-            NSString* spatBotEarly = (__bridge NSString*)kCMFormatDescriptionFieldDetail_SpatialFirstLineLate;
-            /*
-             * SpatialFirstLine... are for "2 fields woven into a frame".
-             * SpatialFirstLineLate (14) is suit for NTSC D1 source.
-             * SpatialFirstLineEarly (9) is suit for any HD interlaced and PAL D1 source.
-             * So Decompressed CMSampleBuffer is either progressive or spatialFistLineXXX.
-             */
-
-            BMDFieldDominance fieldDominance = self.fieldDominanceW;
-            switch (fieldDominance) {
-                case bmdLowerFieldFirst: // woven-fields representation
-                    extensions[keyFieldCount] = @2;
-                    extensions[keyFieldDetail] = spatBotEarly; // detail == 14
-                    break;
-                case bmdUpperFieldFirst: // woven-fields representation
-                    extensions[keyFieldCount] = @2;
-                    extensions[keyFieldDetail] = spatTopEarly; // detail == 9
-                    break;
-                case bmdProgressiveFrame:
-                    extensions[keyFieldCount] = @1;
-                    break;
-                case bmdProgressiveSegmentedFrame: // split-fields representation
-                    extensions[keyFieldCount] = @2;
-                    extensions[keyFieldDetail] = tempTopFirst; // detail == 1
-                    break;
-                default:
-                    break;
-            }
-        }
-        
-        if (ready) {
+        if (ready && extensions) {
             // create format description
             OSStatus result = noErr;
             CMFormatDescriptionRef formatDescription = NULL;
@@ -925,6 +829,158 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         return TRUE;
     } else {
         return FALSE;    // TODO handle err
+    }
+}
+
+- (void)buildFormatDescriptionExtensionsOf:(OSType)cvPixelFormat width:(long)width height:(long)height rowBytes:(size_t)rowBytes
+{
+    NSMutableDictionary *extensions = [NSMutableDictionary dictionary];
+    {
+        // format name (either rgb or yuv related name)
+        NSString* keyFormatName = (__bridge NSString*)kCMFormatDescriptionExtension_FormatName;
+        NSString* name = nameForCVPixelFormatType(cvPixelFormat);
+        extensions[keyFormatName] = name;
+        
+        // stride (bytes per row)
+        NSString* keyStride = (__bridge NSString*)kCMFormatDescriptionExtension_BytesPerRow;
+        extensions[keyStride] = @(rowBytes);
+        
+        // gamma level (legacy)
+        NSString* keyGamma = (__bridge NSString*)kCMFormatDescriptionExtension_GammaLevel;
+        extensions[keyGamma] = @(2.2);
+    }
+    {
+        // Color space
+        NSString* keyMatrix = (__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix;
+        NSString* matrix2020 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_2020;
+        NSString* matrix709 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2;
+        NSString* matrix601 = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4;
+        
+        NSString* keyPrimary = (__bridge NSString*)kCMFormatDescriptionExtension_ColorPrimaries;
+        NSString* primITUR2020 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_2020;
+        NSString* primITUR709 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_709_2;
+        NSString* primSMPTEC = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_SMPTE_C;
+        NSString* primEBU3213 = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_EBU_3213;
+        
+        NSString* keyXfer = (__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction;
+        NSString* xfer2020 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_2020;
+        NSString* xfer709 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
+        
+        // prefer displayModeFlag's colorspace information if specified
+        BMDDisplayModeFlags displayModeFlag = self.displayModeFlagW;
+        NSString* frameMatrix = nil;
+        if (displayModeFlag & bmdDisplayModeColorspaceRec601) {
+            frameMatrix = matrix601;
+        }
+        if (displayModeFlag & bmdDisplayModeColorspaceRec709) {
+            frameMatrix = matrix709;
+        }
+        if (displayModeFlag & bmdDisplayModeColorspaceRec2020) {
+            frameMatrix = matrix2020;
+        }
+        
+        // apply color information (primary/transfer function/YCbCrMatrix)
+        if (height <= 525) {
+            extensions[keyPrimary] = primSMPTEC;
+            extensions[keyXfer] = xfer709;
+            extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix601);
+        } else if (height <= 625) {
+            extensions[keyPrimary] = primEBU3213;
+            extensions[keyXfer] = xfer709;
+            extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix601);
+        } else if (width <= 1920) {
+            extensions[keyPrimary] = primITUR709;
+            extensions[keyXfer] = xfer709;
+            extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix709);
+        } else {
+            extensions[keyPrimary] = primITUR2020;
+            extensions[keyXfer] = xfer2020;
+            extensions[keyMatrix] = (frameMatrix ? frameMatrix : matrix2020);
+        }
+    }
+    {
+        // field dominance
+        NSString* keyFieldCount = (__bridge NSString*)kCMFormatDescriptionExtension_FieldCount;
+        NSString* keyFieldDetail = (__bridge NSString*)kCMFormatDescriptionExtension_FieldDetail;
+        NSString* tempTopFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalTopFirst;
+        //NSString* tempBottomFirst = (__bridge NSString*)kCMFormatDescriptionFieldDetail_TemporalBottomFirst;
+        NSString* spatTopEarly = (__bridge NSString*)kCMFormatDescriptionFieldDetail_SpatialFirstLineEarly;
+        NSString* spatBotEarly = (__bridge NSString*)kCMFormatDescriptionFieldDetail_SpatialFirstLineLate;
+        /*
+         * SpatialFirstLine... are for "2 fields woven into a frame".
+         * SpatialFirstLineLate (14) is suit for NTSC D1 source.
+         * SpatialFirstLineEarly (9) is suit for any HD interlaced and PAL D1 source.
+         * So Decompressed CMSampleBuffer is either progressive or spatialFistLineXXX.
+         */
+
+        BMDFieldDominance fieldDominance = self.fieldDominanceW;
+        switch (fieldDominance) {
+            case bmdLowerFieldFirst: // woven-fields representation
+                extensions[keyFieldCount] = @2;
+                extensions[keyFieldDetail] = spatBotEarly; // detail == 14
+                break;
+            case bmdUpperFieldFirst: // woven-fields representation
+                extensions[keyFieldCount] = @2;
+                extensions[keyFieldDetail] = spatTopEarly; // detail == 9
+                break;
+            case bmdProgressiveFrame:
+                extensions[keyFieldCount] = @1;
+                break;
+            case bmdProgressiveSegmentedFrame: // split-fields representation
+                extensions[keyFieldCount] = @2;
+                extensions[keyFieldDetail] = tempTopFirst; // detail == 1
+                break;
+            default:
+                break;
+        }
+    }
+    if (self.paspReady) {
+        // Pixel Aspect Ratio
+        NSString* keyPasp = (__bridge NSString*)kCMFormatDescriptionExtension_PixelAspectRatio;
+        
+        NSString* keyPaspHSpacing = (__bridge NSString*)kCMFormatDescriptionKey_PixelAspectRatioHorizontalSpacing;
+        NSString* keyPaspVSpacing = (__bridge NSString*)kCMFormatDescriptionKey_PixelAspectRatioVerticalSpacing;
+        
+        NSNumber* paspHSpacing = @(self.paspHSpacing);
+        NSNumber* paspVSpacing = @(self.paspVSpacing);
+        
+        NSDictionary* valuePasp = @{
+                                    keyPaspHSpacing : paspHSpacing,
+                                    keyPaspVSpacing : paspVSpacing,
+                                    };
+        extensions[keyPasp] = valuePasp;
+    }
+    _extensionsNoClap = extensions.copy;
+    
+    if (self.clapReady) {
+        // Clean Aperture
+        NSString* keyClap = (__bridge NSString*)kCMFormatDescriptionExtension_CleanAperture;
+        
+        NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
+        NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
+        NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;
+        NSString* keyClapVOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational;
+        
+        NSNumber* clapWidthN = @(self.clapWidthN);
+        NSNumber* clapWidthD = @(self.clapWidthD);
+        NSNumber* clapHeightN = @(self.clapHeightN);
+        NSNumber* clapHeightD = @(self.clapHeightD);
+        NSNumber* clapHOffsetN = @(self.clapHOffsetN);
+        NSNumber* clapHOffsetD = @(self.clapHOffsetD);
+        NSNumber* clapVOffsetN = @(self.clapVOffsetN);
+        NSNumber* clapVOffsetD = @(self.clapVOffsetD);
+        
+        NSDictionary* valueClap = @{
+                                    keyClapWidthR   : @[clapWidthN, clapWidthD],
+                                    keyClapHeightR  : @[clapHeightN, clapHeightD],
+                                    keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
+                                    keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
+                                    };
+        extensions[keyClap] = valueClap;
+
+        _extensions = extensions.copy;
+    } else {
+        _extensions = _extensionsNoClap;
     }
 }
 

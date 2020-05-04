@@ -116,6 +116,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readwrite) OSType cvPixelFormatType;
 
+/**
+ BytesPerRow for CVPixelFormat. Calculated by buildVideoFormatDescription.
+ */
+@property (nonatomic, assign, readonly) size_t cvRowBytes;
+
 // MARK: BOOL
 
 /**
@@ -136,6 +141,16 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 // MARK: Other - populate by buildVideoFormatDescription
 /* =================================================================================== */
+
+/**
+ CMVideoFormatDescriptionExtension
+ */
+@property (nonatomic, strong, readonly, nullable) NSDictionary* extensions;
+
+/**
+ CMVideoFormatDescriptionExtension without clap (for AVSampleBufferDisplayLayer)
+*/
+@property (nonatomic, strong, readonly, nullable) NSDictionary* extensionsNoClap;
 
 /**
  Video FormatDescription CFObject. Call -(BOOL)buildVideoFormatDescription to populate this.

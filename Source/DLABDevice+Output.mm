@@ -521,7 +521,7 @@
             if (supported) {
                 __block IDeckLinkDisplayMode* displayModeObj = NULL;
                 [self playback_sync:^{
-                    output->GetDisplayMode(actualMode, &displayModeObj);
+                    output->GetDisplayMode((actualMode > 0 ? actualMode : displayMode), &displayModeObj);
                 }];
                 setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                                pixelFormat:pixelFormat
