@@ -25,10 +25,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_11.5.zip @ 2020/02/19 UTC
+ Derived from: Blackmagic_DeckLink_SDK_11.5.1.zip @ 2020/05/04 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b050000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.5"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b050100
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.5.1"
  */
 
 /* =================================================================================== */
@@ -46,7 +46,7 @@ typedef NS_OPTIONS(uint32_t, DLABVideoOutputFlag)
     DLABVideoOutputFlagSynchronizeToPlaybackGroup                     = 1 << 6
 };
 
-/* Enum BMDSupportedVideoModeFlags - Flags to describe supported video mode */
+/* Enum BMDSupportedVideoModeFlags - Flags to describe supported video modes */
 typedef NS_OPTIONS(uint32_t, DLABSupportedVideoModeFlag)
 {
     DLABSupportedVideoModeFlagDefault                                 = 0,
@@ -71,7 +71,6 @@ typedef NS_OPTIONS(uint32_t, DLABFrameFlag)
     DLABFrameFlagDefault                                          = 0,
     DLABFrameFlagFlipVertical                                     = 1 << 0,
     DLABFrameFlagContainsHDRMetadata                                  = 1 << 1,
-    DLABFrameFlagContainsCintelMetadata                               = 1 << 2,
     
     /* Flags that are applicable only to instances of IDeckLinkVideoInputFrame */
     
@@ -283,51 +282,34 @@ typedef NS_ENUM(uint32_t, DLABColorspace)
 /* Enum BMDDynamicRange - SDR or HDR */
 typedef NS_ENUM(uint32_t, DLABDynamicRange)
 {
-    DLABDynamicRangeSDR                                           = 0,
-    DLABDynamicRangeHDRStaticPQ                                   = 1 << 29,     // SMPTE ST 2084
-    DLABDynamicRangeHDRStaticHLG                                  = 1 << 30      // ITU-R BT.2100-0
+    DLABDynamicRangeSDR                                           = 0,          // Standard Dynamic Range in accordance with SMPTE ST 2036-1
+    DLABDynamicRangeHDRStaticPQ                                   = 1 << 29,    // High Dynamic Range PQ in accordance with SMPTE ST 2084
+    DLABDynamicRangeHDRStaticHLG                                  = 1 << 30     // High Dynamic Range HLG in accordance with ITU-R BT.2100-0
 };
 
 /* Enum BMDDeckLinkHDMIInputEDIDID - DeckLink HDMI Input EDID ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkHDMIInputEDID)
 {
+    
+    /* Integers */
+    
     DLABDeckLinkHDMIInputEDIDDynamicRange                         = /* 'HIDy' */ 0x48494479    // Parameter is of type BMDDynamicRange. Default is (bmdDynamicRangeSDR|bmdDynamicRangeHDRStaticPQ)
 };
 
 /* Enum BMDDeckLinkFrameMetadataID - DeckLink Frame Metadata ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkFrameMetadata)
 {
+    
+    /* Colorspace Metadata - Integers */
+    
     DLABDeckLinkFrameMetadataColorspace                           = /* 'cspc' */ 0x63737063,    // Colorspace of video frame (see BMDColorspace)
+    
+    /* HDR Metadata - Integers */
+    
     DLABDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,    // EOTF in range 0-7 as per CEA 861.3
-    DLABDeckLinkFrameMetadataCintelFilmType                       = /* 'cfty' */ 0x63667479,    // Current film type
-    DLABDeckLinkFrameMetadataCintelFilmGauge                      = /* 'cfga' */ 0x63666761,    // Current film gauge
-    DLABDeckLinkFrameMetadataCintelKeykodeLow                     = /* 'ckkl' */ 0x636B6B6C,    // Raw keykode value - low 64 bits
-    DLABDeckLinkFrameMetadataCintelKeykodeHigh                    = /* 'ckkh' */ 0x636B6B68,    // Raw keykode value - high 64 bits
-    DLABDeckLinkFrameMetadataCintelTile1Size                      = /* 'ct1s' */ 0x63743173,    // Size in bytes of compressed raw tile 1
-    DLABDeckLinkFrameMetadataCintelTile2Size                      = /* 'ct2s' */ 0x63743273,    // Size in bytes of compressed raw tile 2
-    DLABDeckLinkFrameMetadataCintelTile3Size                      = /* 'ct3s' */ 0x63743373,    // Size in bytes of compressed raw tile 3
-    DLABDeckLinkFrameMetadataCintelTile4Size                      = /* 'ct4s' */ 0x63743473,    // Size in bytes of compressed raw tile 4
-    DLABDeckLinkFrameMetadataCintelImageWidth                     = /* 'IWPx' */ 0x49575078,    // Width in pixels of image
-    DLABDeckLinkFrameMetadataCintelImageHeight                    = /* 'IHPx' */ 0x49485078,    // Height in pixels of image
-    DLABDeckLinkFrameMetadataCintelLinearMaskingRedInRed          = /* 'mrir' */ 0x6D726972,    // Red in red linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingGreenInRed        = /* 'mgir' */ 0x6D676972,    // Green in red linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingBlueInRed         = /* 'mbir' */ 0x6D626972,    // Blue in red linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingRedInGreen        = /* 'mrig' */ 0x6D726967,    // Red in green linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingGreenInGreen      = /* 'mgig' */ 0x6D676967,    // Green in green linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingBlueInGreen       = /* 'mbig' */ 0x6D626967,    // Blue in green linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingRedInBlue         = /* 'mrib' */ 0x6D726962,    // Red in blue linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingGreenInBlue       = /* 'mgib' */ 0x6D676962,    // Green in blue linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLinearMaskingBlueInBlue        = /* 'mbib' */ 0x6D626962,    // Blue in blue linear masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingRedInRed             = /* 'mlrr' */ 0x6D6C7272,    // Red in red log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingGreenInRed           = /* 'mlgr' */ 0x6D6C6772,    // Green in red log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingBlueInRed            = /* 'mlbr' */ 0x6D6C6272,    // Blue in red log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingRedInGreen           = /* 'mlrg' */ 0x6D6C7267,    // Red in green log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingGreenInGreen         = /* 'mlgg' */ 0x6D6C6767,    // Green in green log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingBlueInGreen          = /* 'mlbg' */ 0x6D6C6267,    // Blue in green log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingRedInBlue            = /* 'mlrb' */ 0x6D6C7262,    // Red in blue log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingGreenInBlue          = /* 'mlgb' */ 0x6D6C6762,    // Green in blue log masking parameter
-    DLABDeckLinkFrameMetadataCintelLogMaskingBlueInBlue           = /* 'mlbb' */ 0x6D6C6262,    // Blue in blue log masking parameter
-    DLABDeckLinkFrameMetadataCintelFilmFrameRate                  = /* 'cffr' */ 0x63666672,    // Film frame rate
+    
+    /* HDR Metadata - Floats */
+    
     DLABDeckLinkFrameMetadataHDRDisplayPrimariesRedX              = /* 'hdrx' */ 0x68647278,    // Red display primaries in range 0.0 - 1.0
     DLABDeckLinkFrameMetadataHDRDisplayPrimariesRedY              = /* 'hdry' */ 0x68647279,    // Red display primaries in range 0.0 - 1.0
     DLABDeckLinkFrameMetadataHDRDisplayPrimariesGreenX            = /* 'hdgx' */ 0x68646778,    // Green display primaries in range 0.0 - 1.0
@@ -340,17 +322,6 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkFrameMetadata)
     DLABDeckLinkFrameMetadataHDRMinDisplayMasteringLuminance      = /* 'hmil' */ 0x686D696C,    // Min display mastering luminance in range 0.0001 cd/m2 - 6.5535 cd/m2
     DLABDeckLinkFrameMetadataHDRMaximumContentLightLevel          = /* 'mcll' */ 0x6D636C6C,    // Maximum Content Light Level in range 1 cd/m2 - 65535 cd/m2
     DLABDeckLinkFrameMetadataHDRMaximumFrameAverageLightLevel     = /* 'fall' */ 0x66616C6C,    // Maximum Frame Average Light Level in range 1 cd/m2 - 65535 cd/m2
-    DLABDeckLinkFrameMetadataCintelOffsetToApplyHorizontal        = /* 'otah' */ 0x6F746168,    // Horizontal offset (pixels) to be applied to image
-    DLABDeckLinkFrameMetadataCintelOffsetToApplyVertical          = /* 'otav' */ 0x6F746176,    // Vertical offset (pixels) to be applied to image
-    DLABDeckLinkFrameMetadataCintelGainRed                        = /* 'LfRd' */ 0x4C665264,    // Red gain parameter to apply after log
-    DLABDeckLinkFrameMetadataCintelGainGreen                      = /* 'LfGr' */ 0x4C664772,    // Green gain parameter to apply after log
-    DLABDeckLinkFrameMetadataCintelGainBlue                       = /* 'LfBl' */ 0x4C66426C,    // Blue gain parameter to apply after log
-    DLABDeckLinkFrameMetadataCintelLiftRed                        = /* 'GnRd' */ 0x476E5264,    // Red lift parameter to apply after log and gain
-    DLABDeckLinkFrameMetadataCintelLiftGreen                      = /* 'GnGr' */ 0x476E4772,    // Green lift parameter to apply after log and gain
-    DLABDeckLinkFrameMetadataCintelLiftBlue                       = /* 'GnBl' */ 0x476E426C,    // Blue lift parameter to apply after log and gain
-    DLABDeckLinkFrameMetadataCintelHDRGainRed                     = /* 'HGRd' */ 0x48475264,    // Red gain parameter to apply to linear data for HDR Combination
-    DLABDeckLinkFrameMetadataCintelHDRGainGreen                   = /* 'HGGr' */ 0x48474772,    // Green gain parameter to apply to linear data for HDR Combination
-    DLABDeckLinkFrameMetadataCintelHDRGainBlue                    = /* 'HGBl' */ 0x4847426C    // Blue gain parameter to apply to linear data for HDR Combination
 };
 
 /* Enum BMDProfileID - Identifies a profile */
@@ -371,6 +342,13 @@ typedef NS_ENUM(uint32_t, DLABHDMITimecodePacking)
     DLABHDMITimecodePackingIEEEOUI5CF9F0                          = 0x5CF9F003
 };
 
+/* Enum BMDInternalKeyingAncillaryDataSource - Source for VANC and timecode data when performing internal keying */
+typedef NS_ENUM(uint32_t, DLABInternalKeyingAncillaryDataSource)
+{
+    DLABInternalKeyingAncillaryDataSourceFromInputSignal            = /* 'ikai' */ 0x696B6169,
+    DLABInternalKeyingAncillaryDataSourceFromKeyFrame               = /* 'ikak' */ 0x696B616B
+};
+
 /* Enum BMDDeckLinkAttributeID - DeckLink Attribute ID */
 typedef NS_ENUM(uint32_t, DLABAttribute)
 {
@@ -388,6 +366,7 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeSupportsClockTimingAdjustment                     = /* 'ctad' */ 0x63746164,
     DLABAttributeSupportsFullFrameReferenceInputTimingOffset       = /* 'frin' */ 0x6672696E,
     DLABAttributeSupportsSMPTELevelAOutput                         = /* 'lvla' */ 0x6C766C61,
+    DLABAttributeSupportsAutoSwitchingPPsFOnInput                  = /* 'apsf' */ 0x61707366,
     DLABAttributeSupportsDualLinkSDI                               = /* 'sdls' */ 0x73646C73,
     DLABAttributeSupportsQuadLinkSDI                               = /* 'sqls' */ 0x73716C73,
     DLABAttributeSupportsIdleOutput                                = /* 'idou' */ 0x69646F75,
@@ -447,6 +426,9 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
 /* Enum BMDDeckLinkAPIInformationID - DeckLinkAPI information ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkAPIInformation)
 {
+    
+    /* Integer or String */
+    
     DLABDeckLinkAPIInformationVersion                                        = /* 'vers' */ 0x76657273
 };
 
@@ -475,6 +457,9 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     
     DLABDeckLinkStatusVideoInputSignalLocked                      = /* 'visl' */ 0x7669736C,
     DLABDeckLinkStatusReferenceSignalLocked                       = /* 'refl' */ 0x7265666C,
+    
+    /* Bytes */
+    
     DLABDeckLinkStatusReceivedEDID                                = /* 'edid' */ 0x65646964
 };
 
@@ -562,7 +547,7 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationSwapHDMICh3AndCh4OnInput                    = /* 'hi34' */ 0x68693334,
     DLABConfigurationSwapHDMICh3AndCh4OnOutput                   = /* 'ho34' */ 0x686F3334,
     
-    /* Video output flags */
+    /* Video Output flags */
     
     DLABConfigurationFieldFlickerRemoval                         = /* 'fdfr' */ 0x66646672,
     DLABConfigurationHD1080p24ToHD1080i5994Conversion            = /* 'to59' */ 0x746F3539,
@@ -573,9 +558,6 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationSMPTELevelAOutput                           = /* 'smta' */ 0x736D7461,
     DLABConfigurationRec2020Output                               = /* 'rec2' */ 0x72656332,    // Ensure output is Rec.2020 colorspace
     DLABConfigurationQuadLinkSDIVideoOutputSquareDivisionSplit   = /* 'SDQS' */ 0x53445153,
-    
-    /* Video Output Flags */
-    
     DLABConfigurationOutput1080pAsPsF                            = /* 'pfpr' */ 0x70667072,
     
     /* Video Output Integers */
@@ -606,9 +588,6 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationVideoInputScanning                          = /* 'visc' */ 0x76697363,    // Applicable to H264 Pro Recorder only
     DLABConfigurationUseDedicatedLTCInput                        = /* 'dltc' */ 0x646C7463,    // Use timecode from LTC input instead of SDI stream
     DLABConfigurationSDIInput3DPayloadOverride                   = /* '3dds' */ 0x33646473,
-    
-    /* Video Input Flags */
-    
     DLABConfigurationCapture1080pAsPsF                           = /* 'cfpr' */ 0x63667072,
     
     /* Video Input Integers */
@@ -632,6 +611,10 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationVideoInputCompositeChromaGain               = /* 'iicg' */ 0x69696367,
     DLABConfigurationVideoInputSVideoLumaGain                    = /* 'islg' */ 0x69736C67,
     DLABConfigurationVideoInputSVideoChromaGain                  = /* 'iscg' */ 0x69736367,
+    
+    /* Keying Integers */
+    
+    DLABConfigurationInternalKeyingAncillaryDataSource           = /* 'ikas' */ 0x696B6173,
     
     /* Audio Input Flags */
     
@@ -723,13 +706,13 @@ typedef NS_ENUM(uint32_t, DLABDeckControlEvent)
     
     /* Export-To-Tape events */
     
-    DLABDeckControlEventPrepareForExportEvent                          = /* 'pfee' */ 0x70666565,    // This event is triggered a few frames before reaching the in-point. IDeckLinkInput::StartScheduledPlayback() should be called at this point.
-    DLABDeckControlEventExportCompleteEvent                            = /* 'exce' */ 0x65786365,    // This event is triggered a few frames after reaching the out-point. At this point, it is safe to stop playback.
+    DLABDeckControlEventPrepareForExportEvent                          = /* 'pfee' */ 0x70666565,    // This event is triggered a few frames before reaching the in-point. IDeckLinkInput::StartScheduledPlayback should be called at this point.
+    DLABDeckControlEventExportCompleteEvent                            = /* 'exce' */ 0x65786365,    // This event is triggered a few frames after reaching the out-point. At this point, it is safe to stop playback. Upon reception of this event the deck's control mode is set back to bmdDeckControlVTRControlMode.
     
     /* Capture events */
     
     DLABDeckControlEventPrepareForCaptureEvent                         = /* 'pfce' */ 0x70666365,    // This event is triggered a few frames before reaching the in-point. The serial timecode attached to IDeckLinkVideoInputFrames is now valid.
-    DLABDeckControlEventCaptureCompleteEvent                           = /* 'ccev' */ 0x63636576    // This event is triggered a few frames after reaching the out-point.
+    DLABDeckControlEventCaptureCompleteEvent                           = /* 'ccev' */ 0x63636576    // This event is triggered a few frames after reaching the out-point. Upon receptio    n of this event the deck's control mode is set back to bmdDeckControlVTRControlMode.
 };
 
 /* Enum BMDDeckControlVTRControlState - VTR Control state */
@@ -945,11 +928,6 @@ typedef NS_ENUM(uint32_t, DLABDisplayMode)
     DLABDisplayMode2560x1600p50                                          = /* 'wqx5' */ 0x77717835,
     DLABDisplayMode2560x1600p60                                          = /* 'wqx6' */ 0x77717836,
     
-    /* RAW Modes for Cintel (input only) */
-    
-    DLABDisplayModeCintelRAW                                             = /* 'rwci' */ 0x72776369,    // Frame size up to 4096x3072, variable frame rate
-    DLABDisplayModeCintelCompressedRAW                                   = /* 'rwcc' */ 0x72776363,    // Frame size up to 4096x3072, variable frame rate
-    
     /* Special Modes */
     
     DLABDisplayModeUnknown                                               = /* 'iunk' */ 0x69756E6B
@@ -982,12 +960,7 @@ typedef NS_ENUM(uint32_t, DLABPixelFormat)
     
     /* AVID DNxHR */
     
-    DLABPixelFormatDNxHR                                               = /* 'AVdh' */ 0x41566468,
-    
-    /* Cintel formats */
-    
-    DLABPixelFormat12BitRAWGRBG                                        = /* 'r12p' */ 0x72313270,    // 12-bit RAW data for bayer pattern GRBG
-    DLABPixelFormat12BitRAWJPEG                                        = /* 'r16p' */ 0x72313670    // 12-bit RAW data arranged in tiles and JPEG compressed
+    DLABPixelFormatDNxHR                                               = /* 'AVdh' */ 0x41566468
 };
 
 /* Enum BMDDisplayModeFlags - Flags to describe the characteristics of an IDeckLinkDisplayMode. */
@@ -1128,7 +1101,7 @@ typedef NS_OPTIONS(uint32_t, DLABTimecodeFlag)
     DLABTimecodeFlagIsDropFrame                                       = 1 << 0,
     DLABTimecodeFlagFieldMark                                         = 1 << 1,
     DLABTimecodeFlagColorFrame                                        = 1 << 2,
-    DLABTimecodeFlagEmbedRecordingTrigger                             = 1 << 3,  // On SDI recording trigger utilises a user-bit
+    DLABTimecodeFlagEmbedRecordingTrigger                             = 1 << 3,  // On SDI recording trigger utilises a user-bit.
     DLABTimecodeFlagRecordingTriggered                                = 1 << 4
 };
 
