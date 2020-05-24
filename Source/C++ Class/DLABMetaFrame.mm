@@ -136,6 +136,12 @@ HRESULT DLABMetaFrame::GetString(BMDDeckLinkFrameMetadataID metadataID, CFString
     return E_INVALIDARG;
 }
 
+HRESULT DLABMetaFrame::GetBytes(BMDDeckLinkFrameMetadataID metadataID, void* buffer, uint32_t* bufferSize)
+{
+    // Not expecting GetBytes
+    return E_INVALIDARG;
+}
+
 //
 
 HRESULT DLABMetaFrame::SetInt(BMDDeckLinkFrameMetadataID metadataID, int64_t value)
