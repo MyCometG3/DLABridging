@@ -561,6 +561,19 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 */
 @property (nonatomic, copy, nullable) OutputFrameMetadataHandler outputFrameMetadataHandler;
 
+/* =================================================================================== */
+// MARK: (Public) - Debug vImageCopyBuffer support (experimental)
+/* =================================================================================== */
+
+/**
+ Experimental - use vImageCopyBuffer() instead of simple memcpy().
+ */
+@property (nonatomic, assign) BOOL debugUsevImageCopyBuffer;
+
+/**
+ Experimental - use IDeckLinkVideoFrame - PixelFormat value to calculate pixelSize in bytes.
+*/
+@property (nonatomic, assign) BOOL debugCalcPixelSizeFast;
 
 /* =================================================================================== */
 // MARK: (Public) - Key/Value

@@ -163,6 +163,96 @@
 // MARK: Process Input videoFrame/audioPacket
 /* =================================================================================== */
 
+NS_INLINE size_t pixelSizeForDL(IDeckLinkVideoFrame* videoFrame) {
+    size_t pixelSize = 0;   // For vImageCopyBuffer()
+    
+    BMDPixelFormat format = videoFrame->GetPixelFormat();
+    switch (format) {
+        case bmdFormat8BitYUV:
+            pixelSize = ceil( 4.0/2); break; // 4 bytes 2 pixels block
+        case bmdFormat10BitYUV:
+            pixelSize = ceil(16.0/6); break; // 16 bytes 6 pixels block
+        case bmdFormat8BitARGB:
+            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
+        case bmdFormat8BitBGRA:
+            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
+        case bmdFormat10BitRGB:
+            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
+        case bmdFormat12BitRGB:
+            pixelSize = ceil(36.0/8); break; // 36 bytes 8 pixel block
+        case bmdFormat12BitRGBLE:
+            pixelSize = ceil(36.0/8); break; // 36 bytes 8 pixel block
+        case bmdFormat10BitRGBXLE:
+            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
+        case bmdFormat10BitRGBX:
+            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
+        default:
+            break;
+    }
+    return pixelSize;
+}
+
+NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
+    size_t pixelSize = 0;   // For vImageCopyBuffer()
+    {
+        NSString* kBitsPerBlock = (__bridge NSString*)kCVPixelFormatBitsPerBlock;
+        NSString* kBlockWidth = (__bridge NSString*)kCVPixelFormatBlockWidth;
+        NSString* kBlockHeight = (__bridge NSString*)kCVPixelFormatBlockHeight;
+        
+        OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
+        CFDictionaryRef pfDict = CVPixelFormatDescriptionCreateWithPixelFormatType(kCFAllocatorDefault, pixelFormat);
+        NSDictionary* dict = CFBridgingRelease(pfDict);
+        
+        int numBitsPerBlock = ((NSNumber*)dict[kBitsPerBlock]).intValue;
+        int numWidthPerBlock = MAX(1,((NSNumber*)dict[kBlockWidth]).intValue);
+        int numHeightPerBlock = MAX(1,((NSNumber*)dict[kBlockHeight]).intValue);
+        int numPixelPerBlock = numWidthPerBlock * numHeightPerBlock;
+        pixelSize = ceil(numBitsPerBlock / numPixelPerBlock / 8.0);
+    }
+    return pixelSize;
+}
+
+NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFrame, CVPixelBufferRef pixelBuffer) {
+    assert(videoFrame && pixelBuffer);
+    
+    bool result = FALSE;
+    CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    if (!err) {
+        void* src = NULL;
+        void* dst = CVPixelBufferGetBaseAddress(pixelBuffer);
+        videoFrame->GetBytes(&src);
+        
+        vImage_Buffer sourceBuffer = {0};
+        sourceBuffer.data = src;
+        sourceBuffer.width = videoFrame->GetWidth();
+        sourceBuffer.height = videoFrame->GetHeight();
+        sourceBuffer.rowBytes = videoFrame->GetRowBytes();
+        
+        vImage_Buffer targetBuffer = {0};
+        targetBuffer.data = dst;
+        targetBuffer.width = CVPixelBufferGetWidth(pixelBuffer);
+        targetBuffer.height = CVPixelBufferGetHeight(pixelBuffer);
+        targetBuffer.rowBytes = CVPixelBufferGetBytesPerRow(pixelBuffer);
+        
+        if (src && dst) {
+            size_t pixelSize = 0;
+            if (self.debugCalcPixelSizeFast) {
+                pixelSize = pixelSizeForDL(videoFrame);
+            } else {
+                pixelSize = pixelSizeForCV(pixelBuffer);
+            }
+            assert(pixelSize > 0);
+            
+            vImage_Error convErr = kvImageNoError;
+            convErr = vImageCopyBuffer(&sourceBuffer, &targetBuffer,
+                                       pixelSize, kvImageNoFlags);
+            result = (convErr == kvImageNoError);
+        }
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    }
+    return result;
+}
+
 - (DLABTimecodeSetting*) createTimecodeSettingOf:(IDeckLinkVideoInputFrame*)videoFrame
                                           format:(BMDTimecodeFormat)format
 {
@@ -271,36 +361,40 @@
             size_t ifHeight = videoFrame->GetHeight();
             BOOL sizeOK = (pbWidth == ifWidth && pbHeight == ifHeight);
             
-            // Simply check if stride is same
-            size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
-            size_t ifRowByte = videoFrame->GetRowBytes();
-            BOOL rowByteOK = (pbRowByte == ifRowByte);
-            
             BMDPixelFormat pixelFormat = videoFrame->GetPixelFormat();
             BOOL sameFormat = (pixelFormat == cvPixelFormat);
             if (sameFormat && sizeOK) {
-                // Copy pixel data from inputVideoFrame to CVPixelBuffer
-                err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-                if (!err) {
-                    // get buffer address for src and dst
-                    void* dst = CVPixelBufferGetBaseAddress(pixelBuffer);
-                    void* src = NULL;
-                    videoFrame->GetBytes(&src);
+                if (self.debugUsevImageCopyBuffer) {
+                    ready = copyBufferDLtoCV(self, videoFrame, pixelBuffer);
+                } else {
+                    // Simply check if stride is same
+                    size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
+                    size_t ifRowByte = videoFrame->GetRowBytes();
+                    BOOL rowByteOK = (pbRowByte == ifRowByte);
                     
-                    if (dst && src) {
-                        if (rowByteOK) { // bulk copy
-                            memcpy(dst, src, ifRowByte * ifHeight);
-                        } else { // line copy with different stride
-                            size_t length = MIN(pbRowByte, ifRowByte);
-                            for (size_t line = 0; line < ifHeight; line++) {
-                                char* srcAddr = (char*)src + pbRowByte * line;
-                                char* dstAddr = (char*)dst + ifRowByte * line;
-                                memcpy(dstAddr, srcAddr, length);
+                    // Copy pixel data from inputVideoFrame to CVPixelBuffer
+                    err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+                    if (!err) {
+                        // get buffer address for src and dst
+                        void* dst = CVPixelBufferGetBaseAddress(pixelBuffer);
+                        void* src = NULL;
+                        videoFrame->GetBytes(&src);
+                        
+                        if (dst && src) {
+                            if (rowByteOK) { // bulk copy
+                                memcpy(dst, src, ifRowByte * ifHeight);
+                            } else { // line copy with different stride
+                                size_t length = MIN(pbRowByte, ifRowByte);
+                                for (size_t line = 0; line < ifHeight; line++) {
+                                    char* srcAddr = (char*)src + pbRowByte * line;
+                                    char* dstAddr = (char*)dst + ifRowByte * line;
+                                    memcpy(dstAddr, srcAddr, length);
+                                }
                             }
+                            ready = true;
                         }
-                        ready = true;
+                        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
                     }
-                    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
                 }
             } else {
                 // Use DLABVideoConverter/vImage to convert video image
