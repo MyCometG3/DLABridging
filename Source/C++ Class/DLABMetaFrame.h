@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
 
+#import <DeckLinkAPI_v11_5.h>
+
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 /*

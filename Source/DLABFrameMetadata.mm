@@ -68,6 +68,10 @@
         // Get MetadataExtensions of input frame
         IDeckLinkVideoFrameMetadataExtensions* ext = NULL;
         HRESULT result = frame->QueryInterface(IID_IDeckLinkVideoFrameMetadataExtensions, (void **)&ext);
+        // _v11_5.h
+        if (result != S_OK) {
+            result = frame->QueryInterface(IID_IDeckLinkVideoFrameMetadataExtensions_v11_5, (void **)&ext);
+        }
         if (result == S_OK && ext) {
             _inputFrame = frame;
             _inputFrame->AddRef();

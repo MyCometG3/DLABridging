@@ -250,6 +250,12 @@ HRESULT DLABMetaFrame::QueryInterface(REFIID iid, LPVOID *ppv)
         AddRef();
         return S_OK;
     }
+    if (memcmp(&iid, &IID_IDeckLinkVideoFrameMetadataExtensions_v11_5, sizeof(REFIID)) == 0)
+    {
+        *ppv = static_cast<IDeckLinkVideoFrameMetadataExtensions*>(this);
+        AddRef();
+        return S_OK;
+    }
     return E_NOINTERFACE;
 }
 
