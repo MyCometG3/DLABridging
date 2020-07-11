@@ -237,21 +237,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 - (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                             pixelFormat:(BMDPixelFormat)pixelFormat
                          videoInputFlag:(BMDVideoInputFlags)inputFlag
-                     displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport
-{
-    NSParameterAssert(newDisplayModeObj && pixelFormat && displayModeSupport);
-    self = [self initWithDisplayModeObj:newDisplayModeObj
-                            pixelFormat:pixelFormat
-                         videoInputFlag:inputFlag];
-    if (self) {
-        _displayModeSupportW = (DLABDisplayModeSupportFlag1011)displayModeSupport;
-    }
-    return self;
-}
-
-- (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
-                            pixelFormat:(BMDPixelFormat)pixelFormat
-                         videoInputFlag:(BMDVideoInputFlags)inputFlag
 {
     NSParameterAssert(newDisplayModeObj && pixelFormat);
     
@@ -265,22 +250,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         _useRP188W = _isHDW;
         
         _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
-    }
-    return self;
-}
-
-- (instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
-                            pixelFormat:(BMDPixelFormat)pixelFormat
-                        videoOutputFlag:(BMDVideoOutputFlags)outputFlag
-                     displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport
-{
-    NSParameterAssert(newDisplayModeObj && pixelFormat && displayModeSupport);
-    
-    self = [self initWithDisplayModeObj:newDisplayModeObj
-                            pixelFormat:pixelFormat
-                        videoOutputFlag:outputFlag];
-    if (self) {
-        _displayModeSupportW = (DLABDisplayModeSupportFlag1011)displayModeSupport;
     }
     return self;
 }
@@ -427,7 +396,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     if (!( self.pixelFormatW == object.pixelFormatW )) return NO;
     if (!( self.inputFlagW == object.inputFlagW )) return NO;
     if (!( self.outputFlagW == object.outputFlagW )) return NO;
-    if (!( self.displayModeSupportW == object.displayModeSupportW )) return NO; // TODO: deprecated
     
     if (!( self.rowBytesW == object.rowBytesW )) return NO;
     
@@ -465,7 +433,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         obj.pixelFormatW = self.pixelFormatW;
         obj.inputFlagW = self.inputFlagW;
         obj.outputFlagW = self.outputFlagW;
-        obj.displayModeSupportW = self.displayModeSupportW; // TODO: deprecated
         obj.rowBytesW = self.rowBytesW;
         obj.cvPixelFormatType = self.cvPixelFormatType;
         
@@ -520,7 +487,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 @synthesize pixelFormatW = _pixelFormatW;
 @synthesize inputFlagW = _inputFlagW;
 @synthesize outputFlagW = _outputFlagW;
-@synthesize displayModeSupportW = _displayModeSupportW;
 @synthesize rowBytesW = _rowBytesW;
 @synthesize videoFormatDescriptionW = _videoFormatDescriptionW;
 @synthesize isHDW = _isHDW;
@@ -544,7 +510,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 - (DLABPixelFormat) pixelFormat { return _pixelFormatW; }
 - (DLABVideoInputFlag) inputFlag { return _inputFlagW; }
 - (DLABVideoOutputFlag) outputFlag { return _outputFlagW; }
-- (DLABDisplayModeSupportFlag1011) displayModeSupport { return _displayModeSupportW; } // TODO: deprecated
 - (long) rowBytes { return _rowBytesW; }
 - (CMVideoFormatDescriptionRef) videoFormatDescription { return _videoFormatDescriptionW; }
 - (BOOL) isHD { return _isHDW; }
@@ -594,7 +559,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     DLABPixelFormat pixelFormat = self.pixelFormatW;
     DLABVideoInputFlag inputFlag = self.inputFlagW;
     DLABVideoOutputFlag outputFlag = self.outputFlagW;
-    DLABDisplayModeSupportFlag1011 displayModeSupport = self.displayModeSupportW; // TODO: deprecated
     
     NSDictionary *displayModeDictionary = @{@"objIdentifier" : obj,
                                             @"width" : @(width),
@@ -608,7 +572,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
                                             @"pixelFormat" : @(pixelFormat),
                                             @"inputFlag" : @(inputFlag),
                                             @"outputFlag" : @(outputFlag),
-                                            @"displayModeSupport" : @(displayModeSupport), // TODO: deprecated
                                             @"rowBytes" : @(rowBytes),
                                             };
     return displayModeDictionary;

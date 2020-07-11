@@ -8,22 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		163CF45D24023A7B00732F8C /* DeckLinkAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF44B24023A7B00732F8C /* DeckLinkAPI.h */; };
-		163CF45E24023A7B00732F8C /* DeckLinkAPI_v10_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF44C24023A7B00732F8C /* DeckLinkAPI_v10_11.h */; };
 		163CF45F24023A7B00732F8C /* DeckLinkAPIConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF44D24023A7B00732F8C /* DeckLinkAPIConfiguration.h */; };
-		163CF46024023A7B00732F8C /* DeckLinkAPIConfiguration_v10_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF44E24023A7B00732F8C /* DeckLinkAPIConfiguration_v10_11.h */; };
 		163CF46124023A7B00732F8C /* DeckLinkAPIDeckControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF44F24023A7B00732F8C /* DeckLinkAPIDeckControl.h */; };
 		163CF46224023A7B00732F8C /* DeckLinkAPIDiscovery.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45024023A7B00732F8C /* DeckLinkAPIDiscovery.h */; };
 		163CF46324023A7B00732F8C /* DeckLinkAPIDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 163CF45124023A7B00732F8C /* DeckLinkAPIDispatch.cpp */; };
-		163CF46424023A7B00732F8C /* DeckLinkAPIDispatch_v10_11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 163CF45224023A7B00732F8C /* DeckLinkAPIDispatch_v10_11.cpp */; };
 		163CF46524023A7B00732F8C /* DeckLinkAPIModes.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45324023A7B00732F8C /* DeckLinkAPIModes.h */; };
 		163CF46624023A7B00732F8C /* DeckLinkAPIStreaming.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45424023A7B00732F8C /* DeckLinkAPIStreaming.h */; };
-		163CF46724023A7B00732F8C /* DeckLinkAPIStreaming_v10_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45524023A7B00732F8C /* DeckLinkAPIStreaming_v10_11.h */; };
 		163CF46824023A7B00732F8C /* DeckLinkAPITypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45624023A7B00732F8C /* DeckLinkAPITypes.h */; };
 		163CF46924023A7B00732F8C /* DeckLinkAPIVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45724023A7B00732F8C /* DeckLinkAPIVersion.h */; };
-		163CF46A24023A7B00732F8C /* DeckLinkAPIVideoEncoderInput_v10_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45824023A7B00732F8C /* DeckLinkAPIVideoEncoderInput_v10_11.h */; };
-		163CF46B24023A7B00732F8C /* DeckLinkAPIVideoInput_v10_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45924023A7B00732F8C /* DeckLinkAPIVideoInput_v10_11.h */; };
 		163CF46C24023A7B00732F8C /* DeckLinkAPIVideoInput_v11_4.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45A24023A7B00732F8C /* DeckLinkAPIVideoInput_v11_4.h */; };
-		163CF46D24023A7B00732F8C /* DeckLinkAPIVideoOutput_v10_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45B24023A7B00732F8C /* DeckLinkAPIVideoOutput_v10_11.h */; };
 		163CF46E24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */; };
 		164C828A1F514632001208BD /* DLABridging.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82881F514632001208BD /* DLABridging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		164C82D11F514687001208BD /* DLABAudioSetting+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */; };
@@ -77,22 +70,15 @@
 
 /* Begin PBXFileReference section */
 		163CF44B24023A7B00732F8C /* DeckLinkAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPI.h; sourceTree = "<group>"; };
-		163CF44C24023A7B00732F8C /* DeckLinkAPI_v10_11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPI_v10_11.h; sourceTree = "<group>"; };
 		163CF44D24023A7B00732F8C /* DeckLinkAPIConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIConfiguration.h; sourceTree = "<group>"; };
-		163CF44E24023A7B00732F8C /* DeckLinkAPIConfiguration_v10_11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIConfiguration_v10_11.h; sourceTree = "<group>"; };
 		163CF44F24023A7B00732F8C /* DeckLinkAPIDeckControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIDeckControl.h; sourceTree = "<group>"; };
 		163CF45024023A7B00732F8C /* DeckLinkAPIDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIDiscovery.h; sourceTree = "<group>"; };
 		163CF45124023A7B00732F8C /* DeckLinkAPIDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeckLinkAPIDispatch.cpp; sourceTree = "<group>"; };
-		163CF45224023A7B00732F8C /* DeckLinkAPIDispatch_v10_11.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DeckLinkAPIDispatch_v10_11.cpp; sourceTree = "<group>"; };
 		163CF45324023A7B00732F8C /* DeckLinkAPIModes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIModes.h; sourceTree = "<group>"; };
 		163CF45424023A7B00732F8C /* DeckLinkAPIStreaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIStreaming.h; sourceTree = "<group>"; };
-		163CF45524023A7B00732F8C /* DeckLinkAPIStreaming_v10_11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIStreaming_v10_11.h; sourceTree = "<group>"; };
 		163CF45624023A7B00732F8C /* DeckLinkAPITypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPITypes.h; sourceTree = "<group>"; };
 		163CF45724023A7B00732F8C /* DeckLinkAPIVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVersion.h; sourceTree = "<group>"; };
-		163CF45824023A7B00732F8C /* DeckLinkAPIVideoEncoderInput_v10_11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoEncoderInput_v10_11.h; sourceTree = "<group>"; };
-		163CF45924023A7B00732F8C /* DeckLinkAPIVideoInput_v10_11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoInput_v10_11.h; sourceTree = "<group>"; };
 		163CF45A24023A7B00732F8C /* DeckLinkAPIVideoInput_v11_4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoInput_v11_4.h; sourceTree = "<group>"; };
-		163CF45B24023A7B00732F8C /* DeckLinkAPIVideoOutput_v10_11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoOutput_v10_11.h; sourceTree = "<group>"; };
 		163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoOutput_v11_4.h; sourceTree = "<group>"; };
 		164C82851F514632001208BD /* DLABridging.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DLABridging.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		164C82881F514632001208BD /* DLABridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABridging.h; sourceTree = "<group>"; };
@@ -166,23 +152,16 @@
 			isa = PBXGroup;
 			children = (
 				163CF44B24023A7B00732F8C /* DeckLinkAPI.h */,
-				163CF44C24023A7B00732F8C /* DeckLinkAPI_v10_11.h */,
 				16F134C5247A2D9300F92C14 /* DeckLinkAPI_v11_5.h */,
 				163CF44D24023A7B00732F8C /* DeckLinkAPIConfiguration.h */,
-				163CF44E24023A7B00732F8C /* DeckLinkAPIConfiguration_v10_11.h */,
 				163CF44F24023A7B00732F8C /* DeckLinkAPIDeckControl.h */,
 				163CF45024023A7B00732F8C /* DeckLinkAPIDiscovery.h */,
 				163CF45124023A7B00732F8C /* DeckLinkAPIDispatch.cpp */,
-				163CF45224023A7B00732F8C /* DeckLinkAPIDispatch_v10_11.cpp */,
 				163CF45324023A7B00732F8C /* DeckLinkAPIModes.h */,
 				163CF45424023A7B00732F8C /* DeckLinkAPIStreaming.h */,
-				163CF45524023A7B00732F8C /* DeckLinkAPIStreaming_v10_11.h */,
 				163CF45624023A7B00732F8C /* DeckLinkAPITypes.h */,
 				163CF45724023A7B00732F8C /* DeckLinkAPIVersion.h */,
-				163CF45824023A7B00732F8C /* DeckLinkAPIVideoEncoderInput_v10_11.h */,
-				163CF45924023A7B00732F8C /* DeckLinkAPIVideoInput_v10_11.h */,
 				163CF45A24023A7B00732F8C /* DeckLinkAPIVideoInput_v11_4.h */,
-				163CF45B24023A7B00732F8C /* DeckLinkAPIVideoOutput_v10_11.h */,
 				163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */,
 			);
 			path = "DeckLink API";
@@ -302,7 +281,6 @@
 				163CF46624023A7B00732F8C /* DeckLinkAPIStreaming.h in Headers */,
 				163CF46124023A7B00732F8C /* DeckLinkAPIDeckControl.h in Headers */,
 				16996D3A2425AB2D00878D02 /* DLABFrameMetadata+Internal.h in Headers */,
-				163CF45E24023A7B00732F8C /* DeckLinkAPI_v10_11.h in Headers */,
 				16B0BF19243BEE12004C2BDF /* DLABVideoConverter.h in Headers */,
 				164C82DB1F514687001208BD /* DLABDevice.h in Headers */,
 				16F134C6247A2D9300F92C14 /* DeckLinkAPI_v11_5.h in Headers */,
@@ -315,20 +293,15 @@
 				16996D392424482C00878D02 /* DLABMetaFrame.h in Headers */,
 				1656BF0E241C6B5B00E95D3B /* DLABProfileAttributes.h in Headers */,
 				1656BF11241C7E0100E95D3B /* DLABProfileAttributes+Internal.h in Headers */,
-				163CF46024023A7B00732F8C /* DeckLinkAPIConfiguration_v10_11.h in Headers */,
 				164C82D41F514687001208BD /* DLABBrowser+Internal.h in Headers */,
 				164C82E51F514687001208BD /* DLABTimecodeSetting+Internal.h in Headers */,
 				163CF46C24023A7B00732F8C /* DeckLinkAPIVideoInput_v11_4.h in Headers */,
 				164C82E81F514687001208BD /* DLABVideoSetting+Internal.h in Headers */,
 				164C82D91F514687001208BD /* DLABDevice+Internal.h in Headers */,
 				164C82DD1F514687001208BD /* DLABDeviceNotificationCallback.h in Headers */,
-				163CF46A24023A7B00732F8C /* DeckLinkAPIVideoEncoderInput_v10_11.h in Headers */,
 				163CF46524023A7B00732F8C /* DeckLinkAPIModes.h in Headers */,
-				163CF46724023A7B00732F8C /* DeckLinkAPIStreaming_v10_11.h in Headers */,
 				164C82DF1F514687001208BD /* DLABInputCallback.h in Headers */,
-				163CF46B24023A7B00732F8C /* DeckLinkAPIVideoInput_v10_11.h in Headers */,
 				164C82E11F514687001208BD /* DLABNotificationCallback.h in Headers */,
-				163CF46D24023A7B00732F8C /* DeckLinkAPIVideoOutput_v10_11.h in Headers */,
 				164C82E31F514687001208BD /* DLABOutputCallback.h in Headers */,
 				163CF46924023A7B00732F8C /* DeckLinkAPIVersion.h in Headers */,
 				163CF46224023A7B00732F8C /* DeckLinkAPIDiscovery.h in Headers */,
@@ -407,7 +380,6 @@
 				164C82D31F514687001208BD /* DLABAudioSetting.mm in Sources */,
 				164C82E21F514687001208BD /* DLABNotificationCallback.mm in Sources */,
 				164EC8B2241CAF59002FBF36 /* DLABDevice+Profile.mm in Sources */,
-				163CF46424023A7B00732F8C /* DeckLinkAPIDispatch_v10_11.cpp in Sources */,
 				164C82DA1F514687001208BD /* DLABDevice+Output.mm in Sources */,
 				164C82EA1F514687001208BD /* DLABVideoSetting.mm in Sources */,
 				164C82DC1F514687001208BD /* DLABDevice.mm in Sources */,

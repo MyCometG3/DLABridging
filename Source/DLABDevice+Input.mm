@@ -772,25 +772,6 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
 - (DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
                                               pixelFormat:(DLABPixelFormat)pixelFormat
                                                 inputFlag:(DLABVideoInputFlag)videoInputFlag
-                                              supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
-                                                    error:(NSError**)error
-{
-    NSParameterAssert(displayMode && pixelFormat);
-    
-    DLABVideoSetting* setting = [self createInputVideoSettingOfDisplayMode:displayMode
-                                                               pixelFormat:pixelFormat
-                                                                 inputFlag:videoInputFlag
-                                                                     error:error];
-    if (setting && displayModeSupportFlag) {
-        *displayModeSupportFlag = DLABDisplayModeSupportFlag1011Supported;
-    }
-    
-    return setting;
-}
-
-- (DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)displayMode
-                                              pixelFormat:(DLABPixelFormat)pixelFormat
-                                                inputFlag:(DLABVideoInputFlag)videoInputFlag
                                                     error:(NSError**)error
 {
     NSParameterAssert(displayMode && pixelFormat);
@@ -822,7 +803,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         __block HRESULT result = E_FAIL;
         __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
-        __block bool pre1105 = (self.apiVersion < 0x0b050000); // 10.11, 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
+        __block bool pre1105 = (self.apiVersion < 0x0b050000); // 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
         [self capture_sync:^{
             if (!pre1105) {
                 BMDVideoInputConversionMode convertMode = bmdNoVideoInputConversion;

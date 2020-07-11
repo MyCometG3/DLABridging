@@ -107,11 +107,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) DLABVideoOutputFlag outputFlag;
 
 /**
- Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
- */
-@property (nonatomic, assign, readonly) DLABDisplayModeSupportFlag1011 displayModeSupport __attribute__((deprecated));
-
-/**
  Preferred CVPixelFormatType for CVPixelBuffer. Use buildVideoFormatDescription again after update.
  */
 @property (nonatomic, assign, readwrite) OSType cvPixelFormatType;

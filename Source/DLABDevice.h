@@ -793,23 +793,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience constructer for Output Video Setting
-
- @param mode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
- @param format Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
- @param videoOutputFlag Additional flag of video (i.e. DLABVideoOutputFlagVANC)
- @param displayModeSupportFlag
- Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
- @param error Error description if failed.
- @return Output Video Setting Object.
- */
-- (nullable DLABVideoSetting*)createOutputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
-                                                        pixelFormat:(DLABPixelFormat)format
-                                                         outputFlag:(DLABVideoOutputFlag)videoOutputFlag
-                                                        supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
-                                                              error:(NSError * _Nullable * _Nullable)error __attribute__((deprecated));
-
-/**
- Convenience constructer for Output Video Setting
  
  @param mode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
  @param format Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
@@ -1251,23 +1234,6 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 // MARK: Setting
 /* =================================================================================== */
-
-/**
- Convenience constructer for Input Video Setting
-
- @param mode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
- @param format Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
- @param videoInputFlag Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
- @param displayModeSupportFlag
- Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
- @param error Error description if failed.
- @return Input Video Setting Object.
- */
-- (nullable DLABVideoSetting*)createInputVideoSettingOfDisplayMode:(DLABDisplayMode)mode
-                                                       pixelFormat:(DLABPixelFormat)format
-                                                         inputFlag:(DLABVideoInputFlag)videoInputFlag
-                                                       supportedAs:(DLABDisplayModeSupportFlag1011*)displayModeSupportFlag
-                                                             error:(NSError * _Nullable * _Nullable)error __attribute__((deprecated));
 
 /**
  Convenience constructer for Input Video Setting

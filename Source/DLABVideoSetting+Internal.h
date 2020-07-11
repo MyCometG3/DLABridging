@@ -29,14 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param newDisplayModeObj IDeckLinkDisplayMode Object.
  @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  @param inputFlag Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
- @param displayModeSupport Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
  @return Input Video Setting Object.
  */
-- (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
-                                     pixelFormat:(BMDPixelFormat)pixelFormat
-                                  videoInputFlag:(BMDVideoInputFlags)inputFlag
-                              displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport __attribute__((deprecated));
-
 - (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                                      pixelFormat:(BMDPixelFormat)pixelFormat
                                   videoInputFlag:(BMDVideoInputFlags)inputFlag;
@@ -47,14 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param newDisplayModeObj IDeckLinkDisplayMode Object.
  @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  @param outputFlag Additional flag of video (i.e. DLABVideoOutputFlagVANC)
- @param displayModeSupport Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
  @return Output Video Setting Object.
  */
-- (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
-                                     pixelFormat:(BMDPixelFormat)pixelFormat
-                                 videoOutputFlag:(BMDVideoOutputFlags)outputFlag
-                              displayModeSupport:(BMDDisplayModeSupport_v10_11)displayModeSupport __attribute__((deprecated));
-
 - (nullable instancetype) initWithDisplayModeObj:(IDeckLinkDisplayMode *)newDisplayModeObj
                                      pixelFormat:(BMDPixelFormat)pixelFormat
                                  videoOutputFlag:(BMDVideoOutputFlags)outputFlag;
@@ -232,11 +220,6 @@ NS_ASSUME_NONNULL_BEGIN
  Additional flag of video output (i.e. DLABVideoOutputFlagVANC)
  */
 @property (nonatomic, assign) DLABVideoOutputFlag outputFlagW;
-
-/**
- Support status of specified setting (i.e. DLABDisplayModeSupportFlagSupportedWithConversion)
- */
-@property (nonatomic, assign) DLABDisplayModeSupportFlag1011 displayModeSupportW __attribute__((deprecated));
 
 /* =================================================================================== */
 // MARK: Property - Ready on streaming

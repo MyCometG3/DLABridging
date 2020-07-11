@@ -12,11 +12,6 @@
 
 #import "DeckLinkAPI.h"
 
-#import "DeckLinkAPI_v10_11.h"
-#import "DeckLinkAPIConfiguration_v10_11.h"
-#import "DeckLinkAPIVideoInput_v10_11.h"
-#import "DeckLinkAPIVideoOutput_v10_11.h"
-
 #import "DeckLinkAPIVideoInput_v11_4.h"
 #import "DeckLinkAPIVideoOutput_v11_4.h"
 
