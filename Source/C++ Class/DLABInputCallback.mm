@@ -49,6 +49,11 @@ HRESULT DLABInputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         AddRef();
         return S_OK;
     }
+    if (memcmp(&iid, &IID_IDeckLinkInputCallback_v11_5_1, sizeof(REFIID)) == 0) {
+        *ppv = (IDeckLinkInputCallback *)this;
+        AddRef();
+        return S_OK;
+    }
     return E_NOINTERFACE;
 }
 
