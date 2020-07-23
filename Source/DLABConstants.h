@@ -25,10 +25,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_11.5.1.zip @ 2020/05/04 UTC
+ Derived from: Blackmagic_DeckLink_SDK_11.6.zip @ 2020/07/09 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b050100
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.5.1"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b060000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.6"
  */
 
 /* =================================================================================== */
@@ -100,7 +100,10 @@ typedef NS_OPTIONS(uint32_t, DLABDetectedVideoInputFormatFlag)
 {
     DLABDetectedVideoInputFormatFlagYCbCr422                                = 1 << 0,
     DLABDetectedVideoInputFormatFlagRGB444                                  = 1 << 1,
-    DLABDetectedVideoInputFormatFlagDualStream3D                            = 1 << 2
+    DLABDetectedVideoInputFormatFlagDualStream3D                            = 1 << 2,
+    DLABDetectedVideoInputFormatFlag12BitDepth                              = 1 << 3,
+    DLABDetectedVideoInputFormatFlag10BitDepth                              = 1 << 4,
+    DLABDetectedVideoInputFormatFlag8BitDepth                               = 1 << 5
 };
 
 /* Enum BMDDeckLinkCapturePassthroughMode - Enumerates whether the video output is electrically connected to the video input or if the clean switching mode is enabled */
@@ -438,7 +441,11 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     /* Integers */
     
     DLABDeckLinkStatusDetectedVideoInputMode                      = /* 'dvim' */ 0x6476696D,
-    DLABDeckLinkStatusDetectedVideoInputFlags                     = /* 'dvif' */ 0x64766966,
+    DLABDeckLinkStatusDetectedVideoInputFormatFlags               = /* 'dvff' */ 0x64766666,
+    DLABDeckLinkStatusDetectedVideoInputFieldDominance            = /* 'dvfd' */ 0x64766664,
+    DLABDeckLinkStatusDetectedVideoInputColorspace                = /* 'dscl' */ 0x6473636C,
+    DLABDeckLinkStatusDetectedVideoInputDynamicRange              = /* 'dsdr' */ 0x64736472,
+    DLABDeckLinkStatusDetectedSDILinkConfiguration                = /* 'dslc' */ 0x64736C63,
     DLABDeckLinkStatusCurrentVideoInputMode                       = /* 'cvim' */ 0x6376696D,
     DLABDeckLinkStatusCurrentVideoInputPixelFormat                = /* 'cvip' */ 0x63766970,
     DLABDeckLinkStatusCurrentVideoInputFlags                      = /* 'cvif' */ 0x63766966,
