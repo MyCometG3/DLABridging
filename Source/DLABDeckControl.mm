@@ -633,33 +633,18 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = control->GetTimecode(&currentTimeCode, &err);
         }];
     }
-    if (currentTimeCode) {
-        if (result == S_OK) {
-            // TODO: Check API of DLABTimecodeSetting
-            BMDTimecodeFormat format = bmdTimecodeSerial;
-            BMDTimecodeUserBits userBits = 0;
-            result = currentTimeCode->GetTimecodeUserBits(&userBits);
-            if (result == S_OK) {
-                setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
-                                                                  timecodeObj:currentTimeCode
-                                                                     userBits:userBits];
-                if (setting) {
-                    ;
-                } else {
-                    if (error) {
-                        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                            reason:@"Failed to instantiate DLABTimecodeSetting."
-                              code:paramErr
-                                to:error];
-                    }
-                }
-            } else {
-                if (error) {
-                    [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                        reason:@"IDeckLinkTimecode::GetTimecodeUserBits failed."
-                          code:result
-                            to:error];
-                }
+    if (result == S_OK && currentTimeCode) {
+        BMDTimecodeFormat format = bmdTimecodeSerial; // dummy
+        setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
+                                                          timecodeObj:currentTimeCode];
+        if (setting) {
+            ;
+        } else {
+            if (error) {
+                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                    reason:@"Failed to instantiate DLABTimecodeSetting."
+                      code:paramErr
+                        to:error];
             }
         }
         currentTimeCode->Release();

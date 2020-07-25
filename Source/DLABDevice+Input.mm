@@ -261,17 +261,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     HRESULT result = E_FAIL;
     
     IDeckLinkTimecode* timecodeObj = NULL;
-    BMDTimecodeUserBits userBits = 0;
     DLABTimecodeSetting* setting = nil;
     
     result = videoFrame->GetTimecode(format, &timecodeObj);
     if (!result && timecodeObj) {
-        result = timecodeObj->GetTimecodeUserBits(&userBits);
-        if (!result) {
-            setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
-                                                              timecodeObj:timecodeObj
-                                                                 userBits:userBits];
-        }
+        setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
+                                                          timecodeObj:timecodeObj];
     }
     return setting;
 }

@@ -20,12 +20,10 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param format Specify value of either RP188 family or VITC family.
  @param timecodeObj IDeckLinkTimecode Object.
- @param userBits Extra userBits(uint32_t) for timecode.
  @return Instance of DLABTimecode.
  */
 - (nullable instancetype) initWithTimecodeFormat:(BMDTimecodeFormat)format
-                                     timecodeObj:(IDeckLinkTimecode*)timecodeObj
-                                        userBits:(BMDTimecodeUserBits)userBits;
+                                     timecodeObj:(IDeckLinkTimecode*)timecodeObj;
 
 /* =================================================================================== */
 // MARK: - (Private) - error helper

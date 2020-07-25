@@ -75,10 +75,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) uint8_t frame;
 
-/* =================================================================================== */
-// MARK: Property - Parameters from BMDTimecode object
-/* =================================================================================== */
-
 /**
  Specify value of either RP188 family or VITC family..
  */
@@ -117,16 +113,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL dropFrame;
 
+/**
+ Timecode String in "HH:MM:SS:FF"
+*/
+@property (nonatomic, strong, readonly) NSString* timecodeString;
+
 /* =================================================================================== */
 // MARK: Public method - Conversion
 /* =================================================================================== */
-
-/**
- Timecode String in "HH:MM:SS:FF"
-
- @return NSString representation of timecode
- */
-- (NSString*)timecodeString;
 
 /**
  Update CVSMPTETimeType according to DLABDisplayMode.

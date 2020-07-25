@@ -54,19 +54,21 @@
 }
 
 - (instancetype) initWithTimecodeFormat:(BMDTimecodeFormat)format
-                                     timecodeObj:(IDeckLinkTimecode*)timecodeObj
-                                        userBits:(BMDTimecodeUserBits)userBits
+                            timecodeObj:(IDeckLinkTimecode*)timecodeObj
 {
     NSParameterAssert(format && timecodeObj);
     
     HRESULT result = E_FAIL;
     uint8_t hour = 0, minute = 0, second = 0, frame = 0;
     DLABTimecodeFlag flag = DLABTimecodeFlagDefault;
-    if (timecodeObj) {
-        result = timecodeObj->GetComponents(&hour, &minute, &second, &frame);
-        flag = (DLABTimecodeFlag) timecodeObj->GetFlags();
-    }
-    if (result) return nil;
+    BMDTimecodeUserBits userBits = 0;
+    
+    result = timecodeObj->GetComponents(&hour, &minute, &second, &frame);
+    flag = (DLABTimecodeFlag) timecodeObj->GetFlags();
+    if (result != S_OK) return nil;
+    
+    result = timecodeObj->GetTimecodeUserBits(&userBits);
+    if (result != S_OK) return nil;
     
     return [self initWithTimecodeFormat:(DLABTimecodeFormat)format
                                    hour:hour
@@ -183,6 +185,22 @@
     }
     return NO;
 }
+
+/* =================================================================================== */
+// MARK: - Property - accessors
+/* =================================================================================== */
+
+@synthesize hour = _hour;
+@synthesize minute = _minute;
+@synthesize second = _second;
+@synthesize frame = _frame;
+@synthesize format = _format;
+@synthesize flags = _flags;
+@synthesize userBits = _userBits;
+@synthesize smpteTime = _smpteTime;
+@dynamic timecodeBCD;
+@dynamic dropFrame;
+@dynamic timecodeString;
 
 /* =================================================================================== */
 // MARK: - Property - Timecode components
@@ -364,12 +382,6 @@
     }
 }
 
-/* =================================================================================== */
-// MARK: Public method - Conversion
-/* =================================================================================== */
-
-// Timecode String in "HH:MM:SS:FF"
-
 - (NSString*)timecodeString
 {
     NSString* string = [NSString stringWithFormat:@"%02d:%02d:%02d:%02d",
@@ -379,6 +391,10 @@
                         (uint32_t)_frame];
     return string;
 }
+
+/* =================================================================================== */
+// MARK: Public method - Conversion
+/* =================================================================================== */
 
 // Update CVSMPTETimeType using DLABDisplayMode.
 
