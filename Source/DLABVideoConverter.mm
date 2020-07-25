@@ -26,9 +26,11 @@
 
 @property (nonatomic, assign) int32_t dlRangeMin;
 @property (nonatomic, assign) int32_t dlRangeMax;
-@property (nonatomic, assign) BOOL dlDefault16Q12;
 
+@property (nonatomic, assign) BOOL dlDefault16Q12;
 @property (nonatomic, assign) BOOL dlUseXRGB16U;
+@property (nonatomic, assign) vImage_YpCbCrToARGB infoToARGB;
+@property (nonatomic, assign) vImage_ARGBToYpCbCr infoToYpCbCr;
 
 @property (nonatomic, assign) vImage_Buffer dlHostBuffer; // dlBuffer in HostEndian
 @property (nonatomic, assign) vImage_Buffer interimBuffer; // interim XRGB16U format (RGB444)
@@ -36,9 +38,6 @@
 @property (nonatomic, assign) vImageConverterRef convCGtoCV; // for input converter from XRGB16U to CV;
 @property (nonatomic, assign) void* tempBuffer;
 @property (nonatomic, assign) BOOL queryTempBuffer;
-
-@property (nonatomic, assign) vImage_YpCbCrToARGB infoToARGB;
-@property (nonatomic, assign) vImage_ARGBToYpCbCr infoToYpCbCr;
 
 @end
 
@@ -107,18 +106,30 @@
 // MARK: Private accessor
 /* =================================================================================== */
 
-@synthesize cvFormat = cvFormat, cvWidth = cvWidth, cvHeight = cvHeight;
-@synthesize dlFormat = dlFormat, dlWidth = dlWidth, dlHeight = dlHeight;
-@synthesize dlRowBytes = dlRowBytes, dlEndianSwap = dlEndianSwap;
-@synthesize dlRangeMin = dlRangeMin, dlRangeMax = dlRangeMax;
+@synthesize cvFormat = cvFormat;
+@synthesize cvWidth = cvWidth;
+@synthesize cvHeight = cvHeight;
+
+@synthesize dlFormat = dlFormat;
+@synthesize dlWidth = dlWidth;
+@synthesize dlHeight = dlHeight;
+@synthesize dlRowBytes = dlRowBytes;
+@synthesize dlEndianSwap = dlEndianSwap;
+
+@synthesize dlRangeMin = dlRangeMin;
+@synthesize dlRangeMax = dlRangeMax;
+
 @synthesize dlDefault16Q12 = dlDefault16Q12;
-
 @synthesize dlUseXRGB16U = dlUseXRGB16U;
-@synthesize infoToARGB = infoToARGB, infoToYpCbCr = infoToYpCbCr;
+@synthesize infoToARGB = infoToARGB;
+@synthesize infoToYpCbCr = infoToYpCbCr;
 
-@synthesize dlHostBuffer = dlHostBuffer, interimBuffer = interimBuffer;
-@synthesize convCVtoCG = convCVtoCG, convCGtoCV = convCGtoCV;
-@synthesize tempBuffer = tempBuffer, queryTempBuffer = queryTempBuffer;
+@synthesize dlHostBuffer = dlHostBuffer;
+@synthesize interimBuffer = interimBuffer;
+@synthesize convCVtoCG = convCVtoCG;
+@synthesize convCGtoCV = convCGtoCV;
+@synthesize tempBuffer = tempBuffer;
+@synthesize queryTempBuffer = queryTempBuffer;
 
 /* =================================================================================== */
 // MARK: - Functions -
