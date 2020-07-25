@@ -11,16 +11,6 @@
 #import "DLABFrameMetadata+Internal.h"
 
 @implementation DLABFrameMetadata
-{
-    HDRMetadata metadata;
-    
-    // For Output (mutable)
-    IDeckLinkMutableVideoFrame* _outputFrame;
-    DLABMetaFrame* _metaframe;
-    
-    // For Input (immutable)
-    IDeckLinkVideoFrame* _inputFrame;
-}
 
 - (instancetype) init
 {
@@ -101,6 +91,76 @@
     }
 }
 
+// public comparison - NSObject
+- (BOOL) isEqual:(id)object
+{
+    if (self == object) return YES;
+    if (!object || ![object isKindOfClass:[self class]]) return NO;
+    
+    return [self isEqualToFrameMetadata:(DLABFrameMetadata*)object];
+}
+
+// private comparison - DLABAudioSetting
+- (BOOL) isEqualToFrameMetadata:(DLABFrameMetadata*)object
+{
+    if (self == object) return YES;
+    if (!object || ![object isKindOfClass:[self class]]) return NO;
+    
+    // For output
+    if (!( self.outputFrame == object.outputFrame )) return NO;
+    // ignore: metaframe
+    
+    // For input
+    if (!( self.inputFrame == object.inputFrame )) return NO;
+    
+    // HDRMetadata
+    HDRMetadata src = self.metadata;
+    HDRMetadata tgt = object.metadata;
+    if (!( src.hdrElectroOpticalTransferFunc == tgt.hdrElectroOpticalTransferFunc )) return NO;
+    if (!( src.hdrDisplayPrimariesRedX == tgt.hdrDisplayPrimariesRedX )) return NO;
+    if (!( src.hdrDisplayPrimariesRedY == tgt.hdrDisplayPrimariesRedY )) return NO;
+    if (!( src.hdrDisplayPrimariesGreenX == tgt.hdrDisplayPrimariesGreenX )) return NO;
+    if (!( src.hdrDisplayPrimariesGreenY == tgt.hdrDisplayPrimariesGreenY )) return NO;
+    if (!( src.hdrDisplayPrimariesBlueX == tgt.hdrDisplayPrimariesBlueX )) return NO;
+    if (!( src.hdrDisplayPrimariesBlueY == tgt.hdrDisplayPrimariesBlueY )) return NO;
+    if (!( src.hdrWhitePointX == tgt.hdrWhitePointX )) return NO;
+    if (!( src.hdrWhitePointY == tgt.hdrWhitePointY )) return NO;
+    if (!( src.hdrMaxDisplayMasteringLuminance == tgt.hdrMaxDisplayMasteringLuminance )) return NO;
+    if (!( src.hdrMinDisplayMasteringLuminance == tgt.hdrMinDisplayMasteringLuminance )) return NO;
+    if (!( src.hdrMaximumContentLightLevel == tgt.hdrMaximumContentLightLevel )) return NO;
+    if (!( src.hdrMaximumFrameAverageLightLevel == tgt.hdrMaximumFrameAverageLightLevel )) return NO;
+    
+    return YES;
+}
+
+/* ================================================================================== */
+// MARK: - Public accessor
+/* ================================================================================== */
+
+@dynamic hdrElectroOpticalTransferFunc;
+@dynamic hdrDisplayPrimariesRedX;
+@dynamic hdrDisplayPrimariesRedY;
+@dynamic hdrDisplayPrimariesGreenX;
+@dynamic hdrDisplayPrimariesGreenY;
+@dynamic hdrDisplayPrimariesBlueX;
+@dynamic hdrDisplayPrimariesBlueY;
+@dynamic hdrWhitePointX;
+@dynamic hdrWhitePointY;
+@dynamic hdrMaxDisplayMasteringLuminance;
+@dynamic hdrMinDisplayMasteringLuminance;
+@dynamic hdrMaximumContentLightLevel;
+@dynamic hdrMaximumFrameAverageLightLevel;
+@dynamic colorspace;
+
+/* ================================================================================== */
+// MARK: - Private accessor
+/* ================================================================================== */
+
+@synthesize outputFrame = _outputFrame;
+@synthesize metaframe = _metaframe;
+@synthesize inputFrame = _inputFrame;
+@synthesize metadata = metadata;
+
 /* ================================================================================== */
 // MARK: - Private Utility
 /* ================================================================================== */
@@ -171,19 +231,11 @@
 // MARK: - Private Accessor
 /* ================================================================================== */
 
-- (IDeckLinkMutableVideoFrame*)outputFrame {
-    return _outputFrame;
-}
-
 - (DLABMetaFrame*)metaframe {
     if (_metaframe) {
         _metaframe->UpdateHDRMetadata(metadata);
     }
     return _metaframe;
-}
-
-- (IDeckLinkVideoFrame*)inputFrame {
-    return _inputFrame;
 }
 
 /* ================================================================================== */
