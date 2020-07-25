@@ -361,6 +361,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (DLABAudioSetting*) outputAudioSetting { return _outputAudioSettingW; }
 - (DLABAudioSetting*) inputAudioSetting { return _inputAudioSettingW; }
 
+@synthesize deckControl = _deckControl;
+
 /* =================================================================================== */
 // MARK: - (Private) - block helper
 /* =================================================================================== */
@@ -658,6 +660,14 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         }
     }
     return _inputVideoSettingArrayW;
+}
+
+- (DLABDeckControl*) deckControl
+{
+    if (!_deckControl) {
+        _deckControl = [[DLABDeckControl alloc] initWithDeckLink:self.deckLink];
+    }
+    return _deckControl;
 }
 
 /* =================================================================================== */

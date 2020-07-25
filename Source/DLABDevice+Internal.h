@@ -26,6 +26,7 @@
 #import "DLABProfileAttributes+Internal.h"
 #import "DLABFrameMetadata+Internal.h"
 #import "DLABVideoConverter.h"
+#import "DLABDeckControl+Internal.h"
 
 const int maxOutputVideoFrameCount = 8;
 

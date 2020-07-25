@@ -29,3 +29,4 @@ FOUNDATION_EXPORT const unsigned char DLABridgingVersionString[];
 #import "DLABTimecodeSetting.h"
 #import "DLABProfileAttributes.h"
 #import "DLABFrameMetadata.h"
+#import "DLABDeckControl.h"

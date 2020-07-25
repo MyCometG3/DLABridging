@@ -20,6 +20,11 @@
 		163CF46E24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h in Headers */ = {isa = PBXBuildFile; fileRef = 163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */; };
 		164BBCC824C96F240076EF54 /* DeckLinkAPIVideoInput_v11_5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCC624C96F240076EF54 /* DeckLinkAPIVideoInput_v11_5_1.h */; };
 		164BBCC924C96F240076EF54 /* DeckLinkAPI_v11_5_1.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCC724C96F240076EF54 /* DeckLinkAPI_v11_5_1.h */; };
+		164BBCCE24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCCC24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h */; };
+		164BBCCF24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164BBCCD24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm */; };
+		164BBCD224CAB4090076EF54 /* DLABDeckControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCD024CAB4090076EF54 /* DLABDeckControl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		164BBCD324CAB4090076EF54 /* DLABDeckControl.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164BBCD124CAB4090076EF54 /* DLABDeckControl.mm */; };
+		164BBCD524CC2D100076EF54 /* DLABDeckControl+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCD424CAB4450076EF54 /* DLABDeckControl+Internal.h */; };
 		164C828A1F514632001208BD /* DLABridging.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82881F514632001208BD /* DLABridging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		164C82D11F514687001208BD /* DLABAudioSetting+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */; };
 		164C82D21F514687001208BD /* DLABAudioSetting.h in Headers */ = {isa = PBXBuildFile; fileRef = 164C82AF1F514687001208BD /* DLABAudioSetting.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -84,6 +89,11 @@
 		163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoOutput_v11_4.h; sourceTree = "<group>"; };
 		164BBCC624C96F240076EF54 /* DeckLinkAPIVideoInput_v11_5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPIVideoInput_v11_5_1.h; sourceTree = "<group>"; };
 		164BBCC724C96F240076EF54 /* DeckLinkAPI_v11_5_1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPI_v11_5_1.h; sourceTree = "<group>"; };
+		164BBCCC24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABDeckControlStatusCallback.h; sourceTree = "<group>"; };
+		164BBCCD24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABDeckControlStatusCallback.mm; sourceTree = "<group>"; };
+		164BBCD024CAB4090076EF54 /* DLABDeckControl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABDeckControl.h; sourceTree = "<group>"; };
+		164BBCD124CAB4090076EF54 /* DLABDeckControl.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABDeckControl.mm; sourceTree = "<group>"; };
+		164BBCD424CAB4450076EF54 /* DLABDeckControl+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DLABDeckControl+Internal.h"; sourceTree = "<group>"; };
 		164C82851F514632001208BD /* DLABridging.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DLABridging.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		164C82881F514632001208BD /* DLABridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABridging.h; sourceTree = "<group>"; };
 		164C82891F514632001208BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -120,15 +130,15 @@
 		164EC8B3241E522F002FBF36 /* DLABFrameMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABFrameMetadata.h; sourceTree = "<group>"; };
 		164EC8B4241E522F002FBF36 /* DLABFrameMetadata.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABFrameMetadata.mm; sourceTree = "<group>"; };
 		164EC8B7241E524C002FBF36 /* DLABFrameMetadata+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DLABFrameMetadata+Internal.h"; sourceTree = "<group>"; };
-		1656BF00240692E500E95D3B /* DLABAncillaryPacket.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = DLABAncillaryPacket.mm; sourceTree = "<group>"; };
-		1656BF01240692E500E95D3B /* DLABAncillaryPacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABAncillaryPacket.h; sourceTree = "<group>"; };
-		1656BF04241B6B4700E95D3B /* DLABProfileCallback.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABProfileCallback.mm; sourceTree = "<group>"; };
-		1656BF05241B6B4700E95D3B /* DLABProfileCallback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABProfileCallback.h; sourceTree = "<group>"; };
+		1656BF00240692E500E95D3B /* DLABAncillaryPacket.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = DLABAncillaryPacket.mm; sourceTree = "<group>"; };
+		1656BF01240692E500E95D3B /* DLABAncillaryPacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABAncillaryPacket.h; sourceTree = "<group>"; };
+		1656BF04241B6B4700E95D3B /* DLABProfileCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABProfileCallback.mm; sourceTree = "<group>"; };
+		1656BF05241B6B4700E95D3B /* DLABProfileCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABProfileCallback.h; sourceTree = "<group>"; };
 		1656BF0C241C6B5B00E95D3B /* DLABProfileAttributes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABProfileAttributes.h; sourceTree = "<group>"; };
 		1656BF0D241C6B5B00E95D3B /* DLABProfileAttributes.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABProfileAttributes.mm; sourceTree = "<group>"; };
 		1656BF10241C6C2000E95D3B /* DLABProfileAttributes+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DLABProfileAttributes+Internal.h"; sourceTree = "<group>"; };
-		16996D362424482C00878D02 /* DLABMetaFrame.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABMetaFrame.mm; sourceTree = "<group>"; };
-		16996D372424482C00878D02 /* DLABMetaFrame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABMetaFrame.h; sourceTree = "<group>"; };
+		16996D362424482C00878D02 /* DLABMetaFrame.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABMetaFrame.mm; sourceTree = "<group>"; };
+		16996D372424482C00878D02 /* DLABMetaFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABMetaFrame.h; sourceTree = "<group>"; };
 		16B0BF17243BEE12004C2BDF /* DLABVideoConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABVideoConverter.h; sourceTree = "<group>"; };
 		16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABVideoConverter.mm; sourceTree = "<group>"; };
 		16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -232,6 +242,9 @@
 				164EC8B4241E522F002FBF36 /* DLABFrameMetadata.mm */,
 				16B0BF17243BEE12004C2BDF /* DLABVideoConverter.h */,
 				16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */,
+				164BBCD024CAB4090076EF54 /* DLABDeckControl.h */,
+				164BBCD424CAB4450076EF54 /* DLABDeckControl+Internal.h */,
+				164BBCD124CAB4090076EF54 /* DLABDeckControl.mm */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -265,6 +278,8 @@
 				1656BF04241B6B4700E95D3B /* DLABProfileCallback.mm */,
 				16996D372424482C00878D02 /* DLABMetaFrame.h */,
 				16996D362424482C00878D02 /* DLABMetaFrame.mm */,
+				164BBCCC24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h */,
+				164BBCCD24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm */,
 			);
 			path = "C++ Class";
 			sourceTree = "<group>";
@@ -279,12 +294,15 @@
 				1656BF07241B6B4700E95D3B /* DLABProfileCallback.h in Headers */,
 				164C828A1F514632001208BD /* DLABridging.h in Headers */,
 				163CF45F24023A7B00732F8C /* DeckLinkAPIConfiguration.h in Headers */,
+				164BBCCE24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h in Headers */,
+				164BBCD224CAB4090076EF54 /* DLABDeckControl.h in Headers */,
 				163CF46824023A7B00732F8C /* DeckLinkAPITypes.h in Headers */,
 				164C82D51F514687001208BD /* DLABBrowser.h in Headers */,
 				164BBCC924C96F240076EF54 /* DeckLinkAPI_v11_5_1.h in Headers */,
 				163CF45D24023A7B00732F8C /* DeckLinkAPI.h in Headers */,
 				163CF46E24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h in Headers */,
 				164C82D71F514687001208BD /* DLABConstants.h in Headers */,
+				164BBCD524CC2D100076EF54 /* DLABDeckControl+Internal.h in Headers */,
 				163CF46624023A7B00732F8C /* DeckLinkAPIStreaming.h in Headers */,
 				163CF46124023A7B00732F8C /* DeckLinkAPIDeckControl.h in Headers */,
 				16996D3A2425AB2D00878D02 /* DLABFrameMetadata+Internal.h in Headers */,
@@ -398,9 +416,11 @@
 				164C82D81F514687001208BD /* DLABDevice+Input.mm in Sources */,
 				163CF46324023A7B00732F8C /* DeckLinkAPIDispatch.cpp in Sources */,
 				164C82E01F514687001208BD /* DLABInputCallback.mm in Sources */,
+				164BBCD324CAB4090076EF54 /* DLABDeckControl.mm in Sources */,
 				1656BF06241B6B4700E95D3B /* DLABProfileCallback.mm in Sources */,
 				164C82DE1F514687001208BD /* DLABDeviceNotificationCallback.mm in Sources */,
 				1656BF0F241C6B5B00E95D3B /* DLABProfileAttributes.mm in Sources */,
+				164BBCCF24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm in Sources */,
 				16B0BF1A243BEE12004C2BDF /* DLABVideoConverter.mm in Sources */,
 				164C82D61F514687001208BD /* DLABBrowser.mm in Sources */,
 				164C82E71F514687001208BD /* DLABTimecodeSetting.mm in Sources */,

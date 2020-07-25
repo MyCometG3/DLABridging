@@ -19,6 +19,7 @@
 @class DLABTimecodeSetting;
 @class DLABProfileAttributes;
 @class DLABFrameMetadata;
+@class DLABDeckControl;
 
 /* =================================================================================== */
 /*
@@ -30,8 +31,6 @@
  : 2.5.26 IDeckLinkGLScreenPreviewHelper
  : 2.5.27 IDeckLinkCocoaScreenPreviewCallback
  : 2.5.28 IDeckLinkDX9ScreenPreviewHelper
- : 2.5.29 IDeckLinkDeckControl
- : 2.5.30 IDeckLinkDeckControlStatusCallback.
  : 2.5.35 IDeckLinkEncoderInput
  : 2.5.36 IDeckLinkEncoderInputCallback
  : 2.5.37 IDeckLinkEncoderPacket
@@ -483,6 +482,15 @@ NS_ASSUME_NONNULL_BEGIN
  Currently available input AudioSetting. Ready while enabled.
  */
 @property (nonatomic, strong, readonly, nullable) DLABAudioSetting* inputAudioSetting;
+
+/* =================================================================================== */
+// MARK: (Public) - DeckControl support (experimental)
+/* =================================================================================== */
+
+/**
+Experimental DeckControl support. Returns nil if DeckControl is not available.
+*/
+@property (nonatomic, strong, readonly, nullable) DLABDeckControl* deckControl;
 
 /* =================================================================================== */
 // MARK: (Public) - Read/Write
