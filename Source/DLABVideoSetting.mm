@@ -223,6 +223,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     }
     return (dlReady && cvReady);
 }
+
 @implementation DLABVideoSetting
 
 - (instancetype) init
@@ -243,11 +244,11 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     self = [self initWithDisplayModeObj:newDisplayModeObj];
     if (self) {
         _pixelFormatW = (DLABPixelFormat)pixelFormat;
-        _inputFlagW = (DLABVideoInputFlag)inputFlag;
+        _inputFlag = (DLABVideoInputFlag)inputFlag;
         _rowBytesW = rowBytesFor(pixelFormat, _widthW);
         
-        _useVITCW = !_isHDW;
-        _useRP188W = _isHDW;
+        _useVITC = !_isHD;
+        _useRP188 = _isHD;
         
         _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
     }
@@ -263,11 +264,11 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     self = [self initWithDisplayModeObj:newDisplayModeObj];
     if (self) {
         _pixelFormatW = (DLABPixelFormat)pixelFormat;
-        _outputFlagW = (DLABVideoOutputFlag)outputFlag;
+        _outputFlag = (DLABVideoOutputFlag)outputFlag;
         _rowBytesW = rowBytesFor(pixelFormat, _widthW);
         
-        _useVITCW = !_isHDW && (_outputFlagW & bmdVideoOutputVITC);
-        _useRP188W = _isHDW && (_outputFlagW & bmdVideoOutputRP188);
+        _useVITC = !_isHD && (_outputFlag & bmdVideoOutputVITC);
+        _useRP188 = _isHD && (_outputFlag & bmdVideoOutputRP188);
         
         _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
     }
@@ -292,39 +293,39 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         _heightW = _displayModeObj->GetHeight();
         
         // NSString*
-        _nameW = @"unknown";
+        _name = @"unknown";
         CFStringRef cfvalue = NULL;
         result = _displayModeObj->GetName(&cfvalue);
         if (result) {
             // ignore error
         } else {
-            _nameW = CFBridgingRelease(cfvalue);
+            _name = CFBridgingRelease(cfvalue);
         }
         
         // int64_t
-        _durationW = 0;
-        _timeScaleW = 0;
-        result = _displayModeObj->GetFrameRate(&_durationW, &_timeScaleW);
+        _duration = 0;
+        _timeScale = 0;
+        result = _displayModeObj->GetFrameRate(&_duration, &_timeScale);
         if (result) {
             // ignore error
         }
         
         // uint32_t
-        _displayModeW = (DLABDisplayMode) _displayModeObj->GetDisplayMode();
-        _fieldDominanceW = (DLABFieldDominance) _displayModeObj->GetFieldDominance();
-        _displayModeFlagW = (DLABDisplayModeFlag) _displayModeObj->GetFlags();
+        _displayMode = (DLABDisplayMode) _displayModeObj->GetDisplayMode();
+        _fieldDominance = (DLABFieldDominance) _displayModeObj->GetFieldDominance();
+        _displayModeFlag = (DLABDisplayModeFlag) _displayModeObj->GetFlags();
         
         //
-        switch (_displayModeW) {
+        switch (_displayMode) {
             case DLABDisplayModeNTSC:
             case DLABDisplayModeNTSC2398:
             case DLABDisplayModePAL:
             case DLABDisplayModeNTSCp:
             case DLABDisplayModePALp:
-                _isHDW = FALSE;
+                _isHD = FALSE;
                 break;
             default:
-                _isHDW = TRUE;
+                _isHD = TRUE;
         }
     }
     return self;
@@ -334,18 +335,16 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 {
     if (_videoFormatDescriptionW) {
         CFRelease(_videoFormatDescriptionW);
-        _videoFormatDescriptionW = NULL;
     }
     if (_displayModeObj) {
         _displayModeObj->Release();
-        _displayModeObj = NULL;
     }
 }
 
 // public hash - NSObject
 - (NSUInteger) hash
 {
-    NSUInteger value = (NSUInteger)(_widthW^_heightW) ^ (NSUInteger)(_displayModeW^_pixelFormatW);
+    NSUInteger value = (NSUInteger)(_widthW^_heightW) ^ (NSUInteger)(_displayMode^_pixelFormatW);
     return value;
 }
 
@@ -364,21 +363,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     if (self == object) return YES;
     if (!object || ![object isKindOfClass:[self class]]) return NO;
     
-    if (!( self.widthW == object.widthW )) return NO;
-    if (!( self.heightW == object.heightW )) return NO;
-    if (!( [self.nameW isEqualTo:object.nameW] )) return NO;
-    
-    if (!( self.durationW == object.durationW )) return NO;
-    if (!( self.timeScaleW == object.timeScaleW )) return NO;
-    
-    if (!( self.displayModeW == object.displayModeW )) return NO;
-    if (!( self.fieldDominanceW == object.fieldDominanceW )) return NO;
-    if (!( self.displayModeFlagW == object.displayModeFlagW )) return NO;
-    
-    if (!( self.isHDW == object.isHDW )) return NO;
-    if (!( self.useVITCW == object.useVITCW )) return NO;
-    if (!( self.useRP188W == object.useRP188W )) return NO;
-    
+    // private properties
     if (!( self.clapReady == object.clapReady )) return NO;
     if (!( self.clapWidthN == object.clapWidthN )) return NO;
     if (!( self.clapWidthD == object.clapWidthD )) return NO;
@@ -388,20 +373,19 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     if (!( self.clapHOffsetD == object.clapHOffsetD )) return NO;
     if (!( self.clapVOffsetN == object.clapVOffsetN )) return NO;
     if (!( self.clapVOffsetD == object.clapVOffsetD )) return NO;
-    
     if (!( self.paspReady == object.paspReady )) return NO;
     if (!( self.paspHSpacing == object.paspHSpacing )) return NO;
     if (!( self.paspVSpacing == object.paspVSpacing )) return NO;
     
-    if (!( self.pixelFormatW == object.pixelFormatW )) return NO;
-    if (!( self.inputFlagW == object.inputFlagW )) return NO;
-    if (!( self.outputFlagW == object.outputFlagW )) return NO;
+    // public/private properties
+    if (!( self.width == object.width )) return NO;
+    if (!( self.height == object.height )) return NO;
+    if (!( self.rowBytes == object.rowBytes )) return NO;
+    if (!( self.pixelFormat == object.pixelFormat )) return NO;
+    // ignore: videoFormatDescription
     
-    if (!( self.rowBytesW == object.rowBytesW )) return NO;
-    
+    // public properties
     if (!( self.cvPixelFormatType == object.cvPixelFormatType )) return NO;
-    
-    if (!CFEqual(self.videoFormatDescriptionW, object.videoFormatDescriptionW)) return NO;
     
     return YES;
 }
@@ -411,11 +395,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 {
     DLABVideoSetting* obj = [[DLABVideoSetting alloc] initWithDisplayModeObj:self.displayModeObj];
     if (obj) {
-        // copy public properties
-        obj.isHDW = self.isHDW;
-        obj.useVITCW = self.useVITCW;
-        obj.useRP188W = self.useRP188W;
-        
+        // private properties
         obj.clapReady = self.clapReady;
         obj.clapWidthN = self.clapWidthN;
         obj.clapWidthD = self.clapWidthD;
@@ -425,19 +405,21 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         obj.clapHOffsetD = self.clapHOffsetD;
         obj.clapVOffsetN = self.clapVOffsetN;
         obj.clapVOffsetD = self.clapVOffsetD;
-        
         obj.paspReady = self.paspReady;
         obj.paspHSpacing = self.paspHSpacing;
         obj.paspVSpacing = self.paspVSpacing;
         
-        obj.pixelFormatW = self.pixelFormatW;
-        obj.inputFlagW = self.inputFlagW;
-        obj.outputFlagW = self.outputFlagW;
+        // public/private properties
+        obj.widthW = self.widthW;
+        obj.heightW = self.heightW;
         obj.rowBytesW = self.rowBytesW;
+        obj.pixelFormatW = self.pixelFormatW;
+        // ignore videoFormatDescriptionW
+        
+        // public properties
         obj.cvPixelFormatType = self.cvPixelFormatType;
         
-        // private properties
-        if (obj.videoFormatDescription) {
+        if (self.videoFormatDescription != nil) {
             [obj buildVideoFormatDescriptionWithError:nil];
         }
     }
@@ -468,53 +450,34 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 }
 
 /* =================================================================================== */
-// MARK: - synthesized accessors
+// MARK: - Private accessors
 /* =================================================================================== */
 
-// public sysnthesize
-@synthesize extensions = _extensions;
-@synthesize extensionsNoClap = _extensionsNoClap;
+// Private readonly
+@synthesize displayModeObj = _displayModeObj;
 
-// private synthesize
+// Private Readwrite (Public Readonly)
 @synthesize widthW = _widthW;
 @synthesize heightW = _heightW;
-@synthesize nameW = _nameW;
-@synthesize durationW = _durationW;
-@synthesize timeScaleW = _timeScaleW;
-@synthesize displayModeW = _displayModeW;
-@synthesize fieldDominanceW = _fieldDominanceW;
-@synthesize displayModeFlagW = _displayModeFlagW;
-@synthesize pixelFormatW = _pixelFormatW;
-@synthesize inputFlagW = _inputFlagW;
-@synthesize outputFlagW = _outputFlagW;
 @synthesize rowBytesW = _rowBytesW;
+@synthesize pixelFormatW = _pixelFormatW;
 @synthesize videoFormatDescriptionW = _videoFormatDescriptionW;
-@synthesize isHDW = _isHDW;
-@synthesize useVITCW = _useVITCW;
-@synthesize useRP188W = _useRP188W;
+@synthesize extensionsW = _extensionsW;
+@synthesize extensionsNoClapW = _extensionsNoClapW;
 
-/* =================================================================================== */
-// MARK: - accessors
-/* =================================================================================== */
-
-// public readonly accessors
-- (long) width { return _widthW; }
-- (long) height { return _heightW; }
-- (NSString*) name { return _nameW; }
-
-- (DLABTimeValue) duration { return _durationW; }
-- (DLABTimeScale) timeScale { return _timeScaleW; }
-- (DLABDisplayMode) displayMode { return _displayModeW; }
-- (DLABFieldDominance) fieldDominance { return _fieldDominanceW; }
-- (DLABDisplayModeFlag) displayModeFlag { return _displayModeFlagW; }
-- (DLABPixelFormat) pixelFormat { return _pixelFormatW; }
-- (DLABVideoInputFlag) inputFlag { return _inputFlagW; }
-- (DLABVideoOutputFlag) outputFlag { return _outputFlagW; }
-- (long) rowBytes { return _rowBytesW; }
-- (CMVideoFormatDescriptionRef) videoFormatDescription { return _videoFormatDescriptionW; }
-- (BOOL) isHD { return _isHDW; }
-- (BOOL) useVITC { return _useVITCW; }
-- (BOOL) useRP188 { return _useRP188W; }
+// Private Readwrite
+@synthesize clapReady = _clapReady;
+@synthesize clapWidthN = _clapWidthN;
+@synthesize clapWidthD = _clapWidthD;
+@synthesize clapHeightN = _clapHeightN;
+@synthesize clapHeightD = _clapHeightD;
+@synthesize clapHOffsetN = _clapHOffsetN;
+@synthesize clapHOffsetD = _clapHOffsetD;
+@synthesize clapVOffsetN = _clapVOffsetN;
+@synthesize clapVOffsetD = _clapVOffsetD;
+@synthesize paspReady = _paspReady;
+@synthesize paspHSpacing = _paspHSpacing;
+@synthesize paspVSpacing = _paspVSpacing;
 
 - (void)setVideoFormatDescriptionW:(CMVideoFormatDescriptionRef)newFormatDescription
 {
@@ -530,6 +493,36 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 }
 
 /* =================================================================================== */
+// MARK: - Public accessors
+/* =================================================================================== */
+
+// Public Readonly
+@synthesize name = _name;
+@synthesize duration = _duration;
+@synthesize timeScale = _timeScale;
+@synthesize displayMode = _displayMode;
+@synthesize fieldDominance = _fieldDominance;
+@synthesize displayModeFlag = _displayModeFlag;
+@synthesize cvRowBytes = _cvRowBytes;
+@synthesize isHD = _isHD;
+@synthesize useVITC = _useVITC;
+@synthesize useRP188 = _useRP188;
+@synthesize inputFlag = _inputFlag;
+@synthesize outputFlag = _outputFlag;
+
+// Public Readonly (Private ReadWrite)
+- (long) width { return _widthW; }
+- (long) height { return _heightW; }
+- (long) rowBytes { return _rowBytesW; }
+- (DLABPixelFormat) pixelFormat { return _pixelFormatW; }
+- (CMVideoFormatDescriptionRef) videoFormatDescription { return _videoFormatDescriptionW; }
+- (NSDictionary*) extensions { return _extensionsW; }
+- (NSDictionary*) extensionsNoClap { return _extensionsNoClapW; }
+
+// Public Readwrite
+@synthesize cvPixelFormatType = _cvPixelFormatType;
+
+/* =================================================================================== */
 // MARK: - Public methods
 /* =================================================================================== */
 
@@ -540,25 +533,25 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     NSValue* obj = [NSValue valueWithPointer:self.displayModeObj];
     
     // long
-    long width = self.widthW;
-    long height = self.heightW;
-    long rowBytes = self.rowBytesW;
+    long width = self.width;
+    long height = self.height;
+    long rowBytes = self.rowBytes;
     
     // NSString*
-    NSString* name = self.nameW;
+    NSString* name = self.name;
     
     // int64_t
-    DLABTimeValue duration = self.durationW;
-    DLABTimeScale timeScale = self.timeScaleW;
+    DLABTimeValue duration = self.duration;
+    DLABTimeScale timeScale = self.timeScale;
     
     // uint32_t
-    DLABDisplayMode displayMode = self.displayModeW;
-    DLABFieldDominance fieldDominance = self.fieldDominanceW;
-    DLABDisplayModeFlag displayModeFlag = self.displayModeFlagW;
+    DLABDisplayMode displayMode = self.displayMode;
+    DLABFieldDominance fieldDominance = self.fieldDominance;
+    DLABDisplayModeFlag displayModeFlag = self.displayModeFlag;
     
-    DLABPixelFormat pixelFormat = self.pixelFormatW;
-    DLABVideoInputFlag inputFlag = self.inputFlagW;
-    DLABVideoOutputFlag outputFlag = self.outputFlagW;
+    DLABPixelFormat pixelFormat = self.pixelFormat;
+    DLABVideoInputFlag inputFlag = self.inputFlag;
+    DLABVideoOutputFlag outputFlag = self.outputFlag;
     
     NSDictionary *displayModeDictionary = @{@"objIdentifier" : obj,
                                             @"width" : @(width),
@@ -581,12 +574,12 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 {
     {
         // long
-        long width = self.widthW;
-        long height = self.heightW;
-        long rowBytes = self.rowBytesW;
+        long width = self.width;
+        long height = self.height;
+        long rowBytes = self.rowBytes;
         
         // pixel format
-        BMDPixelFormat pixelFormat = self.pixelFormatW; //uint32_t
+        BMDPixelFormat pixelFormat = self.pixelFormat; //uint32_t
         OSType cvPixelFormat = self.cvPixelFormatType;  // uint32_t
         
         //
@@ -760,11 +753,11 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
     if (ready) {
         // Keep original value
         // long
-        long widthOrg = self.widthW;
-        long heightOrg = self.heightW;
-        long rowBytesOrg = self.rowBytesW;
+        long widthOrg = self.width;
+        long heightOrg = self.height;
+        long rowBytesOrg = self.rowBytes;
         // pixel format
-        DLABPixelFormat pixelFormatOrg = self.pixelFormatW;    //uint32_t
+        DLABPixelFormat pixelFormatOrg = self.pixelFormat;    //uint32_t
         
         // update parameters
         self.widthW = width;
@@ -830,7 +823,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         NSString* xfer709 = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
         
         // prefer displayModeFlag's colorspace information if specified
-        BMDDisplayModeFlags displayModeFlag = self.displayModeFlagW;
+        BMDDisplayModeFlags displayModeFlag = self.displayModeFlag;
         NSString* frameMatrix = nil;
         if (displayModeFlag & bmdDisplayModeColorspaceRec601) {
             frameMatrix = matrix601;
@@ -876,7 +869,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
          * So Decompressed CMSampleBuffer is either progressive or spatialFistLineXXX.
          */
 
-        BMDFieldDominance fieldDominance = self.fieldDominanceW;
+        BMDFieldDominance fieldDominance = self.fieldDominance;
         switch (fieldDominance) {
             case bmdLowerFieldFirst: // woven-fields representation
                 extensions[keyFieldCount] = @2;
@@ -913,7 +906,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
                                     };
         extensions[keyPasp] = valuePasp;
     }
-    _extensionsNoClap = extensions.copy;
+    self.extensionsNoClapW = extensions;
     
     if (self.clapReady) {
         // Clean Aperture
@@ -941,9 +934,9 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
                                     };
         extensions[keyClap] = valueClap;
 
-        _extensions = extensions.copy;
+        self.extensionsW = extensions;
     } else {
-        _extensions = _extensionsNoClap;
+        self.extensionsW = self.extensionsNoClap;
     }
 }
 

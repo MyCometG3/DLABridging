@@ -66,17 +66,19 @@ NS_ASSUME_NONNULL_BEGIN
            to:(NSError * _Nullable * _Nullable)error;
 
 /* =================================================================================== */
-// MARK: Property - Ready on init
+// MARK: - Private properties
 /* =================================================================================== */
-
-//  - Ready on init
 
 /**
  IDeckLinkDisplayMode object.
  */
-@property (nonatomic, assign, nullable) IDeckLinkDisplayMode* displayModeObj;
+@property (nonatomic, assign, readonly) IDeckLinkDisplayMode* displayModeObj;
 
-// long - Ready on init
+/* =================================================================================== */
+// MARK: - Private Properties (Public Readonly)
+/* =================================================================================== */
+
+// long
 
 /**
  Rectangle horizontal size in pixel.
@@ -89,61 +91,37 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) long heightW;
 
 /**
- IDeckLinkDisplayMode::GetName
+ Length of row buffer in bytes.
  */
-@property (nonatomic, copy) NSString* nameW;
+@property (nonatomic, assign) long rowBytesW;
 
-// int64_t - Ready on init
+// uint32_t
 
 /**
- Duration value of one sample in timeScale.
+ Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  */
-@property (nonatomic, assign) DLABTimeValue durationW;
+@property (nonatomic, assign) DLABPixelFormat pixelFormatW;
+
+// populated by buildVideoFormatDescriptionWithError:
 
 /**
- Resolution value of one sample between one second.
+ Video FormatDescription CFObject. Call -(BOOL)buildVideoFormatDescription to populate this.
  */
-@property (nonatomic, assign) DLABTimeScale timeScaleW;
-
-// uint32_t - Ready on init
+@property (nonatomic, assign, nullable) CMVideoFormatDescriptionRef videoFormatDescriptionW;
 
 /**
- Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
- 
- * This parameter represents visual resolution, interlace/progressive, and frame rate.
+ CMVideoFormatDescriptionExtension
  */
-@property (nonatomic, assign) DLABDisplayMode displayModeW;
+@property (nonatomic, strong, nullable) NSDictionary* extensionsW;
 
 /**
- Field dominance value (i.e. DLABFieldDominanceLowerFieldFirst)
- */
-@property (nonatomic, assign) DLABFieldDominance fieldDominanceW;
+ CMVideoFormatDescriptionExtension without clap (for AVSampleBufferDisplayLayer)
+*/
+@property (nonatomic, strong, nullable) NSDictionary* extensionsNoClapW;
 
-/**
- Additional flag of displayMode (i.e. DLABDisplayModeFlagColorspaceRec709)
- */
-@property (nonatomic, assign) DLABDisplayModeFlag displayModeFlagW;
-
-
-// BOOL - Ready on init
-
-/**
- Convenience property if it represents HD resolution.
- */
-@property (nonatomic, assign) BOOL isHDW;
-
-/**
- Convenience property if preferred timecode type is VITC.
- */
-@property (nonatomic, assign) BOOL useVITCW;
-
-/**
- Convenience property if preferred timecode type is RP188.
- */
-@property (nonatomic, assign) BOOL useRP188W;
 
 /* =================================================================================== */
-// MARK: Property - Ready when added
+// MARK: - Private properties
 /* =================================================================================== */
 
 // clap extension
@@ -201,48 +179,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) uint32_t paspVSpacing;
 
 /* =================================================================================== */
-// MARK: Property - Ready on enabled
-/* =================================================================================== */
-
-// uint32_t - Ready on enabled
-
-/**
- Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
- */
-@property (nonatomic, assign) DLABPixelFormat pixelFormatW;
-
-/**
- Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
- */
-@property (nonatomic, assign) DLABVideoInputFlag inputFlagW;
-
-/**
- Additional flag of video output (i.e. DLABVideoOutputFlagVANC)
- */
-@property (nonatomic, assign) DLABVideoOutputFlag outputFlagW;
-
-/* =================================================================================== */
-// MARK: Property - Ready on streaming
-/* =================================================================================== */
-
-// long - ready on streaming
-
-/**
- Length of row buffer in bytes.
- */
-@property (nonatomic, assign) long rowBytesW;
-
-/* =================================================================================== */
-// MARK: Property - populate by buildVideoFormatDescription
-/* =================================================================================== */
-
-/**
- Video FormatDescription CFObject. Call -(BOOL)buildVideoFormatDescription to populate this.
- */
-@property (nonatomic, assign, nullable) CMVideoFormatDescriptionRef videoFormatDescriptionW;
-
-/* =================================================================================== */
-// MARK: Private methods
+// MARK: - Private methods
 /* =================================================================================== */
 
 /**

@@ -34,33 +34,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype) init NS_UNAVAILABLE;
 
 /* =================================================================================== */
-// MARK: - Properties -
+// MARK: - Public Properties
 /* =================================================================================== */
 
-// MARK: long
-
-/**
- Rectangle horizontal size in pixel.
- */
-@property (nonatomic, assign, readonly) long width;
-/**
- Rectangle vertical size in pixel.
- */
-@property (nonatomic, assign, readonly) long height;
-
-/**
- Length of row buffer in bytes.
- */
-@property (nonatomic, assign, readonly) long rowBytes;
-
-// MARK: NSString*
+// NSString*
 
 /**
  IDeckLinkDisplayMode::GetName
  */
 @property (nonatomic, copy, readonly) NSString* name;
 
-// MARK: int64_t
+// int64_t
 
 /**
  Duration value of one sample in timeScale.
@@ -72,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) DLABTimeScale timeScale;
 
-// MARK: uint32_t
+// uint32_t
 
 /**
  Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
@@ -92,31 +76,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) DLABDisplayModeFlag displayModeFlag;
 
 /**
- Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
- */
-@property (nonatomic, assign, readonly) DLABPixelFormat pixelFormat;
-
-/**
- Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
- */
-@property (nonatomic, assign, readonly) DLABVideoInputFlag inputFlag;
-
-/**
- Additional flag of video output (i.e. DLABVideoOutputFlagVANC)
- */
-@property (nonatomic, assign, readonly) DLABVideoOutputFlag outputFlag;
-
-/**
- Preferred CVPixelFormatType for CVPixelBuffer. Use buildVideoFormatDescription again after update.
- */
-@property (nonatomic, assign, readwrite) OSType cvPixelFormatType;
-
-/**
  BytesPerRow for CVPixelFormat. Calculated by buildVideoFormatDescription.
  */
 @property (nonatomic, assign, readonly) size_t cvRowBytes;
 
-// MARK: BOOL
+// BOOL
 
 /**
  Convenience property if it represents HD resolution.
@@ -133,24 +97,69 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) BOOL useRP188;
 
-/* =================================================================================== */
-// MARK: Other - populate by buildVideoFormatDescription
-/* =================================================================================== */
-
 /**
- CMVideoFormatDescriptionExtension
+ Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
  */
-@property (nonatomic, strong, readonly, nullable) NSDictionary* extensions;
+@property (nonatomic, assign, readonly) DLABVideoInputFlag inputFlag;
 
 /**
- CMVideoFormatDescriptionExtension without clap (for AVSampleBufferDisplayLayer)
-*/
-@property (nonatomic, strong, readonly, nullable) NSDictionary* extensionsNoClap;
+ Additional flag of video output (i.e. DLABVideoOutputFlagVANC)
+ */
+@property (nonatomic, assign, readonly) DLABVideoOutputFlag outputFlag;
+
+/* =================================================================================== */
+// MARK: - Public Properties (Private ReadWrite)
+/* =================================================================================== */
+
+// long
+
+/**
+ Rectangle horizontal size in pixel.
+ */
+@property (nonatomic, assign, readonly) long width;
+/**
+ Rectangle vertical size in pixel.
+ */
+@property (nonatomic, assign, readonly) long height;
+
+/**
+ Length of row buffer in bytes.
+ */
+@property (nonatomic, assign, readonly) long rowBytes;
+
+// uint32_t
+
+/**
+ Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
+ */
+@property (nonatomic, assign, readonly) DLABPixelFormat pixelFormat;
+
+// populate by buildVideoFormatDescription
 
 /**
  Video FormatDescription CFObject. Call -(BOOL)buildVideoFormatDescription to populate this.
  */
 @property (nonatomic, assign, readonly, nullable) CMVideoFormatDescriptionRef videoFormatDescription;
+
+/**
+ CMVideoFormatDescriptionExtension
+ */
+@property (nonatomic, copy, readonly, nullable) NSDictionary* extensions;
+
+/**
+ CMVideoFormatDescriptionExtension without clap (for AVSampleBufferDisplayLayer)
+*/
+@property (nonatomic, copy, readonly, nullable) NSDictionary* extensionsNoClap;
+
+/* =================================================================================== */
+// MARK: - Public properties
+/* =================================================================================== */
+
+/**
+ Preferred CVPixelFormatType for CVPixelBuffer. Use buildVideoFormatDescription again after update.
+ */
+@property (nonatomic, assign) OSType cvPixelFormatType;
+
 
 /* =================================================================================== */
 // MARK: - Public methods

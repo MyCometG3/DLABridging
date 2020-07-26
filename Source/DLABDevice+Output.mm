@@ -75,11 +75,11 @@
             BOOL needsExpansion = (outputVideoFrameIdleSet.count == 0);
             if (needsExpansion) {
                 // Get frame properties
-                int32_t width = (int32_t)setting.widthW;
-                int32_t height = (int32_t)setting.heightW;
-                int32_t rowBytes = (int32_t)setting.rowBytesW;
-                BMDPixelFormat pixelFormat = setting.pixelFormatW;
-                BMDFrameFlags flags = setting.outputFlagW;
+                int32_t width = (int32_t)setting.width;
+                int32_t height = (int32_t)setting.height;
+                int32_t rowBytes = (int32_t)setting.rowBytes;
+                BMDPixelFormat pixelFormat = setting.pixelFormat;
+                BMDFrameFlags flags = setting.outputFlag;
                 
                 // Try expanding the OutputVideoFramePool
                 for (int i = 0; i < expandingUnit; i++) {
@@ -615,7 +615,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         }
     }
     
-    if (setting && setting.videoFormatDescriptionW) {
+    if (setting && setting.videoFormatDescription) {
         return setting;
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -729,8 +729,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     NSParameterAssert(setting);
     
     __block HRESULT result = E_FAIL;
-    BMDDisplayMode displayMode = setting.displayModeW;
-    BMDVideoOutputFlags outputFlag = setting.outputFlagW;
+    BMDDisplayMode displayMode = setting.displayMode;
+    BMDVideoOutputFlags outputFlag = setting.outputFlag;
     
     IDeckLinkOutput* output = self.deckLinkOutput;
     if (output) {
@@ -809,8 +809,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     if (outFrame) {
         // dummy Time/Duration/TimeScale values
         NSInteger displayTime = 0;
-        NSInteger frameDuration = self.outputVideoSetting.durationW;
-        NSInteger timeScale = self.outputVideoSetting.timeScaleW;
+        NSInteger frameDuration = self.outputVideoSetting.duration;
+        NSInteger timeScale = self.outputVideoSetting.timeScale;
         
         // Callback VANCHandler block
         if (self.outputVANCHandler) {

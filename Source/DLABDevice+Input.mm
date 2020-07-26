@@ -31,8 +31,8 @@
         return;
     
     // get current inputSetting parameters
-    BMDPixelFormat pixelFormat = self.inputVideoSettingW.pixelFormatW;
-    BMDVideoInputFlags inputFlag = self.inputVideoSettingW.inputFlagW;
+    BMDPixelFormat pixelFormat = self.inputVideoSettingW.pixelFormat;
+    BMDVideoInputFlags inputFlag = self.inputVideoSettingW.inputFlag;
     
     // decide new color space
     BOOL yuvColorSpaceNow = (pixelFormat == bmdFormat8BitYUV || pixelFormat == bmdFormat10BitYUV);
@@ -425,7 +425,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     BMDTimeValue frameTime = 0;
     BMDTimeValue frameDuration = 0;
-    BMDTimeScale timeScale = self.inputVideoSetting.timeScaleW;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScale;
     HRESULT result = videoFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
     
     if (result)
@@ -459,7 +459,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     }
     
     // Prepare format description (No ownership transfer)
-    CMFormatDescriptionRef formatDescription = self.inputVideoSettingW.videoFormatDescriptionW;
+    CMFormatDescriptionRef formatDescription = self.inputVideoSettingW.videoFormatDescription;
     if (!formatDescription)
         return NULL;
     
@@ -611,7 +611,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     BMDTimeValue frameTime = 0;
     BMDTimeValue frameDuration = 0;
-    BMDTimeScale timeScale = self.inputVideoSetting.timeScaleW;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScale;
     HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
     if (result) return;
     
@@ -650,7 +650,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     BMDTimeValue frameTime = 0;
     BMDTimeValue frameDuration = 0;
-    BMDTimeScale timeScale = self.inputVideoSetting.timeScaleW;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScale;
     HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
     if (result) return;
     
@@ -727,7 +727,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     BMDTimeValue frameTime = 0;
     BMDTimeValue frameDuration = 0;
-    BMDTimeScale timeScale = self.inputVideoSetting.timeScaleW;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScale;
     HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
     if (result) return nil;
     
@@ -842,7 +842,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         }
     }
     
-    if (setting && setting.videoFormatDescriptionW) {
+    if (setting && setting.videoFormatDescription) {
         return setting;
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -937,9 +937,9 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     __block HRESULT result = E_FAIL;
     IDeckLinkInput* input = self.deckLinkInput;
     if (input) {
-        BMDDisplayMode displayMode = setting.displayModeW;
-        BMDVideoInputFlags inputFlag = setting.inputFlagW;
-        BMDPixelFormat format = setting.pixelFormatW;
+        BMDDisplayMode displayMode = setting.displayMode;
+        BMDVideoInputFlags inputFlag = setting.inputFlag;
+        BMDPixelFormat format = setting.pixelFormat;
         
         [self capture_sync:^{
             result = input->EnableVideoInput(displayMode, format, inputFlag);
