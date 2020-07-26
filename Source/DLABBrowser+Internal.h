@@ -31,17 +31,17 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  NSMutableArray of DLABDevice objects.
  */
-@property (nonatomic, strong, nullable) NSMutableArray* devices;
+@property (nonatomic, strong, readonly, nullable) NSMutableArray* devices;
 
 /**
  private dispatch queue.
  */
-@property (nonatomic, strong) dispatch_queue_t browserQueue;
+@property (nonatomic, strong, readonly, nullable) dispatch_queue_t browserQueue;
 
 /**
  IDeckLinkAPIInformation object interface.
  */
-@property (nonatomic, assign, nullable) IDeckLinkAPIInformation* apiInformation;
+@property (nonatomic, assign, readonly, nullable) IDeckLinkAPIInformation* apiInformation;
 
 /* =================================================================================== */
 // MARK: - private method - utility method

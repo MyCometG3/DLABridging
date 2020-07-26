@@ -37,6 +37,23 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 }
 
 /* =================================================================================== */
+// MARK: - public accessors
+/* =================================================================================== */
+
+@synthesize delegate = _delegate;
+@dynamic isRunning;
+@dynamic allDevices;
+
+/* =================================================================================== */
+// MARK: - private accessors
+/* =================================================================================== */
+
+@synthesize isInstalled = _isInstalled;
+@synthesize devices = _devices;
+@synthesize browserQueue = _browserQueue;
+@synthesize apiInformation = _apiInformation;
+
+/* =================================================================================== */
 // MARK: - public method
 /* =================================================================================== */
 

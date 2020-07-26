@@ -67,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Query all detected devices.
  */
-@property (nonatomic, readonly, nullable) NSArray<DLABDevice*>* allDevices;
+@property (nonatomic, strong, readonly, nullable) NSArray<DLABDevice*>* allDevices;
 
 /**
  Query deivce with specified parameter.
