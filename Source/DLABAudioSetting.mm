@@ -29,10 +29,10 @@
     
     self = [super init];
     if (self) {
-        _sampleSizeW = (sampleType / 8) * channelCount;
-        _sampleTypeW = sampleType;
-        _channelCountW = channelCount;
-        _sampleRateW = sampleRate;
+        _sampleSize = (sampleType / 8) * channelCount;
+        _sampleType = sampleType;
+        _channelCount = channelCount;
+        _sampleRate = sampleRate;
     }
     return self;
 }
@@ -41,14 +41,13 @@
 {
     if (_audioFormatDescriptionW) {
         CFRelease(_audioFormatDescriptionW);
-        _audioFormatDescriptionW = NULL;
     }
 }
 
 // public hash - NSObject
 - (NSUInteger) hash
 {
-    NSUInteger value = (NSUInteger)(_sampleSizeW^_channelCountW^_sampleTypeW^_sampleRateW);
+    NSUInteger value = (NSUInteger)(_sampleSize^_channelCount^_sampleType^_sampleRate);
     return value;
 }
 
@@ -67,12 +66,12 @@
     if (self == object) return YES;
     if (!object || ![object isKindOfClass:[self class]]) return NO;
     
-    if (!( self.sampleSizeW == object.sampleSizeW )) return NO;
-    if (!( self.channelCountW == object.channelCountW )) return NO;
-    if (!( self.sampleTypeW == object.sampleTypeW )) return NO;
-    if (!( self.sampleRateW == object.sampleRateW )) return NO;
+    if (!( self.sampleSize == object.sampleSize )) return NO;
+    if (!( self.channelCount == object.channelCount )) return NO;
+    if (!( self.sampleType == object.sampleType )) return NO;
+    if (!( self.sampleRate == object.sampleRate )) return NO;
     
-    if (!CFEqual(self.audioFormatDescriptionW, object.audioFormatDescriptionW)) return NO;
+    // ignore: audioFormatDescription
     
     return YES;
 }
@@ -80,36 +79,43 @@
 // NSCopying protocol
 - (instancetype) copyWithZone:(NSZone *)zone
 {
-    DLABAudioSetting* obj = [[DLABAudioSetting alloc] initWithSampleType:self.sampleTypeW
-                                                            channelCount:self.channelCountW
-                                                              sampleRate:self.sampleRateW];
-    if (obj && _audioFormatDescriptionW != nil) {
-        [obj buildAudioFormatDescription];
+    DLABAudioSetting* obj = [[DLABAudioSetting alloc] initWithSampleType:self.sampleType
+                                                            channelCount:self.channelCount
+                                                              sampleRate:self.sampleRate];
+    if (obj && self.audioFormatDescription != nil) {
+        [obj buildAudioFormatDescriptionWithError:nil];
     }
     return obj;
 }
 
 /* =================================================================================== */
-// MARK: - synthesized accessors
+// MARK: - (Private) - error helper
 /* =================================================================================== */
 
-// private synthesize
-@synthesize sampleSizeW = _sampleSizeW;
-@synthesize channelCountW = _channelCountW;
-@synthesize sampleTypeW = _sampleTypeW;
-@synthesize sampleRateW = _sampleRateW;
+- (BOOL) post:(NSString*)description
+       reason:(NSString*)failureReason
+         code:(NSInteger)result
+           to:(NSError**)error;
+{
+    if (error) {
+        if (!description) description = @"unknown description";
+        if (!failureReason) failureReason = @"unknown failureReason";
+        
+        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
+        NSInteger code = (NSInteger)result;
+        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
+                                   NSLocalizedFailureReasonErrorKey : failureReason,};
+        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
+        return YES;
+    }
+    return NO;
+}
+
+/* =================================================================================== */
+// MARK: - private accessors
+/* =================================================================================== */
+
 @synthesize audioFormatDescriptionW = _audioFormatDescriptionW;
-
-/* =================================================================================== */
-// MARK: - accessors
-/* =================================================================================== */
-
-// public readonly accessors
-- (uint32_t) sampleSize { return _sampleSizeW; }
-- (uint32_t) channelCount { return _channelCountW; }
-- (DLABAudioSampleType) sampleType { return _sampleTypeW; }
-- (DLABAudioSampleRate) sampleRate { return _sampleRateW; }
-- (CMAudioFormatDescriptionRef) audioFormatDescription { return _audioFormatDescriptionW; }
 
 // private setter for audioFormatDescription
 - (void)setAudioFormatDescriptionW:(CMAudioFormatDescriptionRef)newFormatDescription
@@ -126,10 +132,23 @@
 }
 
 /* =================================================================================== */
+// MARK: - public accessors
+/* =================================================================================== */
+
+@synthesize sampleSize = _sampleSize;
+@synthesize channelCount = _channelCount;
+@synthesize sampleType = _sampleType;
+@synthesize sampleRate = _sampleRate;
+@dynamic audioFormatDescription;
+
+// implementation
+- (CMAudioFormatDescriptionRef) audioFormatDescription { return _audioFormatDescriptionW; }
+
+/* =================================================================================== */
 // MARK: - Public methods
 /* =================================================================================== */
 
-- (BOOL) buildAudioFormatDescription
+- (BOOL) buildAudioFormatDescriptionWithError:(NSError**)error
 {
     CMAudioFormatDescriptionRef formatDescription = NULL;
     {
@@ -139,11 +158,12 @@
         DLABAudioSampleType sampleType = self.sampleType;
         DLABAudioSampleRate sampleRate = self.sampleRate;
         
-        BOOL ready = false;
-        if (sampleSize && sampleType && channelCount && sampleRate) {
-            ready = true;
-        } else {
-            NSLog(@"ERROR: Unsupported setting detected.");
+        BOOL ready = (sampleSize && sampleType && channelCount && sampleRate);
+        if (!ready) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Unsupported settings detected."
+                  code:E_INVALIDARG
+                    to:error];
         }
         
         if (ready) {
@@ -193,17 +213,19 @@
                                                  NULL,          //magicCookie
                                                  (__bridge CFDictionaryRef)extensions,
                                                  &formatDescription);
-            if (!err) {
+            if (!err && formatDescription) {
                 self.audioFormatDescriptionW = formatDescription;
+                CFRelease(formatDescription);
+                return TRUE;
+            } else {
+                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                    reason:@"Failed to create CMAudioFormatDescription."
+                      code:E_INVALIDARG
+                        to:error];
             }
         }
     }
-    if (formatDescription) {
-        CFRelease(formatDescription);
-        return YES;
-    } else {
-        return FALSE;    // TODO handle err
-    }
+    return FALSE;
 }
 
 @end

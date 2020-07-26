@@ -520,7 +520,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     // Prepare block info
     size_t numSamples = (size_t)frameCount;
-    size_t sampleSize = (size_t)self.inputAudioSettingW.sampleSizeW;
+    size_t sampleSize = (size_t)self.inputAudioSettingW.sampleSize;
     size_t blockLength = numSamples * sampleSize;
     CMBlockBufferFlags flags = (kCMBlockBufferAssureMemoryNowFlag);
     
@@ -870,7 +870,8 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         setting = [[DLABAudioSetting alloc] initWithSampleType:sampleType
                                                   channelCount:channelCount
                                                     sampleRate:sampleRate];
-        [setting buildAudioFormatDescription];
+        BOOL result = [setting buildAudioFormatDescriptionWithError:error];
+        if (!result) return nil;
     }
     
     if (setting && setting.audioFormatDescriptionW) {
@@ -1034,8 +1035,8 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     IDeckLinkInput* input = self.deckLinkInput;
     if (input) {
         BMDAudioSampleRate sampleRate = setting.sampleRate;
-        BMDAudioSampleType sampleType = setting.sampleTypeW;
-        uint32_t channelCount = setting.channelCountW;
+        BMDAudioSampleType sampleType = setting.sampleType;
+        uint32_t channelCount = setting.channelCount;
         
         [self capture_sync:^{
             result = input->EnableAudioInput(sampleRate, sampleType, channelCount);

@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  @return YES if successfully populated. NO if failed with supplied parameters.
  */
-- (BOOL) buildAudioFormatDescription;
+- (BOOL) buildAudioFormatDescriptionWithError:(NSError * _Nullable * _Nullable)error;
 
 @end
 

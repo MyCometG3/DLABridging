@@ -28,32 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
                                   sampleRate:(DLABAudioSampleRate)sampleRate;
 
 /* =================================================================================== */
-// MARK: Property - Ready on init
-/* =================================================================================== */
-
-// uint32_t - Ready on init
-
-/**
- Length of one Sample frame in bytes.
- */
-@property (nonatomic, assign) uint32_t sampleSizeW;
-
-/**
- Number of audio channel. 1 for Mono, 2 for Stereo. 16 max for discrete.
- */
-@property (nonatomic, assign) uint32_t channelCountW;
-
-/**
- BitsPerSample. Either 16 or 32 are supported.
- */
-@property (nonatomic, assign) DLABAudioSampleType sampleTypeW;
-
-/**
- Sample frame rate. Only 48000 Hz is supported.
- */
-@property (nonatomic, assign) DLABAudioSampleRate sampleRateW;
-
-/* =================================================================================== */
 // MARK: Property - populate by buildAudioFormatDescription
 /* =================================================================================== */
 

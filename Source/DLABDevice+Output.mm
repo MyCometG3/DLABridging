@@ -643,7 +643,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         setting = [[DLABAudioSetting alloc] initWithSampleType:sampleType
                                                   channelCount:channelCount
                                                     sampleRate:sampleRate];
-        [setting buildAudioFormatDescription];
+        BOOL result = [setting buildAudioFormatDescriptionWithError:error];
+        if (!result) return nil;
     }
     
     if (setting && setting.audioFormatDescriptionW) {
@@ -1070,8 +1071,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     NSParameterAssert(setting);
     
     __block HRESULT result = E_FAIL;
-    BMDAudioSampleType sampleType = setting.sampleTypeW;
-    uint32_t channelCount = setting.channelCountW;
+    BMDAudioSampleType sampleType = setting.sampleType;
+    uint32_t channelCount = setting.channelCount;
     
     IDeckLinkOutput* output = self.deckLinkOutput;
     if (output) {
@@ -1146,8 +1147,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     DLABAudioSetting *setting = self.outputAudioSettingW;
     if (output && setting) {
         __block uint32_t writtenTotal = 0;
-        uint32_t mBytesPerFrame = setting.sampleSizeW;
-        uint32_t mNumChannels = setting.channelCountW;
+        uint32_t mBytesPerFrame = setting.sampleSize;
+        uint32_t mNumChannels = setting.channelCount;
         uint32_t mNumberBuffers = audioBufferList->mNumberBuffers;
         
         if (mNumberBuffers) {
@@ -1203,7 +1204,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     DLABAudioSetting *setting = self.outputAudioSettingW;
     if (output && setting) {
         __block uint32_t writtenTotal = 0;
-        uint32_t mBytesPerFrame = setting.sampleSizeW;
+        uint32_t mBytesPerFrame = setting.sampleSize;
         size_t totalLength = 0;
         
         if (blockBuffer) {
@@ -1327,8 +1328,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     if (output && setting) {
         __block BMDTimeValue timeValue = streamTime;
         __block uint32_t writtenTotal = 0;
-        uint32_t mBytesPerFrame = setting.sampleSizeW;
-        uint32_t mNumChannels = setting.channelCountW;
+        uint32_t mBytesPerFrame = setting.sampleSize;
+        uint32_t mNumChannels = setting.channelCount;
         uint32_t mNumberBuffers = audioBufferList->mNumberBuffers;
         
         if (mNumberBuffers) {
@@ -1392,7 +1393,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     if (output && setting) {
         __block BMDTimeValue timeValue = streamTime;
         __block uint32_t writtenTotal = 0;
-        uint32_t mBytesPerFrame = setting.sampleSizeW;
+        uint32_t mBytesPerFrame = setting.sampleSize;
         size_t totalLength = 0;
         
         if (blockBuffer) {
