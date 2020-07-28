@@ -105,7 +105,7 @@ NS_ASSUME_NONNULL_BEGIN
            to:(NSError * _Nullable * _Nullable)error;
 
 /* =================================================================================== */
-// MARK: - (Private/Public) - Subscription Status/Preferences Change
+// MARK: - (Private) - Subscription/Callback
 /* =================================================================================== */
 
 // DLABNotificationCallbackDelegate
@@ -119,40 +119,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void) notify:(BMDNotifications)topic param1:(uint64_t)param1 param2:(uint64_t)param2;
 
-// setter/helper methods
+// Support private callbacks (will be forwarded to delegates)
 
-/**
- Public setter for statusChange delegate
-
- @param newDelegate id<DLABStatusChangeDelegate>
- */
-- (void) setStatusChangeDelegate:(id<DLABStatusChangeDelegate>)newDelegate;
-
-/**
- Private helper method for statusChange
-
- @param flag Flag to start/stop subscription
- @return YES if no error, NO if failed
- */
+- (BOOL) subscribeInput:(BOOL) flag;
+- (BOOL) subscribeOutput:(BOOL) flag;
 - (BOOL) subscribeStatusChangeNotification:(BOOL) flag;
-
-/**
- Public setter for preferencesChange delegate
-
- @param newDelegate id<DLABPrefsChangeDelegate>
- */
-- (void) setPrefsChangeDelegate:(id<DLABPrefsChangeDelegate>)newDelegate;
-
-/**
- Private helper method for preferencesChange
-
- @param flag Flag to start/stop subscription
- @return YES if no error, NO if failed
- */
 - (BOOL) subscribePrefsChangeNotification:(BOOL) flag;
+- (BOOL) subscribeProfileChange:(BOOL) flag;
 
 /* =================================================================================== */
-// MARK: - Properties
+// MARK: - (Private) - property
 /* =================================================================================== */
 
 // cpp objects - Ready on init
@@ -160,76 +136,110 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  IDeckLink object.
  */
-@property (nonatomic, assign) IDeckLink* deckLink;
+@property (nonatomic, assign, readonly) IDeckLink* deckLink;
 
 /**
  IDeckLinkAttributes object.
  */
-@property (nonatomic, assign) IDeckLinkProfileAttributes *deckLinkProfileAttributes;
+@property (nonatomic, assign, readonly) IDeckLinkProfileAttributes *deckLinkProfileAttributes;
 
 /**
  IDeckLinkConfiguration object.
  */
-@property (nonatomic, assign) IDeckLinkConfiguration *deckLinkConfiguration;
+@property (nonatomic, assign, readonly) IDeckLinkConfiguration *deckLinkConfiguration;
 
 /**
  IDeckLinkStatus object.
  */
-@property (nonatomic, assign) IDeckLinkStatus *deckLinkStatus;
+@property (nonatomic, assign, readonly) IDeckLinkStatus *deckLinkStatus;
 
 /**
  IDeckLinkNotification object.
  */
-@property (nonatomic, assign) IDeckLinkNotification *deckLinkNotification;
+@property (nonatomic, assign, readonly) IDeckLinkNotification *deckLinkNotification;
 
 /**
  IDeckLinkHDMIInputEDID object.
  */
-@property (nonatomic, assign, nullable) IDeckLinkHDMIInputEDID *deckLinkHDMIInputEDID;
+@property (nonatomic, assign, readonly, nullable) IDeckLinkHDMIInputEDID *deckLinkHDMIInputEDID;
 
 /**
  IDeckLinkInput object for input.
  */
-@property (nonatomic, assign, nullable) IDeckLinkInput *deckLinkInput;
+@property (nonatomic, assign, readonly, nullable) IDeckLinkInput *deckLinkInput;
 
 /**
  IDeckLinkOutput object for output.
  */
-@property (nonatomic, assign, nullable) IDeckLinkOutput* deckLinkOutput;
+@property (nonatomic, assign, readonly, nullable) IDeckLinkOutput* deckLinkOutput;
 
 /**
  IDeckLinkKeyer object for keying.
  */
-@property (nonatomic, assign, nullable) IDeckLinkKeyer *deckLinkKeyer;
+@property (nonatomic, assign, readonly, nullable) IDeckLinkKeyer *deckLinkKeyer;
 
 /**
  IDeckLinkProfileManager object.
  */
-@property (nonatomic, assign, nullable) IDeckLinkProfileManager *deckLinkProfileManager;
+@property (nonatomic, assign, readonly, nullable) IDeckLinkProfileManager *deckLinkProfileManager;
 
-// lazy instantiation
+// cpp objects - lazy instantiation
 
 /**
  DLABInputCallback object for input.
  */
-@property (nonatomic, assign, nullable) DLABInputCallback *inputCallback;
+@property (nonatomic, assign, readonly, nullable) DLABInputCallback *inputCallback;
 
 /**
  DLABOutputCallback object for output.
  */
-@property (nonatomic, assign, nullable) DLABOutputCallback *outputCallback;
+@property (nonatomic, assign, readonly, nullable) DLABOutputCallback *outputCallback;
 
 /**
  DLABNotificationCallback object for statusChange.
  */
-@property (nonatomic, assign, nullable) DLABNotificationCallback *statusChangeCallback;
+@property (nonatomic, assign, readonly, nullable) DLABNotificationCallback *statusChangeCallback;
 
 /**
  DLABNotificationCallback object for preferenceChange.
  */
-@property (nonatomic, assign, nullable) DLABNotificationCallback *prefsChangeCallback;
+@property (nonatomic, assign, readonly, nullable) DLABNotificationCallback *prefsChangeCallback;
 
-// Ready after setting preview
+/**
+ IDeckLinkProfileCallback object for profile change.
+ */
+@property (nonatomic, assign, readonly, nullable) DLABProfileCallback* profileCallback;
+
+// dispatch_queue_t - lazy instantiation
+
+/**
+ private dispatch queue for input processing.
+ */
+@property (nonatomic, strong, readonly, nullable) dispatch_queue_t captureQueue;
+
+/**
+ private dispatch queue for output processing.
+ */
+@property (nonatomic, strong, readonly, nullable) dispatch_queue_t playbackQueue;
+
+/**
+ private dispatch queue for delegate call.
+ */
+@property (nonatomic, strong, readonly, nullable) dispatch_queue_t delegateQueue;
+
+/**
+ BLACKMAGIC_DECKLINK_API_VERSION from current runtime
+ */
+@property (nonatomic, assign, readonly) int apiVersion;
+
+// CFObjects // lazy instantiation
+
+/**
+ CVPixelBufferPoolRef for input PixelBuffer
+ */
+@property (nonatomic, assign, nullable) CVPixelBufferPoolRef inputPixelBufferPool;
+
+// cpp objects - Ready after setting preview
 
 /**
  IDeckLinkScreenPreviewCallback object for output.
@@ -241,27 +251,23 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, nullable) IDeckLinkScreenPreviewCallback* inputPreviewCallback;
 
-// dispatch_queue_t - lazy instantiation
+// Initial videoFrame forces update.
 
 /**
- IDeckLinkProfileCallback object for profile change.
+ Request input Video Re-configuration
  */
-@property (nonatomic, assign, nullable) IDeckLinkProfileCallback* profileCallback;
+@property (nonatomic, assign) BOOL needsInputVideoConfigurationRefresh;
+
 
 /**
- private dispatch queue for input processing.
+ DLABVideoConverter for video format conversion
  */
-@property (nonatomic, strong) dispatch_queue_t captureQueue;
+@property (nonatomic, strong, nullable) DLABVideoConverter* inputVideoConverter;
 
 /**
- private dispatch queue for output processing.
+ DLABVideoConverter for video format conversion
  */
-@property (nonatomic, strong) dispatch_queue_t playbackQueue;
-
-/**
- private dispatch queue for delegate call.
- */
-@property (nonatomic, strong) dispatch_queue_t delegateQueue;
+@property (nonatomic, strong, nullable) DLABVideoConverter* outputVideoConverter;
 
 /* =================================================================================== */
 // MARK: - (Private) - Paired with public readonly
@@ -344,18 +350,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL supportHDRMetadataW;
 
-// lazy instantiation
-
-/**
- Device supported output VideoSetting templates. For reference only.
- */
-@property (nonatomic, copy, nullable) NSArray *outputVideoSettingArrayW;
-
-/**
- Device supported input VideoSetting templates. For reference only.
- */
-@property (nonatomic, copy, nullable) NSArray *inputVideoSettingArrayW;
-
 // Ready while video enabled
 
 /**
@@ -379,39 +373,6 @@ NS_ASSUME_NONNULL_BEGIN
  Currently available input AudioSetting. Ready while enabled.
  */
 @property (nonatomic, strong, nullable) DLABAudioSetting* inputAudioSettingW;
-
-/* =================================================================================== */
-// MARK: - Properties
-/* =================================================================================== */
-
-// Initial videoFrame forces update.
-
-/**
- Request input Video Re-configuration
- */
-@property (nonatomic, assign) BOOL needsInputVideoConfigurationRefresh;
-
-// CFObjects // lazy instantiation
-
-/**
- CVPixelBufferPoolRef for input PixelBuffer
- */
-@property (nonatomic, assign, nullable) CVPixelBufferPoolRef inputPixelBufferPool;
-
-/**
- BLACKMAGIC_DECKLINK_API_VERSION from current runtime
- */
-@property (nonatomic, assign) int apiVersion;
-
-/**
- DLABVideoConverter for video format conversion
- */
-@property (nonatomic, strong, nullable) DLABVideoConverter* inputVideoConverter;
-
-/**
- DLABVideoConverter for video format conversion
- */
-@property (nonatomic, strong, nullable) DLABVideoConverter* outputVideoConverter;
 
 @end
 

@@ -511,7 +511,6 @@ typedef NS_OPTIONS(uint32_t, DLABVideoIOSupport)
     
     , DLABVideoIOSupportInternalKeying = 1 << 16     // Non-native extension @@@@
     , DLABVideoIOSupportExternalKeying = 1 << 17     // Non-native extension @@@@
-    , DLABVideoIOSupportHDKeying = 1 << 18     // Non-native extension @@@@
 };
 
 /* Enum BMD3DPreviewFormat - Linked Frame preview format */

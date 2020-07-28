@@ -319,15 +319,6 @@ NS_ASSUME_NONNULL_BEGIN
 typedef BOOL (^OutputFrameMetadataHandler) (CMSampleTimingInfo timingInfo,
                                             DLABFrameMetadata* frameMetadata);
 
-NS_ASSUME_NONNULL_END
-
-
-/* =================================================================================== */
-// MARK: -
-/* =================================================================================== */
-
-NS_ASSUME_NONNULL_BEGIN
-
 /**
  Experimental HDR metadata support: frame metadata callback block
  
@@ -447,18 +438,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) BOOL supportHDRMetadata;
 
-// lazy instantiation
-
-/**
- Device supported output VideoSetting templates. For reference only.
- */
-@property (nonatomic, copy, readonly, nullable) NSArray<DLABVideoSetting*> *outputVideoSettingArray;
-
-/**
- Device supported input VideoSetting templates. For reference only.
- */
-@property (nonatomic, copy, readonly, nullable) NSArray<DLABVideoSetting*> *inputVideoSettingArray;
-
 // Ready while video enabled
 
 /**
@@ -484,6 +463,22 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly, nullable) DLABAudioSetting* inputAudioSetting;
 
 /* =================================================================================== */
+// MARK: (Public) - Video Setting Array
+/* =================================================================================== */
+
+// lazy instantiation
+
+/**
+ Device supported output VideoSetting templates. For reference only.
+ */
+@property (nonatomic, copy, readonly, nullable) NSArray<DLABVideoSetting*> *outputVideoSettingArray;
+
+/**
+ Device supported input VideoSetting templates. For reference only.
+ */
+@property (nonatomic, copy, readonly, nullable) NSArray<DLABVideoSetting*> *inputVideoSettingArray;
+
+/* =================================================================================== */
 // MARK: (Public) - DeckControl support (experimental)
 /* =================================================================================== */
 
@@ -493,7 +488,7 @@ Experimental DeckControl support. Returns nil if DeckControl is not available.
 @property (nonatomic, strong, readonly, nullable) DLABDeckControl* deckControl;
 
 /* =================================================================================== */
-// MARK: (Public) - Read/Write
+// MARK: (Public) - Delegate
 /* =================================================================================== */
 
 /**

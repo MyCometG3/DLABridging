@@ -1126,7 +1126,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     IDeckLinkInput* input = self.deckLinkInput;
     if (input) {
-        [self inputCallback]; // allow lazy instantiation
+        [self subscribeInput:YES];
         
         [self capture_sync:^{
             result = input->StartStreams();

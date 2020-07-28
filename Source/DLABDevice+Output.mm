@@ -1520,7 +1520,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     
     IDeckLinkOutput* output = self.deckLinkOutput;
     if (output) {
-        [self outputCallback]; // allow lazy instantiation
+        [self subscribeOutput:YES];
         
         [self playback_sync:^{
             result = output->StartScheduledPlayback(startTime, timeScale, 1.0);

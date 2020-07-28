@@ -331,8 +331,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize supportInputFormatDetectionW = _supportInputFormatDetectionW;
 @synthesize supportHDRMetadataW = _supportHDRMetadataW;
 
-@synthesize outputVideoSettingArrayW = _outputVideoSettingArrayW;
-@synthesize inputVideoSettingArrayW = _inputVideoSettingArrayW;
 @synthesize outputVideoSettingW = _outputVideoSettingW;
 @synthesize inputVideoSettingW = _inputVideoSettingW;
 @synthesize outputAudioSettingW = _outputAudioSettingW;
@@ -354,14 +352,70 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (BOOL) supportInputFormatDetection { return _supportInputFormatDetectionW; }
 - (BOOL) supportHDRMetadata { return _supportHDRMetadataW; }
 
-//- (NSArray*) outputVideoSettingArray { return _outputVideoSettingArrayW; } // defined lator
-//- (NSArray*) inputVideoSettingArray { return _inputVideoSettingArrayW; } // defined lator
 - (DLABVideoSetting*) outputVideoSetting { return _outputVideoSettingW; }
 - (DLABVideoSetting*) inputVideoSetting { return _inputVideoSettingW; }
 - (DLABAudioSetting*) outputAudioSetting { return _outputAudioSettingW; }
 - (DLABAudioSetting*) inputAudioSetting { return _inputAudioSettingW; }
 
+/* =================================================================================== */
+// MARK: - (Public) property accessor
+/* =================================================================================== */
+
+@synthesize outputVideoSettingArray = _outputVideoSettingArray;
+@synthesize inputVideoSettingArray = _inputVideoSettingArray;
 @synthesize deckControl = _deckControl;
+
+@synthesize outputDelegate = _outputDelegate;
+@synthesize inputDelegate = _inputDelegate;
+@synthesize statusDelegate = _statusDelegate;
+@synthesize prefsDelegate = _prefsDelegate;
+@synthesize profileDelegate = _profileDelegate;
+
+@synthesize inputVANCLines = _inputVANCLines;
+@synthesize inputVANCHandler = _inputVANCHandler;
+@synthesize outputVANCLines = _outputVANCLines;
+@synthesize outputVANCHandler = _outputVANCHandler;
+@synthesize inputVANCPacketHandler = _inputVANCPacketHandler;
+@synthesize outputVANCPacketHandler = _outputVANCPacketHandler;
+
+@synthesize inputFrameMetadataHandler = _inputFrameMetadataHandler;
+@synthesize outputFrameMetadataHandler = _outputFrameMetadataHandler;
+
+@synthesize debugUsevImageCopyBuffer = _debugUsevImageCopyBuffer;
+@synthesize debugCalcPixelSizeFast = _debugCalcPixelSizeFast;
+
+/* =================================================================================== */
+// MARK: - (Private) property accessor
+/* =================================================================================== */
+
+@synthesize deckLink = _deckLink;
+@synthesize deckLinkProfileAttributes = _deckLinkProfileAttributes;
+@synthesize deckLinkConfiguration = _deckLinkConfiguration;
+@synthesize deckLinkStatus = _deckLinkStatus;
+@synthesize deckLinkNotification = _deckLinkNotification;
+@synthesize deckLinkHDMIInputEDID = _deckLinkHDMIInputEDID;
+@synthesize deckLinkInput = _deckLinkInput;
+@synthesize deckLinkOutput = _deckLinkOutput;
+@synthesize deckLinkKeyer = _deckLinkKeyer;
+@synthesize deckLinkProfileManager = _deckLinkProfileManager;
+
+@synthesize inputCallback = _inputCallback;
+@synthesize outputCallback = _outputCallback;
+@synthesize statusChangeCallback = _statusChangeCallback;
+@synthesize prefsChangeCallback = _prefsChangeCallback;
+@synthesize profileCallback = _profileCallback;
+@synthesize captureQueue = _captureQueue;
+@synthesize playbackQueue = _playbackQueue;
+@synthesize delegateQueue = _delegateQueue;
+@synthesize apiVersion = _apiVersion;
+
+@synthesize inputPixelBufferPool = _inputPixelBufferPool;
+@synthesize outputPreviewCallback = _outputPreviewCallback;
+@synthesize inputPreviewCallback = _inputPreviewCallback;
+
+@synthesize needsInputVideoConfigurationRefresh = _needsInputVideoConfigurationRefresh;
+@synthesize inputVideoConverter = _inputVideoConverter;
+@synthesize outputVideoConverter = _outputVideoConverter;
 
 /* =================================================================================== */
 // MARK: - (Private) - block helper
@@ -447,7 +501,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 }
 
 /* =================================================================================== */
-// MARK: - (Private/Public) - Subscription Status/Preferences Change
+// MARK: - (Private) - Subscription/Callback
 /* =================================================================================== */
 
 // private DLABNotificationCallbackDelegate
@@ -478,129 +532,120 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     }
 }
 
-// public setter
-- (void) setStatusChangeDelegate:(id<DLABStatusChangeDelegate>)newDelegate
+// Support private callbacks (will be forwarded to delegates)
+
+// Private helper method for input
+- (BOOL) subscribeInput:(BOOL) flag
 {
-    if (_statusDelegate == newDelegate) return;
-    if (_statusDelegate) {
-        // Unsubscribe request from current delegate
-        _statusDelegate = nil;
-        
-        [self subscribeStatusChangeNotification:NO];
+    HRESULT result = E_FAIL;
+    IDeckLinkInput * input = self.deckLinkInput;
+    DLABInputCallback* callback = self.inputCallback;
+    if (!input || !callback) return FALSE;
+    if (flag) {
+        result = input->SetCallback(callback);
+        if (result) {
+            NSLog(@"ERROR: IDeckLinkInput::SetCallback failed.");
+        }
+    } else {
+        result = input->SetCallback(NULL);
+        if (result) {
+            NSLog(@"ERROR: IDeckLinkInput::SetCallback failed.");
+        }
     }
-    if (newDelegate) {
-        // Subscribe request from new delegate
-        _statusDelegate = newDelegate;
-        
-        [self subscribeStatusChangeNotification:YES];
-    }
+    return (result == S_OK);
 }
 
-// private setter helper
+// Private helper method for output
+- (BOOL) subscribeOutput:(BOOL) flag
+{
+    HRESULT result = E_FAIL;
+    IDeckLinkOutput * output = self.deckLinkOutput;
+    DLABOutputCallback* callback = self.outputCallback;
+    if (!output || !callback) return FALSE;
+    if (flag) {
+        result = output->SetScheduledFrameCompletionCallback(callback);
+        if (result) {
+            NSLog(@"ERROR: IDeckLinkOutput::SetScheduledFrameCompletionCallback failed.");
+        }
+    } else {
+        result = output->SetScheduledFrameCompletionCallback(NULL);
+        if (result) {
+            NSLog(@"ERROR: IDeckLinkOutput::SetScheduledFrameCompletionCallback failed.");
+        }
+    }
+    return (result == S_OK);
+}
+
+// Private helper method for statusChange
 - (BOOL) subscribeStatusChangeNotification:(BOOL) flag
 {
     HRESULT result = E_FAIL;
     IDeckLinkNotification *notification = self.deckLinkNotification;
+    DLABNotificationCallback *callback = self.statusChangeCallback;
+    if (!notification || !callback) return FALSE;
     if (flag) {
-        if (_statusChangeCallback)
-            return YES; // We are currently subscribing status change
-        
-        _statusChangeCallback = new DLABNotificationCallback((id)self);
-        if (!_statusChangeCallback) {
-            NSLog(@"ERROR: IDeckLinkNotificationCallback is not available.");
-            return NO;
-        }
-        
-        result = notification->Subscribe(bmdStatusChanged, _statusChangeCallback);
-        if (!result) {
-            return YES;
-        } else {
+        result = notification->Subscribe(bmdStatusChanged, callback);
+        if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Subscribe failed.");
-            _statusChangeCallback->Release();
-            _statusChangeCallback = NULL;
-            return NO;
         }
     } else {
-        if (!_statusChangeCallback)
-            return YES; // We are not subscribing for now
-        
-        result = notification->Unsubscribe(bmdStatusChanged, _statusChangeCallback);
-        if (!result) {
-            _statusChangeCallback->Release();
-            _statusChangeCallback = NULL;
-            return YES;
-        } else {
+        result = notification->Unsubscribe(bmdStatusChanged, callback);
+        if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Unsubscribe failed.");
-            return NO;
         }
     }
+    return (result == S_OK);
 }
 
-// public setter
-- (void) setPrefsChangeDelegate:(id<DLABPrefsChangeDelegate>)newDelegate
-{
-    if (_prefsDelegate == newDelegate) return;
-    if (_prefsDelegate) {
-        // Unsubscribe request from current delegate
-        _prefsDelegate = nil;
-        
-        [self subscribePrefsChangeNotification:NO];
-    }
-    if (newDelegate) {
-        // Subscribe request from new delegate
-        _prefsDelegate = newDelegate;
-        
-        [self subscribePrefsChangeNotification:YES];
-    }
-}
-
-// private setter helper
+// Private helper method for preferencesChange
 - (BOOL) subscribePrefsChangeNotification:(BOOL) flag
 {
     HRESULT result = E_FAIL;
     IDeckLinkNotification *notification = self.deckLinkNotification;
+    DLABNotificationCallback *callback = self.prefsChangeCallback;
+    if (!notification || !callback) return FALSE;
     if (flag) {
-        if (_prefsChangeCallback)
-            return YES; // We are currently subscribing prefs change
-        
-        _prefsChangeCallback = new DLABNotificationCallback((id)self);
-        if (!_prefsChangeCallback) {
-            NSLog(@"ERROR: IDeckLinkNotificationCallback is not available.");
-            return NO;
-        }
-        
-        result = notification->Subscribe(bmdPreferencesChanged, _prefsChangeCallback);
-        if (!result) {
-            return YES;
-        } else {
+        result = notification->Subscribe(bmdPreferencesChanged, callback);
+        if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Subscribe failed.");
-            _prefsChangeCallback->Release();
-            _prefsChangeCallback = NULL;
-            return NO;
         }
     } else {
-        if (!_prefsChangeCallback)
-            return YES; // We are not subscribing for now
-        
-        result = notification->Unsubscribe(bmdPreferencesChanged, _prefsChangeCallback);
-        if (!result) {
-            _prefsChangeCallback->Release();
-            _prefsChangeCallback = NULL;
-            return YES;
-        } else {
+        result = notification->Unsubscribe(bmdPreferencesChanged, callback);
+        if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Unsubscribe failed.");
-            return NO;
         }
     }
+    return (result == S_OK);
+}
+
+// Private helper method for profileChange
+- (BOOL) subscribeProfileChange:(BOOL) flag
+{
+    HRESULT result = E_FAIL;
+    IDeckLinkProfileManager* manager = self.deckLinkProfileManager;
+    DLABProfileCallback* callback = self.profileCallback;
+    if (!manager || !callback) return FALSE;
+    if (flag) {
+        result = manager->SetCallback(callback);
+        if (result) {
+            NSLog(@"ERROR: IDeckLinkProfileManager::SetCallback failed.");
+        }
+    } else {
+        result = manager->SetCallback(NULL);
+        if (result) {
+            NSLog(@"ERROR: IDeckLinkProfileManager::SetCallback failed.");
+        }
+    }
+    return (result == S_OK);
 }
 
 /* =================================================================================== */
-// MARK: - (Public) - accessor - lazy instantiation
+// MARK: - (Public) - property getter - lazy instantiation
 /* =================================================================================== */
 
 - (NSArray*) outputVideoSettingArray
 {
-    if (!_outputVideoSettingArrayW) {
+    if (!_outputVideoSettingArray) {
         IDeckLinkOutput* output = self.deckLinkOutput;
         if (output) {
             // Get DisplayModeIterator
@@ -623,16 +668,16 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
                 
                 iterator->Release();
                 
-                _outputVideoSettingArrayW = [NSArray arrayWithArray:array];
+                _outputVideoSettingArray = [NSArray arrayWithArray:array];
             }
         }
     }
-    return _outputVideoSettingArrayW;
+    return _outputVideoSettingArray;
 }
 
 - (NSArray*) inputVideoSettingArray
 {
-    if (!_inputVideoSettingArrayW) {
+    if (!_inputVideoSettingArray) {
         IDeckLinkInput* input = self.deckLinkInput;
         if (input) {
             // Get DisplayModeIterator
@@ -655,11 +700,11 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
                 
                 iterator->Release();
                 
-                _inputVideoSettingArrayW = [NSArray arrayWithArray:array];
+                _inputVideoSettingArray = [NSArray arrayWithArray:array];
             }
         }
     }
-    return _inputVideoSettingArrayW;
+    return _inputVideoSettingArray;
 }
 
 - (DLABDeckControl*) deckControl
@@ -671,41 +716,105 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 }
 
 /* =================================================================================== */
-// MARK: - (Private) - accessor - lazy instantiation
+// MARK: - (Public) - property setter
 /* =================================================================================== */
 
-- (int) apiVersion
+- (void) setOutputDelegate:(id<DLABOutputPlaybackDelegate>)newDelegate
 {
-    if (_apiVersion == 0) {
-        IDeckLinkAPIInformation* api = CreateDeckLinkAPIInformationInstance();
-        if (api != NULL) {
-            HRESULT result = E_FAIL;
-            BMDDeckLinkAPIInformationID cfgID = DLABDeckLinkAPIInformationVersion;
-            int64_t newIntValue = false;
-            result = api->GetInt(cfgID, &newIntValue);
-            if (!result) {
-                _apiVersion = (int)newIntValue;
-            }
-            api->Release();
-        }
+    if (_outputDelegate == newDelegate) return;
+    if (_outputDelegate) {
+        // Unsubscribe request from current delegate
+        _outputDelegate = nil;
+        
+        [self subscribeOutput:NO];
     }
-    return _apiVersion;
+    if (newDelegate) {
+        // Subscribe request from new delegate
+        _outputDelegate = newDelegate;
+        
+        [self subscribeOutput:YES];
+    }
 }
+
+- (void) setInputDelegate:(id<DLABInputCaptureDelegate>)newDelegate
+{
+    if (_inputDelegate == newDelegate) return;
+    if (_inputDelegate) {
+        // Unsubscribe request from current delegate
+        _inputDelegate = nil;
+        
+        [self subscribeInput:NO];
+    }
+    if (newDelegate) {
+        // Subscribe request from new delegate
+        _inputDelegate = newDelegate;
+        
+        [self subscribeInput:YES];
+    }
+}
+
+// public DLABStatusChangeDelegate
+- (void) setStatusDelegate:(id<DLABStatusChangeDelegate>)newDelegate
+{
+    if (_statusDelegate == newDelegate) return;
+    if (_statusDelegate) {
+        // Unsubscribe request from current delegate
+        _statusDelegate = nil;
+        
+        [self subscribeStatusChangeNotification:NO];
+    }
+    if (newDelegate) {
+        // Subscribe request from new delegate
+        _statusDelegate = newDelegate;
+        
+        [self subscribeStatusChangeNotification:YES];
+    }
+}
+
+// public DLABPrefsChangeDelegate
+- (void) setPrefsDelegate:(id<DLABPrefsChangeDelegate>)newDelegate
+{
+    if (_prefsDelegate == newDelegate) return;
+    if (_prefsDelegate) {
+        // Unsubscribe request from current delegate
+        _prefsDelegate = nil;
+        
+        [self subscribePrefsChangeNotification:NO];
+    }
+    if (newDelegate) {
+        // Subscribe request from new delegate
+        _prefsDelegate = newDelegate;
+        
+        [self subscribePrefsChangeNotification:YES];
+    }
+}
+
+// public DLABProfileChangeDelegate
+- (void) setProfileDelegate:(id<DLABProfileChangeDelegate>)newDelegate
+{
+    if (_profileDelegate == newDelegate) return;
+    if (_profileDelegate) {
+        // Unsubscribe request from current delegate
+        _profileDelegate = nil;
+        
+        [self subscribeProfileChange:NO];
+    }
+    if (newDelegate) {
+        // Subscribe request from new delegate
+        _profileDelegate = newDelegate;
+        
+        [self subscribeProfileChange:YES];
+    }
+}
+
+/* =================================================================================== */
+// MARK: - (Private) - property getter - lazy instantiation
+/* =================================================================================== */
 
 - (DLABInputCallback *)inputCallback
 {
     if (!_inputCallback) {
-        IDeckLinkInput * input = self.deckLinkInput;
-        if (input) {
-            HRESULT result = E_FAIL;
-            _inputCallback = new DLABInputCallback((id)self);
-            result = input->SetCallback(_inputCallback);
-            if (result) {
-                NSLog(@"ERROR: IDeckLinkInput::SetCallback failed.");
-                _inputCallback->Release();
-                _inputCallback = NULL;
-            }
-        }
+        _inputCallback = new DLABInputCallback((id)self);
     }
     return _inputCallback;
 }
@@ -713,19 +822,33 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (DLABOutputCallback *)outputCallback
 {
     if (!_outputCallback) {
-        IDeckLinkOutput *output = self.deckLinkOutput;
-        if (output) {
-            HRESULT result = E_FAIL;
-            _outputCallback = new DLABOutputCallback((id)self);
-            result = output->SetScheduledFrameCompletionCallback(_outputCallback);
-            if (result) {
-                NSLog(@"ERROR: IDeckLinkOutput::SetScheduledFrameCompletionCallback failed.");
-                _outputCallback->Release();
-                _outputCallback = NULL;
-            }
-        }
+        _outputCallback = new DLABOutputCallback((id)self);
     }
     return _outputCallback;
+}
+
+- (DLABNotificationCallback*)statusChangeCallback
+{
+    if (!_statusChangeCallback) {
+        _statusChangeCallback = new DLABNotificationCallback((id)self);
+    }
+    return _statusChangeCallback;
+}
+
+- (DLABNotificationCallback*)prefsChangeCallback
+{
+    if (!_prefsChangeCallback) {
+        _prefsChangeCallback = new DLABNotificationCallback((id)self);
+    }
+    return _prefsChangeCallback;
+}
+
+- (DLABProfileCallback*)profileCallback
+{
+    if (!_profileCallback) {
+        _profileCallback = new DLABProfileCallback((id)self);
+    }
+    return _profileCallback;
 }
 
 - (dispatch_queue_t) captureQueue
@@ -760,6 +883,28 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     }
     return _delegateQueue;
 }
+
+- (int) apiVersion
+{
+    if (_apiVersion == 0) {
+        IDeckLinkAPIInformation* api = CreateDeckLinkAPIInformationInstance();
+        if (api != NULL) {
+            HRESULT result = E_FAIL;
+            BMDDeckLinkAPIInformationID cfgID = DLABDeckLinkAPIInformationVersion;
+            int64_t newIntValue = false;
+            result = api->GetInt(cfgID, &newIntValue);
+            if (!result) {
+                _apiVersion = (int)newIntValue;
+            }
+            api->Release();
+        }
+    }
+    return _apiVersion;
+}
+
+/* =================================================================================== */
+// MARK: - (Private) - property setter
+/* =================================================================================== */
 
 - (void) setInputPixelBufferPool:(CVPixelBufferPoolRef)newPool
 {
@@ -797,19 +942,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     if (newPreviewCallback) {
         _inputPreviewCallback = newPreviewCallback;
         _inputPreviewCallback->AddRef();
-    }
-}
-
-- (void) setProfileCallback:(IDeckLinkProfileCallback *)newProfileCallback
-{
-    if (_profileCallback == newProfileCallback) return;
-    if (_profileCallback) {
-        _profileCallback->Release();
-        _profileCallback = NULL;
-    }
-    if (newProfileCallback) {
-        _profileCallback = newProfileCallback;
-        _profileCallback->AddRef();
     }
 }
 
