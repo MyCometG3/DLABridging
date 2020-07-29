@@ -146,8 +146,8 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
     NSParameterAssert(modelName && displayName);
     
     for (DLABDevice* device in self.devices) {
-        BOOL matchModelName = ([device.modelNameW compare: modelName] == NSOrderedSame);
-        BOOL matchDisplayName = ([device.displayNameW compare: displayName] == NSOrderedSame);
+        BOOL matchModelName = ([device.modelName compare: modelName] == NSOrderedSame);
+        BOOL matchDisplayName = ([device.displayName compare: displayName] == NSOrderedSame);
         if (matchModelName && matchDisplayName) {
             return device;
         }
@@ -158,7 +158,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 - (DLABDevice*) deviceWithPersistentID:(int64_t)persistentID
 {
     for (DLABDevice* device in self.devices) {
-        if (device.persistentIDW == persistentID) {
+        if (device.persistentID == persistentID) {
             return device;
         }
     }
@@ -168,7 +168,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 - (DLABDevice*) deviceWithTopologicalID:(int64_t)topologicalID
 {
     for (DLABDevice* device in self.devices) {
-        if (device.topologicalIDW == topologicalID) {
+        if (device.topologicalID == topologicalID) {
             return device;
         }
     }
@@ -342,9 +342,9 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
             if (newDevice) {
                 // Check capability
                 BOOL captureFlag = ((newDirection & DLABVideoIOSupportCapture) &&
-                                    newDevice.supportCaptureW);
+                                    newDevice.supportCapture);
                 BOOL playbackFlag = ((newDirection & DLABVideoIOSupportPlayback) &&
-                                     newDevice.supportPlaybackW);
+                                     newDevice.supportPlayback);
                 
                 // Register as new device
                 if (captureFlag || playbackFlag) {
@@ -455,9 +455,9 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
         DLABDevice* device = [[DLABDevice alloc] initWithDeckLink:deckLink];
         if (device) {
             BOOL captureFlag = ((self->direction & DLABVideoIOSupportCapture) &&
-                                device.supportCaptureW);
+                                device.supportCapture);
             BOOL playbackFlag = ((self->direction & DLABVideoIOSupportPlayback) &&
-                                 device.supportPlaybackW);
+                                 device.supportPlayback);
             
             if (captureFlag || playbackFlag) {
                 [self.devices addObject:device];

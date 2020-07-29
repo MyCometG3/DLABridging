@@ -138,90 +138,90 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     }
     
     // Validate support feature
-    _supportFlagW = DLABVideoIOSupportNone;
-    _supportCaptureW = FALSE;
-    _supportPlaybackW = FALSE;
-    _supportKeyingW = FALSE;
+    _supportFlag = DLABVideoIOSupportNone;
+    _supportCapture = FALSE;
+    _supportPlayback = FALSE;
+    _supportKeying = FALSE;
     
     if (supportsCapture) {
-        _supportFlagW = (_supportFlagW | DLABVideoIOSupportCapture);
-        _supportCaptureW = TRUE;
+        _supportFlag = (_supportFlag | DLABVideoIOSupportCapture);
+        _supportCapture = TRUE;
     }
     if (supportsPlayback) {
-        _supportFlagW = (_supportFlagW | DLABVideoIOSupportPlayback);
-        _supportPlaybackW = TRUE;
+        _supportFlag = (_supportFlag | DLABVideoIOSupportPlayback);
+        _supportPlayback = TRUE;
     }
     if (_deckLinkKeyer) {
         bool keyingInternal = false;
         error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &keyingInternal);
         if (!error && keyingInternal)
-            _supportFlagW = (_supportFlagW | DLABVideoIOSupportInternalKeying);
+            _supportFlag = (_supportFlag | DLABVideoIOSupportInternalKeying);
         
         bool keyingExternal = false;
         error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &keyingExternal);
         if (!error && keyingExternal)
-            _supportFlagW = (_supportFlagW | DLABVideoIOSupportExternalKeying);
+            _supportFlag = (_supportFlag | DLABVideoIOSupportExternalKeying);
         
-        _supportKeyingW = (keyingInternal || keyingExternal);
+        _supportKeying = (keyingInternal || keyingExternal);
     }
     
     // Validate attributes
-    _modelNameW = @"Unknown modelName";
+    _modelName = @"Unknown modelName";
     CFStringRef newModelName = nil;
     error = _deckLink->GetModelName(&newModelName);
-    if (!error) _modelNameW = CFBridgingRelease(newModelName);
+    if (!error) _modelName = CFBridgingRelease(newModelName);
     
-    _displayNameW = @"Unknown displayName";
+    _displayName = @"Unknown displayName";
     CFStringRef newDisplayName = nil;
     error = _deckLink->GetDisplayName(&newDisplayName);
-    if (!error) _displayNameW = CFBridgingRelease(newDisplayName);
+    if (!error) _displayName = CFBridgingRelease(newDisplayName);
     
-    _persistentIDW = 0;
+    _persistentID = 0;
     int64_t newPersistentID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkPersistentID, &newPersistentID);
-    if (!error) _persistentIDW = newPersistentID;
+    if (!error) _persistentID = newPersistentID;
     
-    _deviceGroupIDW = 0;
+    _deviceGroupID = 0;
     int64_t newDeviceGroupID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDeviceGroupID, &newDeviceGroupID);
-    if (!error) _deviceGroupIDW = newDeviceGroupID;
+    if (!error) _deviceGroupID = newDeviceGroupID;
     
-    _topologicalIDW = 0;
+    _topologicalID = 0;
     int64_t newTopologicalID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkTopologicalID, &newTopologicalID);
-    if (!error) _topologicalIDW = newTopologicalID;
+    if (!error) _topologicalID = newTopologicalID;
     
-    _numberOfSubDevicesW = 0;
+    _numberOfSubDevices = 0;
     int64_t newNumberOfSubDevices = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &newNumberOfSubDevices);
-    if (!error) _numberOfSubDevicesW = newNumberOfSubDevices;
+    if (!error) _numberOfSubDevices = newNumberOfSubDevices;
     
-    _subDeviceIndexW = 0;
+    _subDeviceIndex = 0;
     int64_t newSubDeviceIndex = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkSubDeviceIndex, &newSubDeviceIndex);
-    if (!error) _subDeviceIndexW = newSubDeviceIndex;
+    if (!error) _subDeviceIndex = newSubDeviceIndex;
     
-    _profileIDW = 0;
+    _profileID = 0;
     int64_t newProfileID = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkProfileID, &newProfileID);
-    if (!error) _profileIDW = newProfileID;
+    if (!error) _profileID = newProfileID;
     
-    _duplexW = 0;
+    _duplex = 0;
     int64_t newDuplex = 0;
     error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkDuplex, &newDuplex);
-    if (!error) _duplexW = newDuplex;
+    if (!error) _duplex = newDuplex;
     
-    _supportInputFormatDetectionW = false;
+    _supportInputFormatDetection = false;
     bool newSupportsInputFormatDetection = false;
     error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
                                          &newSupportsInputFormatDetection);
-    if (!error) _supportInputFormatDetectionW = newSupportsInputFormatDetection;
+    if (!error) _supportInputFormatDetection = newSupportsInputFormatDetection;
     
-    _supportHDRMetadataW = false;
+    _supportHDRMetadata = false;
     bool newSupportsHDRMetadata = false;
     error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsHDRMetadata,
                                                 &newSupportsHDRMetadata);
-    if (!error) _supportHDRMetadataW = newSupportsHDRMetadata;
+    if (!error) _supportHDRMetadata = newSupportsHDRMetadata;
 }
 
 - (void) shutdown
@@ -315,43 +315,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 // MARK: - (Private) - Paired with public readonly
 /* =================================================================================== */
 
-@synthesize modelNameW = _modelNameW;
-@synthesize displayNameW = _displayNameW;
-@synthesize persistentIDW = _persistentIDW;
-@synthesize deviceGroupIDW = _deviceGroupIDW;
-@synthesize topologicalIDW = _topologicalIDW;
-@synthesize numberOfSubDevicesW = _numberOfSubDevicesW;
-@synthesize subDeviceIndexW = _subDeviceIndexW;
-@synthesize profileIDW = _profileIDW;
-@synthesize duplexW = _duplexW;
-@synthesize supportFlagW = _supportFlagW;
-@synthesize supportCaptureW = _supportCaptureW;
-@synthesize supportPlaybackW = _supportPlaybackW;
-@synthesize supportKeyingW = _supportKeyingW;
-@synthesize supportInputFormatDetectionW = _supportInputFormatDetectionW;
-@synthesize supportHDRMetadataW = _supportHDRMetadataW;
-
-@synthesize outputVideoSettingW = _outputVideoSettingW;
-@synthesize inputVideoSettingW = _inputVideoSettingW;
-@synthesize outputAudioSettingW = _outputAudioSettingW;
-@synthesize inputAudioSettingW = _inputAudioSettingW;
-
-- (NSString*) modelName { return _modelNameW; }
-- (NSString*) displayName { return _displayNameW; }
-- (int64_t) persistentID { return _persistentIDW; }
-- (int64_t) deviceGroupID { return _deviceGroupIDW; }
-- (int64_t) topologicalID { return _topologicalIDW; }
-- (int64_t) numberOfSubDevices { return _numberOfSubDevicesW; }
-- (int64_t) subDeviceIndex { return _subDeviceIndexW; }
-- (int64_t) profileID { return _profileIDW; }
-- (int64_t) duplex { return _duplexW; }
-- (DLABVideoIOSupport) supportFlag { return _supportFlagW; }
-- (BOOL) supportCapture { return _supportCaptureW; }
-- (BOOL) supportPlayback { return _supportPlaybackW; }
-- (BOOL) supportKeying { return _supportKeyingW; }
-- (BOOL) supportInputFormatDetection { return _supportInputFormatDetectionW; }
-- (BOOL) supportHDRMetadata { return _supportHDRMetadataW; }
-
 - (DLABVideoSetting*) outputVideoSetting { return _outputVideoSettingW; }
 - (DLABVideoSetting*) inputVideoSetting { return _inputVideoSettingW; }
 - (DLABAudioSetting*) outputAudioSetting { return _outputAudioSettingW; }
@@ -361,9 +324,35 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 // MARK: - (Public) property accessor
 /* =================================================================================== */
 
+@synthesize modelName = _modelName;
+@synthesize displayName = _displayName;
+@synthesize persistentID = _persistentID;
+@synthesize deviceGroupID = _deviceGroupID;
+@synthesize topologicalID = _topologicalID;
+@synthesize numberOfSubDevices = _numberOfSubDevices;
+@synthesize subDeviceIndex = _subDeviceIndex;
+@synthesize profileID = _profileID;
+@synthesize duplex = _duplex;
+
+@synthesize supportFlag = _supportFlag;
+@synthesize supportCapture = _supportCapture;
+@synthesize supportPlayback = _supportPlayback;
+@synthesize supportKeying = _supportKeying;
+@synthesize supportInputFormatDetection = _supportInputFormatDetection;
+@synthesize supportHDRMetadata = _supportHDRMetadata;
+
+@synthesize outputVideoSettingW = _outputVideoSettingW;
+@synthesize inputVideoSettingW = _inputVideoSettingW;
+@synthesize outputAudioSettingW = _outputAudioSettingW;
+@synthesize inputAudioSettingW = _inputAudioSettingW;
+
+// MARK: -
+
 @synthesize outputVideoSettingArray = _outputVideoSettingArray;
 @synthesize inputVideoSettingArray = _inputVideoSettingArray;
 @synthesize deckControl = _deckControl;
+
+// MARK: -
 
 @synthesize outputDelegate = _outputDelegate;
 @synthesize inputDelegate = _inputDelegate;
@@ -393,11 +382,14 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize deckLinkConfiguration = _deckLinkConfiguration;
 @synthesize deckLinkStatus = _deckLinkStatus;
 @synthesize deckLinkNotification = _deckLinkNotification;
+
 @synthesize deckLinkHDMIInputEDID = _deckLinkHDMIInputEDID;
 @synthesize deckLinkInput = _deckLinkInput;
 @synthesize deckLinkOutput = _deckLinkOutput;
 @synthesize deckLinkKeyer = _deckLinkKeyer;
 @synthesize deckLinkProfileManager = _deckLinkProfileManager;
+
+// MARK: -
 
 @synthesize inputCallback = _inputCallback;
 @synthesize outputCallback = _outputCallback;
@@ -408,6 +400,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize playbackQueue = _playbackQueue;
 @synthesize delegateQueue = _delegateQueue;
 @synthesize apiVersion = _apiVersion;
+
+// MARK: -
 
 @synthesize inputPixelBufferPool = _inputPixelBufferPool;
 @synthesize outputPreviewCallback = _outputPreviewCallback;

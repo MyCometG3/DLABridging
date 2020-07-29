@@ -128,6 +128,34 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL) subscribeProfileChange:(BOOL) flag;
 
 /* =================================================================================== */
+// MARK: - (Private) - Paired with public readonly
+/* =================================================================================== */
+
+// Ready while video enabled
+
+/**
+ Currently available output VideoSetting. Ready while enabled.
+ */
+@property (nonatomic, strong, nullable) DLABVideoSetting* outputVideoSettingW;
+
+/**
+ Currently available input VideoSetting. Ready while enabled.
+ */
+@property (nonatomic, strong, nullable) DLABVideoSetting* inputVideoSettingW;
+
+// Ready while audio enabled
+
+/**
+ Currently available output AudioSetting. Ready while enabled.
+ */
+@property (nonatomic, strong, nullable) DLABAudioSetting* outputAudioSettingW;
+
+/**
+ Currently available input AudioSetting. Ready while enabled.
+ */
+@property (nonatomic, strong, nullable) DLABAudioSetting* inputAudioSettingW;
+
+/* =================================================================================== */
 // MARK: - (Private) - property
 /* =================================================================================== */
 
@@ -268,111 +296,6 @@ NS_ASSUME_NONNULL_BEGIN
  DLABVideoConverter for video format conversion
  */
 @property (nonatomic, strong, nullable) DLABVideoConverter* outputVideoConverter;
-
-/* =================================================================================== */
-// MARK: - (Private) - Paired with public readonly
-/* =================================================================================== */
-
-// private - Ready on init
-
-/**
- Device's DLABAttributeModelName value.
- */
-@property (nonatomic, copy) NSString *modelNameW;
-
-/**
- Device's DLABAttributeDisplayName value.
- */
-@property (nonatomic, copy) NSString *displayNameW;
-
-/**
- Device's DLABAttributePersistentID value.
- */
-@property (nonatomic, assign) int64_t persistentIDW;
-
-/**
- Device's DLABAttributeDeviceGroupID value.
- */
-@property (nonatomic, assign) int64_t deviceGroupIDW;
-
-/**
- Device's DLABAttributeTopologicalID value.
- */
-@property (nonatomic, assign) int64_t topologicalIDW;
-
-/**
- Device's DLABAttributeNumberOfSubDevices value.
- */
-@property (nonatomic, assign) int64_t numberOfSubDevicesW;
-
-/**
- Device's DLABAttributeSubDeviceIndex value.
- */
-@property (nonatomic, assign) int64_t subDeviceIndexW;
-
-/**
- Device's DLABAttributeProfileID value.
- */
-@property (nonatomic, assign) int64_t profileIDW;
-
-/**
- Device's DLABAttributeDuplex value.
- */
-@property (nonatomic, assign) int64_t duplexW;
-
-/**
- Detail bitmask of DLABVideoIOSupport. You can examine what kind of keying feature is supported.
- */
-@property (nonatomic, assign) DLABVideoIOSupport supportFlagW; // uint32_t
-
-/**
- Convenience flag if the device supports capture (input stream).
- */
-@property (nonatomic, assign) BOOL supportCaptureW;
-
-/**
- Convenience flag if the device supports playback (output stream).
- */
-@property (nonatomic, assign) BOOL supportPlaybackW;
-
-/**
- Convenience flag if the device supports keying (output stream).
- */
-@property (nonatomic, assign) BOOL supportKeyingW;
-
-/**
- Convenience flag if the device supports format change detection (input stream).
- */
-@property (nonatomic, assign) BOOL supportInputFormatDetectionW;
-
-/**
- Device's DLABAttributeSupportsHDRMetadata value.
- */
-@property (nonatomic, assign) BOOL supportHDRMetadataW;
-
-// Ready while video enabled
-
-/**
- Currently available output VideoSetting. Ready while enabled.
- */
-@property (nonatomic, strong, nullable) DLABVideoSetting* outputVideoSettingW;
-
-/**
- Currently available input VideoSetting. Ready while enabled.
- */
-@property (nonatomic, strong, nullable) DLABVideoSetting* inputVideoSettingW;
-
-// Ready while audio enabled
-
-/**
- Currently available output AudioSetting. Ready while enabled.
- */
-@property (nonatomic, strong, nullable) DLABAudioSetting* outputAudioSettingW;
-
-/**
- Currently available input AudioSetting. Ready while enabled.
- */
-@property (nonatomic, strong, nullable) DLABAudioSetting* inputAudioSettingW;
 
 @end
 
