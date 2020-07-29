@@ -35,16 +35,6 @@ const int maxOutputVideoFrameCount = 8;
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLABDevice () <DLABNotificationCallbackDelegate>
-{
-    // private queue management
-    void* captureQueueKey; // for Decklink-API Call
-    void* playbackQueueKey; // for Decklink-API Call
-    void* delegateQueueKey; // for delegate call
-    
-    // OutputVideoFramePool management
-    NSMutableSet* outputVideoFrameSet;
-    NSMutableSet* outputVideoFrameIdleSet;
-}
 
 /**
  Create DLABDevice instance from IDeckLink object.
@@ -186,6 +176,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) IDeckLinkNotification *deckLinkNotification;
 
+/* =================================================================================== */
+
 /**
  IDeckLinkHDMIInputEDID object.
  */
@@ -210,6 +202,8 @@ NS_ASSUME_NONNULL_BEGIN
  IDeckLinkProfileManager object.
  */
 @property (nonatomic, assign, readonly, nullable) IDeckLinkProfileManager *deckLinkProfileManager;
+
+/* =================================================================================== */
 
 // cpp objects - lazy instantiation
 
@@ -255,12 +249,47 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong, readonly, nullable) dispatch_queue_t delegateQueue;
 
+//
+
 /**
  BLACKMAGIC_DECKLINK_API_VERSION from current runtime
  */
 @property (nonatomic, assign, readonly) int apiVersion;
 
-// CFObjects // lazy instantiation
+/* =================================================================================== */
+
+// private queue management
+
+/**
+ Queue Key for Decklink-API Call (Capture)
+ */
+@property (nonatomic, assign, readonly) void* captureQueueKey;
+
+/**
+ Queue Key for Decklink-API Call (Playback)
+ */
+@property (nonatomic, assign, readonly) void* playbackQueueKey;
+
+/**
+ Queue Key for delegate-API Call
+ */
+@property (nonatomic, assign, readonly) void* delegateQueueKey;
+
+// NSMutableSet* - OutputVideoFramePool management
+
+/**
+ OutputVideoFramePool management.
+ */
+@property (nonatomic, strong, readonly) NSMutableSet* outputVideoFrameSet;
+
+/**
+ OutputVideoFramePool management.
+ */
+@property (nonatomic, strong, readonly) NSMutableSet* outputVideoFrameIdleSet;
+
+/* =================================================================================== */
+
+// CFObjects
 
 /**
  CVPixelBufferPoolRef for input PixelBuffer
@@ -279,6 +308,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, nullable) IDeckLinkScreenPreviewCallback* inputPreviewCallback;
 
+/* =================================================================================== */
+
 // Initial videoFrame forces update.
 
 /**
@@ -286,6 +317,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL needsInputVideoConfigurationRefresh;
 
+//
 
 /**
  DLABVideoConverter for video format conversion

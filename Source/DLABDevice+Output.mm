@@ -69,10 +69,10 @@
     if (output && setting) {
         @synchronized (self) {
             // Set initial pool size as 4 frames
-            BOOL initialSetup = (outputVideoFrameSet.count == 0);
+            BOOL initialSetup = (self.outputVideoFrameSet.count == 0);
             int expandingUnit = initialSetup ? 4 : 2;
             
-            BOOL needsExpansion = (outputVideoFrameIdleSet.count == 0);
+            BOOL needsExpansion = (self.outputVideoFrameIdleSet.count == 0);
             if (needsExpansion) {
                 // Get frame properties
                 int32_t width = (int32_t)setting.width;
@@ -84,7 +84,7 @@
                 // Try expanding the OutputVideoFramePool
                 for (int i = 0; i < expandingUnit; i++) {
                     // Check if pool size is at maximum value
-                    BOOL poolIsFull = (outputVideoFrameSet.count >= maxOutputVideoFrameCount);
+                    BOOL poolIsFull = (self.outputVideoFrameSet.count >= maxOutputVideoFrameCount);
                     if (poolIsFull) break;
                     
                     // Create new output videoFrame object
@@ -95,11 +95,11 @@
                     
                     // register outputVideoFrame into the pool
                     NSValue* ptrValue = [NSValue valueWithPointer:(void*)outFrame];
-                    [outputVideoFrameSet addObject:ptrValue];
-                    [outputVideoFrameIdleSet addObject:ptrValue];
+                    [self.outputVideoFrameSet addObject:ptrValue];
+                    [self.outputVideoFrameIdleSet addObject:ptrValue];
                 }
             }
-            ret = (outputVideoFrameIdleSet.count > 0);
+            ret = (self.outputVideoFrameIdleSet.count > 0);
         }
     }
     return ret;
@@ -109,7 +109,7 @@
 {
     @synchronized (self) {
         // Release all outputVideoFrame objects
-        for (NSValue *ptrValue in outputVideoFrameSet) {
+        for (NSValue *ptrValue in self.outputVideoFrameSet) {
             IDeckLinkMutableVideoFrame *outFrame = (IDeckLinkMutableVideoFrame*)ptrValue.pointerValue;
             if (outFrame) {
                 outFrame->Release();
@@ -117,8 +117,8 @@
         }
         
         // unregister all of outputVideoFrame in the pool
-        [outputVideoFrameIdleSet removeAllObjects];
-        [outputVideoFrameSet removeAllObjects];
+        [self.outputVideoFrameIdleSet removeAllObjects];
+        [self.outputVideoFrameSet removeAllObjects];
     }
 }
 
@@ -129,9 +129,9 @@
     
     IDeckLinkMutableVideoFrame *outFrame = NULL;
     @synchronized (self) {
-        NSValue* ptrValue = [outputVideoFrameIdleSet anyObject];
+        NSValue* ptrValue = [self.outputVideoFrameIdleSet anyObject];
         if (ptrValue) {
-            [outputVideoFrameIdleSet removeObject:ptrValue];
+            [self.outputVideoFrameIdleSet removeObject:ptrValue];
             outFrame = (IDeckLinkMutableVideoFrame*)ptrValue.pointerValue;
         }
     }
@@ -144,9 +144,9 @@
     BOOL result = NO;
     @synchronized (self) {
         NSValue* ptrValue = [NSValue valueWithPointer:(void*)outFrame];
-        NSValue* orgValue = [outputVideoFrameSet member:ptrValue];
+        NSValue* orgValue = [self.outputVideoFrameSet member:ptrValue];
         if (orgValue) {
-            [outputVideoFrameIdleSet addObject:orgValue];
+            [self.outputVideoFrameIdleSet addObject:orgValue];
             result = YES;
         }
     }

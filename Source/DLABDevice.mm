@@ -237,30 +237,39 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _inputPixelBufferPool = NULL;
     }
     
-    // Release c++ objects
-    if (_prefsChangeCallback) {
-        [self subscribePrefsChangeNotification:NO];
-    }
-    if (_statusChangeCallback) {
-        [self subscribeStatusChangeNotification:NO];
-    }
-    if (_profileCallback) {
-        _profileCallback->Release();
-        _profileCallback = NULL;
-    }
+    // Release c++ Callback objects
     if (_outputPreviewCallback) {
+        [self setOutputScreenPreviewToView:nil error:nil];
         _outputPreviewCallback->Release();
         _outputPreviewCallback = NULL;
     }
     if (_inputPreviewCallback) {
+        [self setInputScreenPreviewToView:nil error:nil];
         _inputPreviewCallback->Release();
         _inputPreviewCallback = NULL;
     }
+    if (_profileCallback) {
+        [self subscribeProfileChange:NO];
+        _profileCallback->Release();
+        _profileCallback = NULL;
+    }
+    if (_prefsChangeCallback) {
+        [self subscribePrefsChangeNotification:NO];
+        _prefsChangeCallback->Release();
+        _prefsChangeCallback = NULL;
+    }
+    if (_statusChangeCallback) {
+        [self subscribeStatusChangeNotification:NO];
+        _statusChangeCallback->Release();
+        _statusChangeCallback = NULL;
+    }
     if (_outputCallback) {
+        [self subscribeOutput:NO];
         _outputCallback->Release();
         _outputCallback = NULL;
     }
     if (_inputCallback) {
+        [self subscribeInput:NO];
         _inputCallback->Release();
         _inputCallback = NULL;
     }
@@ -293,6 +302,10 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     [self shutdown];
     
     // Release c++ objects
+    if (_deckLinkNotification) {
+        _deckLinkNotification->Release();
+        //_deckLinkNotification = NULL;
+    }
     if (_deckLinkStatus) {
         _deckLinkStatus->Release();
         //_deckLinkStatus = NULL;
@@ -312,13 +325,18 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 }
 
 /* =================================================================================== */
-// MARK: - (Private) - Paired with public readonly
+// MARK: - (Public RO/Private RW) - property accessor
 /* =================================================================================== */
 
 - (DLABVideoSetting*) outputVideoSetting { return _outputVideoSettingW; }
 - (DLABVideoSetting*) inputVideoSetting { return _inputVideoSettingW; }
 - (DLABAudioSetting*) outputAudioSetting { return _outputAudioSettingW; }
 - (DLABAudioSetting*) inputAudioSetting { return _inputAudioSettingW; }
+
+@synthesize outputVideoSettingW = _outputVideoSettingW;
+@synthesize inputVideoSettingW = _inputVideoSettingW;
+@synthesize outputAudioSettingW = _outputAudioSettingW;
+@synthesize inputAudioSettingW = _inputAudioSettingW;
 
 /* =================================================================================== */
 // MARK: - (Public) property accessor
@@ -340,11 +358,6 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize supportKeying = _supportKeying;
 @synthesize supportInputFormatDetection = _supportInputFormatDetection;
 @synthesize supportHDRMetadata = _supportHDRMetadata;
-
-@synthesize outputVideoSettingW = _outputVideoSettingW;
-@synthesize inputVideoSettingW = _inputVideoSettingW;
-@synthesize outputAudioSettingW = _outputAudioSettingW;
-@synthesize inputAudioSettingW = _inputAudioSettingW;
 
 // MARK: -
 
@@ -402,6 +415,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize apiVersion = _apiVersion;
 
 // MARK: -
+
+@synthesize captureQueueKey = captureQueueKey;
+@synthesize playbackQueueKey = playbackQueueKey;
+@synthesize delegateQueueKey = delegateQueueKey;
+@synthesize outputVideoFrameSet = outputVideoFrameSet;
+@synthesize outputVideoFrameIdleSet = outputVideoFrameIdleSet;
 
 @synthesize inputPixelBufferPool = _inputPixelBufferPool;
 @synthesize outputPreviewCallback = _outputPreviewCallback;
