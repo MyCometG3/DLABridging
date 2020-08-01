@@ -14,11 +14,11 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol DLABDeckControlStatusCallbackDelegate
 @required
 - (void) deckControlTimecodeUpdate:(DLABTimecodeBCD)currentTimecode;
-- (void) deckControlVTRControlStateChanged:(DLABDeckControlVTRControl)newState
+- (void) deckControlVTRControlStateChanged:(DLABDeckControlVTRControlState)newState
                               controlError:(DLABDeckControlError)error;
 - (void) deckControlEventReceived:(DLABDeckControlEvent)event
                      controlError:(DLABDeckControlError)error;
-- (void) deckControlStatusChanged:(DLABDeckControlStatus)flags mask:(uint32_t)mask;
+- (void) deckControlStatusChanged:(DLABDeckControlStatusFlag)flags mask:(uint32_t)mask;
 @optional
 @end
 
@@ -29,6 +29,10 @@ NS_ASSUME_NONNULL_END
 /* =================================================================================== */
 
 NS_ASSUME_NONNULL_BEGIN
+
+extern NSString* const kCurrentModeKey;
+extern NSString* const kCurrentVTRControlStateKey;
+extern NSString* const kCurrentStatusFlagsKey;
 
 @interface DLABDeckControl : NSObject
 
@@ -47,29 +51,34 @@ NS_ASSUME_NONNULL_BEGIN
                     error:(NSError * _Nullable * _Nullable) error;
 
 /// Close the deck and update standby state.
-/// @param standbyOn TRUE for standby on, FALSE for standby off.
+/// @param standby TRUE for standby on, FALSE for standby off.
 /// @param error Error description if failed.
 /// @result TRUE if success, FALSE if failed.
-- (BOOL) closeWithStandbyOn:(BOOL)standbyOn
-                      error:(NSError * _Nullable * _Nullable) error;
+- (BOOL) closeWithStandby:(BOOL)standby
+                    error:(NSError * _Nullable * _Nullable) error;
 
-/// Convenience property for current DLABDeckControlMode.
-@property (nonatomic, assign, readonly) DLABDeckControlMode controlMode;
-/// Convenience property for current DLABDeckControlVTRControl.
-@property (nonatomic, assign, readonly) DLABDeckControlVTRControl vtrControlState;
-/// Convenience property for current DLABDeckControlStatus.
-@property (nonatomic, assign, readonly) DLABDeckControlStatus statusFlags;
+/// Convenience query for current DLABDeckControlMode.
+- (nullable NSNumber*) currentModeWithError:(NSError * _Nullable * _Nullable) error;
+
+/// Convenience query for current DLABDeckControlVTRControlState.
+- (nullable NSNumber*) currentVTRControlStateWithError:(NSError * _Nullable * _Nullable) error;
+
+/// Convenience query for current DLABDeckControlStatusFlag.
+- (nullable NSNumber*) currentStatusFlagsWithError:(NSError * _Nullable * _Nullable) error;
+
+/// Convenience query for current state using kCurrentModeKey, kCurrentVTRControlStateKey, and kCurrentStatusFlagsKey.
+- (nullable NSDictionary<NSString*, NSNumber*>*) currentStateDictionaryWithError:(NSError * _Nullable * _Nullable) error;
 
 /// Get current state of the deck.
 /// @param mode DLABDeckControlMode
-/// @param state DLABDeckControlVTRControl
-/// @param flags DLABDeckControlStatus
+/// @param state DLABDeckControlVTRControlState
+/// @param flags DLABDeckControlStatusFlag
 /// @param error Error description if failed.
 /// @result TRUE if success, FALSE if failed.
-- (BOOL) currentStateWithMode:(DLABDeckControlMode*)mode
-              vtrControlState:(DLABDeckControlVTRControl*)state
-                        flags:(DLABDeckControlStatus*)flags
-                        error:(NSError * _Nullable * _Nullable)error;
+- (BOOL) currentStateOfControlMode:(DLABDeckControlMode*)mode
+                   vtrControlState:(DLABDeckControlVTRControlState*)state
+                       statusFlags:(DLABDeckControlStatusFlag*)flags
+                             error:(NSError * _Nullable * _Nullable)error;
 
 /// Update the deck standby state.
 /// @param standbyOn TRUE for standby on, FALSE for standby off.
@@ -160,49 +169,46 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Get the current timecode in BCD format.
 /// @param error Error description if failed.
-/// @result DLABTimecodeBCD
-- (DLABTimecodeBCD) timecodeBCDWithError:(NSError * _Nullable * _Nullable)error;
-
-/// The preroll period in seconds.
-@property (nonatomic, assign, readwrite) uint32_t prerollSeconds;
+/// @result The current timecode in BCD format in NSNumber<uint32_t>* form.
+- (nullable NSNumber*) timecodeBCDWithError:(NSError * _Nullable * _Nullable)error;
 
 /// Set the preroll time period.
-/// @param prerollInSec The preroll period in seconds to set.
-- (void) setPrerollSeconds:(uint32_t)prerollInSec;
+/// @param prerollInSec The preroll period to set in seconds.
+/// @param error Error description if failed.
+/// @result TRUE if success, FALSE if failed.
+- (BOOL) setPrerollSeconds:(uint32_t)prerollInSec error:(NSError * _Nullable * _Nullable)error;
 
 /// Get the preroll time period.
-/// @result The current preroll period in seconds.
-- (uint32_t) prerollSeconds;
-
-/// The field accurate capture timecode offset.
-@property (nonatomic, assign, readwrite) int32_t captureOffset;
+/// @param error Error description if failed.
+/// @result The current preroll period seconds in NSNumber<uint32_t>* form.
+- (nullable NSNumber*) prerollSecondsWithError:(NSError * _Nullable * _Nullable)error;
 
 /// Set the number of fields for a deck specific offset between the inpoint and the time at which the capture starts.
 /// @param offsetFields The timecode offset to set in fields.
-- (void) setCaptureOffset:(int32_t)offsetFields;
+/// @param error Error description if failed.
+/// @result TRUE if success, FALSE if failed.
+- (BOOL) setCaptureOffset:(int32_t)offsetFields error:(NSError * _Nullable * _Nullable)error;
 
 /// Get the number of fields for a deck specific offset between the inpoint and the time at which the capture starts.
-/// @result The current timecode offset in fields.
-- (int32_t) captureOffset;
-
-/// The field accurate export timecode offset.
-@property (nonatomic, assign, readwrite) int32_t exportOffset;
+/// @param error Error description if failed.
+/// @result The current timecode offset fields in NSNumber<int32_t>* form.
+- (nullable NSNumber*) captureOffsetWithError:(NSError * _Nullable * _Nullable)error;
 
 /// Set the number of fields for a deck specific offset prior to the in or out point where an export will begin or end.
 /// @param offsetFields The timecode offset to set in fields.
-- (void) setExportOffset:(int32_t)offsetFields;
+/// @param error Error description if failed.
+/// @result TRUE if success, FALSE if failed.
+- (BOOL) setExportOffset:(int32_t)offsetFields error:(NSError * _Nullable * _Nullable)error;
 
 /// Get the number of fields for a deck specific offset prior to the in or out point where an export will begin or end.
-/// @result The current timecode offset in fields.
-- (int32_t) exportOffset;
+/// @param error Error description if failed.
+/// @result The current timecode offset fields in NSNumber<int32_t>* form..
+- (nullable NSNumber*) exportOffsetWithError:(NSError * _Nullable * _Nullable)error;
 
-/// The recommended delay field of the current deck.
-@property (nonatomic, assign, readonly) int32_t manualExportOffset;
-
-/// Get the recommended delay fields of the current deck.
-/// @discussion This is only applicable for manual exports and may be adjusted with the main export offset if required.
-/// @result The current timecode offset in fields.
-- (int32_t) manualExportOffset;
+/// Get the recommended delay field of the current deck.
+/// @param error Error description if failed.
+/// @result The current timecode offset fields in NSNumber<int32_t>* form.
+- (nullable NSNumber*) manualExportOffsetWithError:(NSError * _Nullable * _Nullable)error;
 
 //
 
@@ -228,11 +234,10 @@ NS_ASSUME_NONNULL_BEGIN
                   useVITC:(BOOL)useVITC
                     error:(NSError * _Nullable * _Nullable)error;
 
-/// The device ID returned by the deck.
-@property (nonatomic, assign, readonly) uint16_t deviceID;
-
 /// Get the device ID returned by the deck.
-- (uint16_t)deviceID;
+/// @param error Error description if failed.
+/// @result deviceID in NSNumber<uint16_t> form.
+- (nullable NSNumber*) deviceIDWithError:(NSError * _Nullable * _Nullable)error;
 
 /// The Abort operation is synchronous. Completion is signaled with a DLABDeckControlAbortedEvent event.
 /// @param error Error description if failed.

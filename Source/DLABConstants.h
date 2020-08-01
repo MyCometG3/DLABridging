@@ -700,10 +700,10 @@ typedef NS_ENUM(uint32_t, DLABEncoderConfiguration)
 /* Enum BMDDeckControlMode - DeckControl mode */
 typedef NS_ENUM(uint32_t, DLABDeckControlMode)
 {
-    DLABDeckControlNotOpened                                      = /* 'ntop' */ 0x6E746F70,
-    DLABDeckControlVTRControlMode                                 = /* 'vtrc' */ 0x76747263,
-    DLABDeckControlExportMode                                     = /* 'expm' */ 0x6578706D,
-    DLABDeckControlCaptureMode                                    = /* 'capm' */ 0x6361706D
+    DLABDeckControlModeNotOpened                                      = /* 'ntop' */ 0x6E746F70,
+    DLABDeckControlModeVTRControlMode                                 = /* 'vtrc' */ 0x76747263,
+    DLABDeckControlModeExportMode                                     = /* 'expm' */ 0x6578706D,
+    DLABDeckControlModeCaptureMode                                    = /* 'capm' */ 0x6361706D
 };
 
 /* Enum BMDDeckControlEvent - DeckControl event */
@@ -723,26 +723,26 @@ typedef NS_ENUM(uint32_t, DLABDeckControlEvent)
 };
 
 /* Enum BMDDeckControlVTRControlState - VTR Control state */
-typedef NS_ENUM(uint32_t, DLABDeckControlVTRControl)
+typedef NS_ENUM(uint32_t, DLABDeckControlVTRControlState)
 {
-    DLABDeckControlVTRControlNotInVTRControlMode                            = /* 'nvcm' */ 0x6E76636D,
-    DLABDeckControlVTRControlPlaying                              = /* 'vtrp' */ 0x76747270,
-    DLABDeckControlVTRControlRecording                            = /* 'vtrr' */ 0x76747272,
-    DLABDeckControlVTRControlStill                                = /* 'vtra' */ 0x76747261,
-    DLABDeckControlVTRControlShuttleForward                       = /* 'vtsf' */ 0x76747366,
-    DLABDeckControlVTRControlShuttleReverse                       = /* 'vtsr' */ 0x76747372,
-    DLABDeckControlVTRControlJogForward                           = /* 'vtjf' */ 0x76746A66,
-    DLABDeckControlVTRControlJogReverse                           = /* 'vtjr' */ 0x76746A72,
-    DLABDeckControlVTRControlStopped                              = /* 'vtro' */ 0x7674726F
+    DLABDeckControlVTRControlStateNotInVTRControlMode                            = /* 'nvcm' */ 0x6E76636D,
+    DLABDeckControlVTRControlStatePlaying                              = /* 'vtrp' */ 0x76747270,
+    DLABDeckControlVTRControlStateRecording                            = /* 'vtrr' */ 0x76747272,
+    DLABDeckControlVTRControlStateStill                                = /* 'vtra' */ 0x76747261,
+    DLABDeckControlVTRControlStateShuttleForward                       = /* 'vtsf' */ 0x76747366,
+    DLABDeckControlVTRControlStateShuttleReverse                       = /* 'vtsr' */ 0x76747372,
+    DLABDeckControlVTRControlStateJogForward                           = /* 'vtjf' */ 0x76746A66,
+    DLABDeckControlVTRControlStateJogReverse                           = /* 'vtjr' */ 0x76746A72,
+    DLABDeckControlVTRControlStateStopped                              = /* 'vtro' */ 0x7674726F
 };
 
 /* Enum BMDDeckControlStatusFlags - Deck Control status flags */
-typedef NS_OPTIONS(uint32_t, DLABDeckControlStatus)
+typedef NS_OPTIONS(uint32_t, DLABDeckControlStatusFlag)
 {
-    DLABDeckControlStatusDeckConnected                            = 1 << 0,
-    DLABDeckControlStatusRemoteMode                               = 1 << 1,
-    DLABDeckControlStatusRecordInhibited                          = 1 << 2,
-    DLABDeckControlStatusCassetteOut                              = 1 << 3
+    DLABDeckControlStatusFlagDeckConnected                            = 1 << 0,
+    DLABDeckControlStatusFlagRemoteMode                               = 1 << 1,
+    DLABDeckControlStatusFlagRecordInhibited                          = 1 << 2,
+    DLABDeckControlStatusFlagCassetteOut                              = 1 << 3
 };
 
 /* Enum BMDDeckControlExportModeOpsFlags - Export mode flags */

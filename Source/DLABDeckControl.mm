@@ -10,6 +10,10 @@
 
 const char* kDeckQueue = "DLABDeckControl.deckQueue";
 
+NSString* const kCurrentModeKey = @"currentMode";
+NSString* const kCurrentVTRControlStateKey = @"currentState";
+NSString* const kCurrentStatusFlagsKey = @"currentFlags";
+
 @implementation DLABDeckControl
 
 - (instancetype) init
@@ -61,18 +65,10 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
 
 // Public
 @synthesize delegate = _delegate;
-@dynamic controlMode;
-@dynamic vtrControlState;
-@dynamic statusFlags;
-@dynamic prerollSeconds;
-@dynamic captureOffset;
-@dynamic exportOffset;
-@dynamic manualExportOffset;
-@dynamic deviceID;
 
 // Private
-@synthesize deckQueueKey = deckQueueKey;
 @synthesize deckControl = _deckControl;
+@synthesize deckQueueKey = deckQueueKey;
 @synthesize deckQueue = _deckQueue;
 
 /* =================================================================================== */
@@ -158,7 +154,7 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
 {
     id obj = self.delegate;
     if ([obj respondsToSelector:@selector(deckControlVTRControlStateChanged:controlError:)]) {
-        [obj deckControlVTRControlStateChanged:(DLABDeckControlVTRControl)newState
+        [obj deckControlVTRControlStateChanged:(DLABDeckControlVTRControlState)newState
                                   controlError:(DLABDeckControlError)error];
     }
 }
@@ -198,77 +194,130 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->Open(timeScale, timeValue, dropFrame, &err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::Open failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return (result == S_OK);
 }
 
-- (BOOL) closeWithStandbyOn:(BOOL)standbyOn error:(NSError**)error
+- (BOOL) closeWithStandby:(BOOL)standby error:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     IDeckLinkDeckControl* control = self.deckControl;
     if (control) {
         [self deck_sync:^{
-            result = self.deckControl->Close(standbyOn);
+            result = self.deckControl->Close(standby);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::Close failed."
                   code:result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
-- (DLABDeckControlMode) controlMode
+- (nullable NSNumber*) currentModeWithError:(NSError**)error
 {
-    DLABDeckControlMode currentMode = DLABDeckControlNotOpened;
-    DLABDeckControlVTRControl currentState = DLABDeckControlVTRControlNotInVTRControlMode;
-    DLABDeckControlStatus currentFlags = DLABDeckControlStatusDeckConnected;
-    BOOL result = [self currentStateWithMode:&currentMode
-                             vtrControlState:&currentState
-                                       flags:&currentFlags
-                                       error:nil];
-    return (result == S_OK ? currentMode : DLABDeckControlNotOpened);
+    DLABDeckControlMode currentMode = DLABDeckControlModeNotOpened;
+    DLABDeckControlVTRControlState currentState = DLABDeckControlVTRControlStateNotInVTRControlMode;
+    DLABDeckControlStatusFlag currentFlags = DLABDeckControlStatusFlagDeckConnected;
+    NSError* err = nil;
+    BOOL result = [self currentStateOfControlMode:&currentMode
+                                  vtrControlState:&currentState
+                                      statusFlags:&currentFlags
+                                            error:&err];
+    if (result) {
+        return @(currentMode);
+    } else {
+        if (error) {
+            *error = err;
+        }
+        return nil;
+    }
 }
 
-- (DLABDeckControlVTRControl) vtrControlState
+- (nullable NSNumber*) currentVTRControlStateWithError:(NSError**)error
 {
-    DLABDeckControlMode currentMode = DLABDeckControlNotOpened;
-    DLABDeckControlVTRControl currentState = DLABDeckControlVTRControlNotInVTRControlMode;
-    DLABDeckControlStatus currentFlags = DLABDeckControlStatusDeckConnected;
-    BOOL result = [self currentStateWithMode:&currentMode
-                             vtrControlState:&currentState
-                                       flags:&currentFlags
-                                       error:nil];
-    return (result == S_OK ? currentState : DLABDeckControlVTRControlNotInVTRControlMode);
+    DLABDeckControlMode currentMode = DLABDeckControlModeNotOpened;
+    DLABDeckControlVTRControlState currentState = DLABDeckControlVTRControlStateNotInVTRControlMode;
+    DLABDeckControlStatusFlag currentFlags = DLABDeckControlStatusFlagDeckConnected;
+    NSError* err = nil;
+    BOOL result = [self currentStateOfControlMode:&currentMode
+                                  vtrControlState:&currentState
+                                      statusFlags:&currentFlags
+                                            error:&err];
+    if (result) {
+        return @(currentState);
+    } else {
+        if (error) {
+            *error = err;
+        }
+        return nil;
+    }
 }
 
-- (DLABDeckControlStatus) statusFlags
+- (nullable NSNumber*) currentStatusFlagsWithError:(NSError**)error
 {
-    DLABDeckControlMode currentMode = DLABDeckControlNotOpened;
-    DLABDeckControlVTRControl currentState = DLABDeckControlVTRControlNotInVTRControlMode;
-    DLABDeckControlStatus currentFlags = DLABDeckControlStatusDeckConnected;
-    BOOL result = [self currentStateWithMode:&currentMode
-                             vtrControlState:&currentState
-                                       flags:&currentFlags
-                                       error:nil];
-    return (result == S_OK ? currentFlags : DLABDeckControlStatusDeckConnected);
+    DLABDeckControlMode currentMode = DLABDeckControlModeNotOpened;
+    DLABDeckControlVTRControlState currentState = DLABDeckControlVTRControlStateNotInVTRControlMode;
+    DLABDeckControlStatusFlag currentFlags = DLABDeckControlStatusFlagDeckConnected;
+    NSError* err = nil;
+    BOOL result = [self currentStateOfControlMode:&currentMode
+                                  vtrControlState:&currentState
+                                      statusFlags:&currentFlags
+                                            error:&err];
+    if (result) {
+        return @(currentFlags);
+    } else {
+        if (error) {
+            *error = err;
+        }
+        return nil;
+    }
 }
 
-- (BOOL) currentStateWithMode:(DLABDeckControlMode*)mode
-              vtrControlState:(DLABDeckControlVTRControl*)state
-                        flags:(DLABDeckControlStatus*)flags
-                        error:(NSError**)error
+- (nullable NSDictionary<NSString*, NSNumber*>*) currentStateDictionaryWithError:(NSError**)error
+{
+    DLABDeckControlMode currentMode = DLABDeckControlModeNotOpened;
+    DLABDeckControlVTRControlState currentState = DLABDeckControlVTRControlStateNotInVTRControlMode;
+    DLABDeckControlStatusFlag currentFlags = DLABDeckControlStatusFlagDeckConnected;
+    NSError* err = nil;
+    BOOL result = [self currentStateOfControlMode:&currentMode
+                                  vtrControlState:&currentState
+                                      statusFlags:&currentFlags
+                                            error:&err];
+    if (result) {
+        NSDictionary<NSString*, NSNumber*>* dict = @{
+            kCurrentModeKey:@(currentMode),
+            kCurrentVTRControlStateKey:@(currentState),
+            kCurrentStatusFlagsKey:@(currentFlags)
+        };
+        return dict;
+    } else {
+        if (error) {
+            *error = err;
+        }
+        return nil;
+    }
+}
+
+- (BOOL) currentStateOfControlMode:(DLABDeckControlMode*)mode
+                   vtrControlState:(DLABDeckControlVTRControlState*)state
+                       statusFlags:(DLABDeckControlStatusFlag*)flags
+                             error:(NSError**)error
 {
     NSParameterAssert(mode && state && flags);
     
@@ -286,18 +335,18 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
     }
     if (result == S_OK) {
         *mode = (DLABDeckControlMode)currentMode;
-        *state = (DLABDeckControlVTRControl)currentState;
-        *flags = (DLABDeckControlStatus)currentFlags;
-    }
-    if (result != S_OK) {
+        *state = (DLABDeckControlVTRControlState)currentState;
+        *flags = (DLABDeckControlStatusFlag)currentFlags;
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::GetCurrentState failed."
                   code:result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) standby:(BOOL)standbyOn error:(NSError**)error
@@ -309,15 +358,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->SetStandby(standbyOn);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::SetStandby failed."
                   code:result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) sendCommand:(NSData*)commandBuffer
@@ -342,15 +393,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
                                                    outBufferSize, &err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::SendCommand failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) playWithError:(NSError**)error
@@ -363,15 +416,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->Play(&err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::Play failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) stopWithError:(NSError**)error
@@ -384,15 +439,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->Stop(&err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::Stop failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) togglePlayStopWithError:(NSError**)error
@@ -405,15 +462,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->TogglePlayStop(&err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::TogglePlayStop failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) ejectWithError:(NSError**)error
@@ -426,15 +485,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->Eject(&err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::Eject failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) goToTimecode:(DLABTimecodeBCD)timecode error:(NSError**)error
@@ -447,15 +508,17 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = self.deckControl->GoToTimecode(timecode, &err);
         }];
     }
-    if (result != S_OK) {
+    if (result == S_OK) {
+        return YES;
+    } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkDeckControl::GoToTimecode failed."
                   code:(NSInteger)err // result
                     to:error];
         }
+        return NO;
     }
-    return result;
 }
 
 - (BOOL) fastForwardWithViewTape:(BOOL)viewTape error:(NSError**)error
@@ -468,7 +531,7 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
             result = control->FastForward(viewTape, &err);
         }];
     }
-    if (!result) {
+    if (result == S_OK) {
         return YES;
     } else {
         if (error) {
@@ -637,8 +700,9 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         BMDTimecodeFormat format = bmdTimecodeSerial; // dummy
         setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
                                                           timecodeObj:currentTimeCode];
+        currentTimeCode->Release();
         if (setting) {
-            ;
+            return setting;
         } else {
             if (error) {
                 [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -646,8 +710,8 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
                       code:paramErr
                         to:error];
             }
+            return nil;
         }
-        currentTimeCode->Release();
     } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -655,11 +719,11 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
                   code:(NSInteger)err // result
                     to:error];
         }
+        return nil;
     }
-    return setting;
 }
 
-- (DLABTimecodeBCD) timecodeBCDWithError:(NSError**)error
+- (nullable NSNumber*) timecodeBCDWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     __block BMDTimecodeBCD currentTimeCode = 0;
@@ -671,7 +735,7 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return currentTimeCode;
+        return @(currentTimeCode);
     } else {
         if (error) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
@@ -679,11 +743,11 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
                   code:(NSInteger)err // result
                     to:error];
         }
-        return 0;
+        return nil;
     }
 }
 
-- (void) setPrerollSeconds:(uint32_t)prerollInSec
+- (BOOL) setPrerollSeconds:(uint32_t)prerollInSec error:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     IDeckLinkDeckControl* control = self.deckControl;
@@ -693,13 +757,19 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return;
+        return YES;
     } else {
-        // Ignore HRESULT; Behave as property method
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::SetPreroll failed."
+                  code:result
+                    to:error];
+        }
+        return NO;
     }
 }
 
-- (uint32_t) prerollSeconds
+- (nullable NSNumber*) prerollSecondsWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     __block uint32_t prerollInSec = 0;
@@ -710,14 +780,19 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return prerollInSec;
+        return @(prerollInSec);
     } else {
-        // Ignore HRESULT; Behave as property method
-        return 0;
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::GetPreroll failed."
+                  code:result
+                    to:error];
+        }
+        return nil;
     }
 }
 
-- (void) setCaptureOffset:(int32_t)offsetFields
+- (BOOL) setCaptureOffset:(int32_t)offsetFields error:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     IDeckLinkDeckControl* control = self.deckControl;
@@ -727,13 +802,19 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return;
+        return YES;
     } else {
-        // Ignore HRESULT; Behave as property method
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::SetCaptureOffset failed."
+                  code:result
+                    to:error];
+        }
+        return NO;
     }
 }
 
-- (int32_t) captureOffset
+- (nullable NSNumber*) captureOffsetWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     __block int32_t offsetFields = 0;
@@ -744,14 +825,19 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return offsetFields;
+        return @(offsetFields);
     } else {
-        // Ignore HRESULT; Behave as property method
-        return 0;
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::GetCaptureOffset failed."
+                  code:result
+                    to:error];
+        }
+        return nil;
     }
 }
 
-- (void) setExportOffset:(int32_t)offsetFields
+- (BOOL) setExportOffset:(int32_t)offsetFields error:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     IDeckLinkDeckControl* control = self.deckControl;
@@ -761,13 +847,19 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return;
+        return YES;
     } else {
-        // Ignore HRESULT; Behave as property method
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::SetExportOffset failed."
+                  code:result
+                    to:error];
+        }
+        return NO;
     }
 }
 
-- (int32_t) exportOffset
+- (nullable NSNumber*) exportOffsetWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     __block int32_t offsetFields = 0;
@@ -778,14 +870,19 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return offsetFields;
+        return @(offsetFields);
     } else {
-        // Ignore HRESULT; Behave as property method
-        return 0;
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::GetExportOffset failed."
+                  code:result
+                    to:error];
+        }
+        return nil;
     }
 }
 
-- (int32_t) manualExportOffset
+- (nullable NSNumber*) manualExportOffsetWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     __block int32_t offsetFields = 0;
@@ -796,10 +893,15 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return offsetFields;
+        return @(offsetFields);
     } else {
-        // Ignore HRESULT; Behave as property method
-        return 0;
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::GetManualExportOffset failed."
+                  code:result
+                    to:error];
+        }
+        return nil;
     }
 }
 
@@ -855,7 +957,7 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
     }
 }
 
-- (uint16_t)deviceID
+- (nullable NSNumber*) deviceIDWithError:(NSError**)error
 {
     __block HRESULT result = E_FAIL;
     __block uint16_t deviceID = 0;
@@ -867,10 +969,15 @@ const char* kDeckQueue = "DLABDeckControl.deckQueue";
         }];
     }
     if (result == S_OK) {
-        return deviceID;
+        return @(deviceID);
     } else {
-        // Ignore HRESULT; Behave as property method
-        return 0;
+        if (error) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkDeckControl::GetDeviceID failed."
+                  code:(NSInteger)result
+                    to:error];
+        }
+        return nil;
     }
 }
 
