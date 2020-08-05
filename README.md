@@ -12,14 +12,12 @@ NOTE: Compressed capture is not supported.
 
 #### About unsupported feature(s):
 
-    : Following interfaces are not supported. (Section # are from SDK 11.5 pdf)
+    : Following interfaces are not supported. (Section # are from SDK 11.6 pdf)
     : 2.5.8 IDeckLinkVideoFrame3DExtensions
     : 2.5.18 IDeckLinkMemoryAllocator
     : 2.5.26 IDeckLinkGLScreenPreviewHelper
     : 2.5.27 IDeckLinkCocoaScreenPreviewCallback
     : 2.5.28 IDeckLinkDX9ScreenPreviewHelper
-    : 2.5.29 IDeckLinkDeckControl
-    : 2.5.30 IDeckLinkDeckControlStatusCallback.
     : 2.5.35 IDeckLinkEncoderInput
     : 2.5.36 IDeckLinkEncoderInputCallback
     : 2.5.37 IDeckLinkEncoderPacket
@@ -112,8 +110,8 @@ NOTE: Compressed capture is not supported.
     device = nil
 
 #### Development environment
-- MacOS X 10.15.4 Catalina
-- Xcode 11.5
+- MacOS X 10.15.6 Catalina
+- Xcode 11.6
 - Objective-C++, Swift 5.2
 
 #### License
