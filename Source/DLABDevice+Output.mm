@@ -358,41 +358,49 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
 // MARK: VANC support
 /* =================================================================================== */
 
-// private experimental - VANC support
-- (void*) getVancBufferOfOutputFrame:(IDeckLinkMutableVideoFrame*)outFrame
-                                line:(uint32_t)lineNumber
+// private experimental - VANC Playback support
+
+- (IDeckLinkVideoFrameAncillary*) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame
 {
     NSParameterAssert(outFrame);
     
-    HRESULT result = E_FAIL;
     IDeckLinkVideoFrameAncillary *ancillaryData = NULL;
-    result = outFrame->GetAncillaryData(&ancillaryData);
+    outFrame->GetAncillaryData(&ancillaryData);
     
-    // If ancillaryData is not available, create new one and attach to outFrame
-    if (result) {
+    if (!ancillaryData) {
+        // Create new one and attach to outFrame
         IDeckLinkOutput *output = self.deckLinkOutput;
         if (output) {
-            result = output->CreateAncillaryData(outFrame->GetPixelFormat(), &ancillaryData);
-            if (!result) {
-                result = outFrame->SetAncillaryData(ancillaryData);
+            output->CreateAncillaryData(outFrame->GetPixelFormat(), &ancillaryData);
+            if (ancillaryData) {
+                outFrame->SetAncillaryData(ancillaryData);
                 ancillaryData->Release();
+                ancillaryData = NULL;   // Ensure nullify
             }
         }
+        
+        // Issue Another query.
+        outFrame->GetAncillaryData(&ancillaryData);
     }
     
-    if (!result) {
-        void* buffer = NULL;
-        result = ancillaryData->GetBufferForVerticalBlankingLine(lineNumber, &buffer);
-        if (!result) {
-            return buffer;
-        } else {
-            NSLog(@"ERROR: VANC for lineNumber %d is not supported.", lineNumber);
-        }
-    }
-    return NULL;
+    return ancillaryData; // Nullable
 }
 
-// private experimental - VANC support
+- (void*) bufferOfOutputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
+                                  line:(uint32_t)lineNumber
+{
+    NSParameterAssert(ancillaryData);
+    
+    void* buffer = NULL;
+    ancillaryData->GetBufferForVerticalBlankingLine(lineNumber, &buffer);
+    if (buffer) {
+        return buffer;
+    } else {
+        NSLog(@"ERROR: VANC for lineNumber %d is not supported.", lineNumber);
+        return NULL;
+    }
+}
+
 - (void) callbackOutputVANCHandler:(IDeckLinkMutableVideoFrame*)outFrame
                             atTime:(NSInteger)displayTime
                           duration:(NSInteger)frameDuration
@@ -411,22 +419,28 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     //
     VANCHandler outHandler = self.outputVANCHandler;
     if (outHandler) {
-        // Callback in delegate queue
-        [self delegate_sync:^{
-            NSArray<NSNumber*>* lines = self.outputVANCLines;
-            for (NSNumber* num in lines) {
-                int32_t lineNumber = num.intValue;
-                void* buffer = [self getVancBufferOfOutputFrame:outFrame line:lineNumber];
-                if (buffer) {
-                    BOOL result = outHandler(timingInfo, lineNumber, buffer);
-                    if (!result) break;
+        IDeckLinkVideoFrameAncillary* frameAncillary = [self prepareOutputFrameAncillary:outFrame];
+        if (frameAncillary) {
+            // Callback in delegate queue
+            [self delegate_sync:^{
+                NSArray<NSNumber*>* lines = self.outputVANCLines;
+                for (NSNumber* num in lines) {
+                    int32_t lineNumber = num.intValue;
+                    void* buffer = [self bufferOfOutputFrameAncillary:frameAncillary line:lineNumber];
+                    if (buffer) {
+                        BOOL result = outHandler(timingInfo, lineNumber, buffer);
+                        if (!result) break;
+                    }
                 }
-            }
-        }];
+            }];
+
+            frameAncillary->Release();
+        }
     }
 }
 
-// private experimental - VANC Packet Output support
+// private experimental - VANC Packet Playback support
+
 - (void) callbackOutputVANCPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
                                   atTime:(NSInteger)displayTime
                                 duration:(NSInteger)frameDuration
@@ -448,40 +462,37 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     if (outHandler) {
         // Prepare for callback
         IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
-        HRESULT result = outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
-                                                  (void**)&frameAncillaryPackets);
-        assert (result == S_OK);
-        
-        DLABAncillaryPacket* packet = new DLABAncillaryPacket();
-        assert (packet != NULL);
-        
-        // Callback in delegate queue
-        [self delegate_sync:^{
-            while (TRUE) {
-                HRESULT ret = S_OK;
-                uint8_t did = 0;
-                uint8_t sdid = 0;
-                uint32_t lineNumber = 0;
-                uint8_t dataStreamIndex = 0;
-                
-                NSData* data = outHandler(timingInfo, &did, &sdid, &lineNumber, &dataStreamIndex);
-                if (!data) break; // finished w/o error
-                
-                ret = packet->Update(did, sdid, lineNumber, dataStreamIndex, data);
-                if (ret != S_OK) {
-                    break;
+        outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
+                                 (void**)&frameAncillaryPackets);
+        if (frameAncillaryPackets) {
+            [self delegate_sync:^{
+                // Callback in delegate queue
+                while (TRUE) {
+                    BOOL ready = FALSE;
+                    DLABAncillaryPacket* packet = new DLABAncillaryPacket();
+                    if (packet) {
+                        uint8_t did = 0;
+                        uint8_t sdid = 0;
+                        uint32_t lineNumber = 0;
+                        uint8_t dataStreamIndex = 0;
+                        NSData* data = outHandler(timingInfo,
+                                                  &did, &sdid, &lineNumber, &dataStreamIndex);
+                        if (data) {
+                            HRESULT ret = packet->Update(did, sdid, lineNumber, dataStreamIndex,
+                                                         data);
+                            if (ret == S_OK) {
+                                ret = frameAncillaryPackets->AttachPacket(packet);
+                            }
+                            ready = (ret == S_OK);
+                        }
+                        delete packet;
+                    }
+                    if (!ready) break;
                 }
-
-                ret = frameAncillaryPackets->AttachPacket(packet);
-                if (ret != S_OK) {
-                    break;
-                }
-            }
-        }];
-        
-        // Clean up
-        delete packet;
-        frameAncillaryPackets->Release();
+            }];
+            
+            frameAncillaryPackets->Release();
+        }
     }
 }
 

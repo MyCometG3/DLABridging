@@ -420,14 +420,22 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 
 /**
- Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
-
+ Wrapper of IDeckLinkMutableVideoFrame::GetAncillaryData. Caller must release when finished.
+ 
  @param outFrame IDeckLinkMutableVideoFrame
+ @return VideoFrameAncillary for Output Frame.
+ */
+- (nullable IDeckLinkVideoFrameAncillary *) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame;
+
+/**
+ Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
+ 
+ @param ancillaryData VideoFrameAncillary for Output Frame.
  @param lineNumber VANC line number of interrest.
  @return row buffer pointer, or null if not available.
  */
-- (nullable void*) getVancBufferOfOutputFrame:(IDeckLinkMutableVideoFrame*)outFrame
-                                         line:(uint32_t)lineNumber;
+- (nullable void*) bufferOfOutputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
+                                           line:(uint32_t)lineNumber;
 
 /**
  Call VANCHandler for output VideoFrame
@@ -441,6 +449,19 @@ NS_ASSUME_NONNULL_BEGIN
                             atTime:(NSInteger)displayTime
                           duration:(NSInteger)frameDuration
                        inTimeScale:(NSInteger)timeScale;
+
+/**
+ Call VANCPacketHandler for output VideoFrame
+ 
+ @param outFrame IDeckLinkMutableVideoFrame
+ @param displayTime time at which to display the frame in timeScale units
+ @param frameDuration duration for which to display the frame in timeScale units
+ @param timeScale time scale for displayTime and displayDuration
+ */
+- (void) callbackOutputVANCPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
+                                  atTime:(NSInteger)displayTime
+                                duration:(NSInteger)frameDuration
+                             inTimeScale:(NSInteger)timeScale;
 
 @end
 
@@ -531,14 +552,22 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 
 /**
- Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
-
+ Wrapper of IDeckLinkVideoInputFrame::GetAncillaryData. Caller must release when finished.
+ 
  @param inFrame IDeckLinkVideoInputFrame
+ @return VideoFrameAncillary for Input Frame.
+ */
+- (nullable IDeckLinkVideoFrameAncillary *) prepareInputFrameAncillary:(IDeckLinkVideoInputFrame*)inFrame;
+
+/**
+ Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
+ 
+ @param ancillaryData VideoFrameAncillary for Input Frame.
  @param lineNumber VANC line number of interrest.
  @return row buffer pointer, or null if not available.
  */
-- (nullable void*) getVancBufferOfInputFrame:(IDeckLinkVideoInputFrame*)inFrame
-                                        line:(uint32_t)lineNumber;
+- (nullable void*) bufferOfInputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
+                                          line:(uint32_t)lineNumber;
 
 /**
  Call VANCHandler block for input VideoFrame.
@@ -546,6 +575,13 @@ NS_ASSUME_NONNULL_BEGIN
  @param inFrame IDeckLinkVideoInputFrame
  */
 - (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame;
+
+/**
+ Call VANCPacketHandler block for input VideoFrame.
+ 
+ @param inFrame IDeckLinkVideoInputFrame
+ */
+- (void) callbackInputVANCPacketHandler:(IDeckLinkVideoInputFrame*)inFrame;
 
 @end
 

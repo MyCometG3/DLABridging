@@ -250,9 +250,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param timingInfo TimingInfo of Video Input Frame
  @param lineNumber lineNumber of VANC buffer.
  @param buffer VANC buffer of specified lineNumber.
- @return Return FALSE if further call is not acceptable.
+ @return Return FALSE if further call is not required.
  */
-typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber, void* _Nullable buffer);
+typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber, void* buffer);
 
 /**
  Experimetal VANC Packet support : VANC Capture callback block
@@ -268,17 +268,17 @@ typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber,
  @param lineNumber lineNumber of VANC buffer.
  @param dataStreamIndex the data stream index for ancillary packet.
  @param data VANC Packet data encoded in bmdAncillaryPacketFormatUInt8 format.
- @return Return FALSE if further call is not acceptable.
+ @return Return FALSE if further call is not required.
  */
 typedef BOOL (^InputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
                                         uint8_t did,
                                         uint8_t sdid,
                                         uint32_t lineNumber,
                                         uint8_t dataStreamIndex,
-                                        NSData* _Nonnull data);
+                                        NSData* data);
 
 /**
- Experimental VANC Packet support : VANC Output callback block
+ Experimental VANC Packet support : VANC Playback callback block
  
  This block is called in sync on delegate queue. You should process immediately.
  Sequence of callback will be triggered until you returned nil (when you finish all of VANC packets).
@@ -290,7 +290,7 @@ typedef BOOL (^InputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
  @param sdid Secondary Data ID (SDID) for ancillary packet.
  @param lineNumber lineNumber of VANC buffer.
  @param dataStreamIndex the data stream index for ancillary packet.
- @return data VANC Packet data encoded in bmdAncillaryPacketFormatUInt8 format.
+ @return data VANC Packet data encoded in bmdAncillaryPacketFormatUInt8 format. Return nil if futher call is not required.
  */
 typedef NSData* _Nullable (^OutputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
                                                       uint8_t* did,
