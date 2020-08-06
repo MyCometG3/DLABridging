@@ -197,12 +197,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Open failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Open failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -219,12 +217,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Close failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Close failed."
+              code:result
+                to:error];
         return NO;
     }
 }
@@ -242,9 +238,7 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result) {
         return @(currentMode);
     } else {
-        if (error) {
-            *error = err;
-        }
+        if (error) *error = err;
         return nil;
     }
 }
@@ -262,9 +256,7 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result) {
         return @(currentState);
     } else {
-        if (error) {
-            *error = err;
-        }
+        if (error) *error = err;
         return nil;
     }
 }
@@ -282,9 +274,7 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result) {
         return @(currentFlags);
     } else {
-        if (error) {
-            *error = err;
-        }
+        if (error) *error = err;
         return nil;
     }
 }
@@ -307,9 +297,7 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
         };
         return dict;
     } else {
-        if (error) {
-            *error = err;
-        }
+        if (error) *error = err;
         return nil;
     }
 }
@@ -339,12 +327,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
         *flags = (DLABDeckControlStatusFlag)currentFlags;
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetCurrentState failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetCurrentState failed."
+              code:result
+                to:error];
         return NO;
     }
 }
@@ -361,12 +347,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::SetStandby failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::SetStandby failed."
+              code:result
+                to:error];
         return NO;
     }
 }
@@ -396,12 +380,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::SendCommand failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::SendCommand failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -419,12 +401,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Play failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Play failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -442,12 +422,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Stop failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Stop failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -465,12 +443,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::TogglePlayStop failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::TogglePlayStop failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -488,12 +464,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Eject failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Eject failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -511,12 +485,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GoToTimecode failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GoToTimecode failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -534,12 +506,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::FastForward failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::FastForward failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -557,12 +527,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Rewind failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Rewind failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -580,12 +548,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::StepForward failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::StepForward failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -603,12 +569,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::StepBack failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::StepBack failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -626,12 +590,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Jog failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Jog failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -649,12 +611,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Shuttle failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Shuttle failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -673,12 +633,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK && currentTimeCode) {
         return CFBridgingRelease(currentTimeCode);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Shuttle failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Shuttle failed."
+              code:(NSInteger)err // result
+                to:error];
         return nil;
     }
 }
@@ -704,21 +662,17 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
         if (setting) {
             return setting;
         } else {
-            if (error) {
-                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                    reason:@"Failed to instantiate DLABTimecodeSetting."
-                      code:paramErr
-                        to:error];
-            }
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Failed to instantiate DLABTimecodeSetting."
+                  code:paramErr
+                    to:error];
             return nil;
         }
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetTimecode failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetTimecode failed."
+              code:(NSInteger)err // result
+                to:error];
         return nil;
     }
 }
@@ -737,12 +691,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return @(currentTimeCode);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetTimecodeBCD failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetTimecodeBCD failed."
+              code:(NSInteger)err // result
+                to:error];
         return nil;
     }
 }
@@ -759,12 +711,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::SetPreroll failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::SetPreroll failed."
+              code:result
+                to:error];
         return NO;
     }
 }
@@ -782,12 +732,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return @(prerollInSec);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetPreroll failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetPreroll failed."
+              code:result
+                to:error];
         return nil;
     }
 }
@@ -804,12 +752,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::SetCaptureOffset failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::SetCaptureOffset failed."
+              code:result
+                to:error];
         return NO;
     }
 }
@@ -827,12 +773,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return @(offsetFields);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetCaptureOffset failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetCaptureOffset failed."
+              code:result
+                to:error];
         return nil;
     }
 }
@@ -849,12 +793,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::SetExportOffset failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::SetExportOffset failed."
+              code:result
+                to:error];
         return NO;
     }
 }
@@ -872,12 +814,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return @(offsetFields);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetExportOffset failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetExportOffset failed."
+              code:result
+                to:error];
         return nil;
     }
 }
@@ -895,12 +835,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return @(offsetFields);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetManualExportOffset failed."
-                  code:result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetManualExportOffset failed."
+              code:result
+                to:error];
         return nil;
     }
 }
@@ -921,12 +859,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::StartExport failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::StartExport failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -947,12 +883,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::StartCapture failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::StartCapture failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -971,12 +905,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return @(deviceID);
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::GetDeviceID failed."
-                  code:(NSInteger)result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::GetDeviceID failed."
+              code:(NSInteger)result
+                to:error];
         return nil;
     }
 }
@@ -993,12 +925,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::Abort failed."
-                  code:(NSInteger)result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::Abort failed."
+              code:(NSInteger)result
+                to:error];
         return NO;
     }
 }
@@ -1016,12 +946,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::CrashRecordStart failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::CrashRecordStart failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }
@@ -1039,12 +967,10 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     if (result == S_OK) {
         return YES;
     } else {
-        if (error) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkDeckControl::CrashRecordStop failed."
-                  code:(NSInteger)err // result
-                    to:error];
-        }
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkDeckControl::CrashRecordStop failed."
+              code:(NSInteger)err // result
+                to:error];
         return NO;
     }
 }

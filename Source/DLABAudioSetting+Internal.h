@@ -28,6 +28,24 @@ NS_ASSUME_NONNULL_BEGIN
                                   sampleRate:(DLABAudioSampleRate)sampleRate;
 
 /* =================================================================================== */
+// MARK: - (Private) - error helper
+/* =================================================================================== */
+
+/**
+ Utility method to fill (NSError * _Nullable * _Nullable)
+ 
+ @param description string for NSLocalizedDescriptionKey
+ @param failureReason string for NSLocalizedFailureReasonErrorKey
+ @param result error code
+ @param error pointer to (NSError*)
+ @return YES if no error, NO if failed
+ */
+- (BOOL) post:(nullable NSString*)description
+       reason:(nullable NSString*)failureReason
+         code:(NSInteger)result
+           to:(NSError * _Nullable * _Nullable)error;
+
+/* =================================================================================== */
 // MARK: Property - populate by buildAudioFormatDescription
 /* =================================================================================== */
 
