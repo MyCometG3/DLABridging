@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABTimecode instance.
-
+ 
  @param timecodeFormat Specify value of either RP188 family or VITC family.
  @param hour Timecode Value field.
  @param minute Timecode Value field.
@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
                                         userBits:(DLABTimecodeUserBits)userBits NS_DESIGNATED_INITIALIZER;
 /**
  Create DLABTimecode instance from CVSMPTETime struct.
-
+ 
  @param timecodeFormat Specify value of either RP188 family or VITC family.
  @param cvSMPTETime CVSMPTETime stuct for each timecode value fields.
  @param userBits Extra userBits(uint32_t) for timecode.
@@ -115,7 +115,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Timecode String in "HH:MM:SS:FF"
-*/
+ */
 @property (nonatomic, strong, readonly) NSString* timecodeString;
 
 /* =================================================================================== */
@@ -125,7 +125,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Update CVSMPTETimeType according to DLABDisplayMode.
  If you use either 2398/2400/2500/5000 modes, dropFrame will be turned off.
-
+ 
  @param displayMode DLABDisplayMode to define proper CVSMPTETimeType value
  @param error Error description if failed.
  @return YES if successfully populated. NO if failed with supplied parameters.
@@ -137,7 +137,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Create CMSampleBuffer for Timecode with timingInfo from videoSampleBuffer.
  Supports kCMTimeCodeFormatType_TimeCode32 or kCMTimeCodeFormatType_TimeCode64.
-
+ 
  @param formatType Choose either TimeCode32 or TimeCode64.
  @param videoSampleBuffer Reference as CMTimingInfo source.
  @return Result CMSampleBuffer for Timecode.

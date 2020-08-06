@@ -16,10 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DLABVideoConverter : NSObject
 
 /*
-This converter supports colorspace conversion between DeckLink VideoFrame
-and CoreVideo PixelBuffer.
-NOTE: BMDPixelFormat12BitRGB/BMDPixelFormat12BitRGBLE are not supported.
-*/
+ This converter supports colorspace conversion between DeckLink VideoFrame
+ and CoreVideo PixelBuffer.
+ NOTE: BMDPixelFormat12BitRGB/BMDPixelFormat12BitRGBLE are not supported.
+ */
 
 /// init + prepare videoConverter for capture
 /// @param videoFrame IDeckLinkVideoFrame

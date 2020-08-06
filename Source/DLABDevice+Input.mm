@@ -300,7 +300,7 @@ NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBuff
     BOOL ready = false;
     OSType cvPixelFormat = self.inputVideoSetting.cvPixelFormatType;
     assert(cvPixelFormat);
-
+    
     // Check pool, and create if required
     CVPixelBufferPoolRef pool = self.inputPixelBufferPool;
     if (pool == NULL) {
@@ -649,7 +649,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                     }
                 }
             }];
-
+            
             frameAncillary->Release();
         }
     }
@@ -820,7 +820,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                                                      supportedVideoModeFlag,    // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
                                                      &actualMode,               // BMDDisplayMode = DLABDisplayMode
                                                      &supported);               // bool
-            } else
+            }
             if (pre1105) {
                 IDeckLinkInput_v11_4 *input1104 = (IDeckLinkInput_v11_4*)input;
                 result = input1104->DoesSupportVideoMode(videoConnection,           // BMDVideoConnection = DLABVideoConnection

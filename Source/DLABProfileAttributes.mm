@@ -29,7 +29,7 @@
     if (self) {
         // Retain
         profile->AddRef();
-
+        
         // validate property support (attributes)
         HRESULT result = E_FAIL;
         IDeckLinkProfileAttributes *attr = NULL;

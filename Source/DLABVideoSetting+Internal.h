@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABVideoSetting reference instance from IDeckLinkDisplayMode Object.
-
+ 
  @param newDisplayModeObj IDeckLinkDisplayMode Object.
  @return Instance of DLABVideoSetting.
  */
@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABVideoSetting(Input) instance from IDeckLinkDisplayMode Object and required details.
-
+ 
  @param newDisplayModeObj IDeckLinkDisplayMode Object.
  @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  @param inputFlag Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABVideoSetting(Output) instance from IDeckLinkDisplayMode Object and required details.
-
+ 
  @param newDisplayModeObj IDeckLinkDisplayMode Object.
  @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  @param outputFlag Additional flag of video (i.e. DLABVideoOutputFlagVANC)
@@ -116,7 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  CMVideoFormatDescriptionExtension without clap (for AVSampleBufferDisplayLayer)
-*/
+ */
 @property (nonatomic, strong, nullable) NSDictionary* extensionsNoClapW;
 
 
@@ -184,7 +184,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Refresh input VideoSetting/VideoFormatDescription using first input VideoFrame
-
+ 
  @param videoFrame input VideoFrame as source
  @return YES if no error, NO if failed
  */

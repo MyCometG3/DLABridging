@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABDeckControl instance from IDeckLink object.
-
+ 
  @param deckLink IDeckLink object.
  @return Instance of DLABDeckControl.
  */

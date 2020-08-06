@@ -407,7 +407,7 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeDuplex                                            = /* 'dupx' */ 0x64757078,
     DLABAttributeMinimumPrerollFrames                              = /* 'mprf' */ 0x6D707266,
     DLABAttributeSupportedDynamicRange                             = /* 'sudr' */ 0x73756472,
-
+    
     /* Floats */
     
     DLABAttributeVideoInputGainMinimum                             = /* 'vigm' */ 0x7669676D,

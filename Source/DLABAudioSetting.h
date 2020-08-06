@@ -80,7 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Prepare Audio FormatDescription CFObject from current parameters.
-
+ 
  @return YES if successfully populated. NO if failed with supplied parameters.
  */
 - (BOOL) buildAudioFormatDescriptionWithError:(NSError * _Nullable * _Nullable)error;

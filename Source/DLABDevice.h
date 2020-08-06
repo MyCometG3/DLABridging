@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Called when new input VideoSample is available.
-
+ 
  @param sampleBuffer CMSampleBufferRef for Video
  @param sender Source DLABDevice object.
  */
@@ -99,7 +99,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Called when new input AudioSample is available.
-
+ 
  @param sampleBuffer CMSampleBufferRef for Audio
  @param sender Source DLABDevice object.
  */
@@ -109,7 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Called when new input VideoSample with Timecode is available.
-
+ 
  @param sampleBuffer CMSampleBufferRef for Video
  @param setting DLABTimecodeSetting for this VideoSample
  @param sender Source DLABDevice object.
@@ -120,13 +120,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Called when input video format change is detected.
-
+ 
  Caller can do either 1) stop stream, or 2) apply new setting.
  
  1) To stop stream do following:
  
  : stopStreamsWithError:
-
+ 
  2) To apply new setting do following in sequence:
  
  : pauseStreamsWithError:
@@ -165,7 +165,7 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 /**
  Called when status udpate is detected.
-
+ 
  @param statusID DLABDeckLinkStatus
  */
 - (void)statusChanged:(DLABDeckLinkStatus)statusID
@@ -282,7 +282,7 @@ typedef BOOL (^InputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
  
  This block is called in sync on delegate queue. You should process immediately.
  Sequence of callback will be triggered until you returned nil (when you finish all of VANC packets).
-
+ 
  - output : This block is called prior to outputVideoFrame is scheduled
  
  @param timingInfo TimingInfo of Video Input Frame
@@ -311,7 +311,7 @@ NS_ASSUME_NONNULL_BEGIN
  This block is called in sync on delegate queue. You should update HDR metadata for output frame immediately.
  
  - output: This block is called prior to outputVideoFrame is scheduled
-
+ 
  @param timingInfo TimingInfo of Output Video Frame
  @param frameMetadata The FrameMetadata for output frame to be embeded.
  @return Return FALSE if frameMetadata is not required for this frame.
@@ -483,8 +483,8 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 
 /**
-Experimental DeckControl support. Returns nil if DeckControl is not available.
-*/
+ Experimental DeckControl support. Returns nil if DeckControl is not available.
+ */
 @property (nonatomic, strong, readonly, nullable) DLABDeckControl* deckControl;
 
 /* =================================================================================== */
@@ -546,8 +546,8 @@ Experimental DeckControl support. Returns nil if DeckControl is not available.
 @property (nonatomic, copy, nullable) InputVANCPacketHandler inputVANCPacketHandler;
 
 /**
-Experimental VANC Packet Output support: Caller should populate VANC Packet callback block.
-*/
+ Experimental VANC Packet Output support: Caller should populate VANC Packet callback block.
+ */
 @property (nonatomic, copy, nullable) OutputVANCPacketHandler outputVANCPacketHandler;
 
 /* =================================================================================== */
@@ -561,7 +561,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Experimental Output FrameMetadataHDR support: Caller should populate FrameMetadataHandler block for output.
-*/
+ */
 @property (nonatomic, copy, nullable) OutputFrameMetadataHandler outputFrameMetadataHandler;
 
 /* =================================================================================== */
@@ -575,7 +575,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Experimental - use IDeckLinkVideoFrame - PixelFormat value to calculate pixelSize in bytes.
-*/
+ */
 @property (nonatomic, assign) BOOL debugCalcPixelSizeFast;
 
 /* =================================================================================== */
@@ -586,7 +586,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABAttribute
-
+ 
  @param attributeID DLABAttribute
  @param error Error description if failed.
  @return Query result in NSNumber<BOOL>* form.
@@ -606,7 +606,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABAttribute
-
+ 
  @param attributeID DLABAttribute
  @param error Error description if failed.
  @return Query result in NSNumber<double>* form.
@@ -628,7 +628,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABConfiguration
-
+ 
  @param configurationID DLABConfiguration
  @param error Error description if failed.
  @return Query result in NSNumber<BOOL>* form.
@@ -670,7 +670,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Setter for DLABConfiguration
-
+ 
  @param value BOOL value
  @param configurationID DLABConfiguration
  @param error Error description if failed.
@@ -718,7 +718,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Wrapper of IDeckLinkConfiguration::WriteConfigurationToPreferences
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -728,7 +728,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABDeckLinkStatus
-
+ 
  @param statusID DLABDeckLinkStatus.
  @param error Error description if failed.
  @return Query result in NSNumber<BOOL>* form.
@@ -738,7 +738,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABDeckLinkStatus
-
+ 
  @param statusID DLABDeckLinkStatus.
  @param error Error description if failed.
  @return Query result in NSNumber<int64_t>* form.
@@ -748,7 +748,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABDeckLinkStatus
-
+ 
  @param statusID DLABDeckLinkStatus.
  @param error Error description if failed.
  @return Query result in NSNumber<double>* form.
@@ -758,7 +758,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABDeckLinkStatus
-
+ 
  @param statusID DLABDeckLinkStatus.
  @param error Error description if failed.
  @return Query result in NSString* form.
@@ -768,7 +768,7 @@ Experimental VANC Packet Output support: Caller should populate VANC Packet call
 
 /**
  Getter for DLABDeckLinkStatus.
-
+ 
  @param statusID DLABDeckLinkStatus.
  @param requestSize Byte length of result. Specify 0 if unknown.
  @param error Error description if failed.
@@ -810,7 +810,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience constructer for Output Video Setting
-
+ 
  @param displayMode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
  @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  @param videoOutputFlag Additional flag of video (i.e. DLABVideoOutputFlagVANC)
@@ -828,7 +828,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience constructer for Output Audio Setting
-
+ 
  @param type BitsPerSample. Either 16 or 32 are supported.
  @param count Number of audio channel. 1 for Mono, 2 for Stereo. 16 max for discrete.
  @param rate Sample frame rate. Only 48000 Hz is supported.
@@ -846,7 +846,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Wrapper of IDeckLinkOutput::IsScheduledPlaybackRunning
-
+ 
  @param error Error description if failed
  @return Query result in NSNumber<BOOL>* form, or NULL if failed.
  */
@@ -854,7 +854,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Wrapper of IDeckLinkOutput::SetScreenPreviewCallback and CreateCocoaScreenPreview()
-
+ 
  @param parentView Parent NSView for preview output.
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -864,8 +864,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Wrapper of IDeckLinkOutput::EnableVideoOutput
-
- @param setting 
+ 
+ @param setting
  Output Video Setting created by createOutputVideoSettingOfDisplayMode:pixelFormat:outputFlag:supportedAs:error:
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -874,20 +874,20 @@ NS_ASSUME_NONNULL_BEGIN
                                      error:(NSError * _Nullable * _Nullable)error;
 
 /**
-Wrapper of IDeckLinkOutput::EnableVideoOutput
-
-@param setting Output Video Setting created by createOutputVideoSettingOfDisplayMode:pixelFormat:outputFlag:supportedAs:error:
-@param connection Specify DLABVideoConnection for output
-@param error Error description if failed
-@return YES if no error, NO if failed
-*/
+ Wrapper of IDeckLinkOutput::EnableVideoOutput
+ 
+ @param setting Output Video Setting created by createOutputVideoSettingOfDisplayMode:pixelFormat:outputFlag:supportedAs:error:
+ @param connection Specify DLABVideoConnection for output
+ @param error Error description if failed
+ @return YES if no error, NO if failed
+ */
 - (BOOL) enableVideoOutputWithVideoSetting:(DLABVideoSetting*)setting
                               onConnection:(DLABVideoConnection)connection
                                      error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Wrapper of IDeckLinkOutput::DisableVideoOutput
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -895,7 +895,7 @@ Wrapper of IDeckLinkOutput::EnableVideoOutput
 
 /**
  Wrapper of IDeckLinkOutput::DisplayVideoFrameSync
-
+ 
  @param pixelBuffer CVPixelBufferRef for output
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -921,7 +921,7 @@ Wrapper of IDeckLinkOutput::EnableVideoOutput
 
 /**
  Wrapper of IDeckLinkOutput::ScheduleVideoFrame with Timecode support
-
+ 
  @param pixelBuffer CVPixelBufferRef for output
  @param displayTime time at which to display the frame in timeScale units
  @param frameDuration duration for which to display the frame in timeScale units
@@ -939,7 +939,7 @@ Wrapper of IDeckLinkOutput::EnableVideoOutput
 
 /**
  Wrapper of IDeckLinkOutput::GetBufferedVideoFrameCount
-
+ 
  @param error Error description if failed
  @return The number of frames queued, or NULL if failed.
  */
@@ -951,7 +951,7 @@ Wrapper of IDeckLinkOutput::EnableVideoOutput
 
 /**
  Wrapper of IDeckLinkOutput::EnableAudioOutput
-
+ 
  @param setting Output Audio Setting created by createOutputAudioSettingOfSampleType:channelCount:sampleRate:error:
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -960,20 +960,20 @@ Wrapper of IDeckLinkOutput::EnableVideoOutput
                                      error:(NSError * _Nullable * _Nullable)error;
 
 /**
-Wrapper of IDeckLinkOutput::EnableAudioOutput
-
-@param setting Output Audio Setting created by createOutputAudioSettingOfSampleType:channelCount:sampleRate:error:
-@param audioOutputSwitch Specify DLABAudioOutputSwitch for output
-@param error Error description if failed
-@return YES if no error, NO if failed
-*/
+ Wrapper of IDeckLinkOutput::EnableAudioOutput
+ 
+ @param setting Output Audio Setting created by createOutputAudioSettingOfSampleType:channelCount:sampleRate:error:
+ @param audioOutputSwitch Specify DLABAudioOutputSwitch for output
+ @param error Error description if failed
+ @return YES if no error, NO if failed
+ */
 - (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
                                   onSwitch:(DLABAudioOutputSwitch)audioOutputSwitch
                                      error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Wrappper of IDeckLinkOutput::DisableAudioOutput
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1009,7 +1009,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::BeginAudioPreroll
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1017,7 +1017,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::EndAudioPreroll
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1025,7 +1025,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::ScheduleAudioSamples using AudioBufferList
-
+ 
  @param audioBufferList audioBufferList containing audio sample frames.
  
  Audio channel samples must be interleaved into a sample frame and sample frames must be contiguous.
@@ -1045,7 +1045,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::ScheduleAudioSamples using CMBlockBuffer
-
+ 
  Audio channel samples must be interleaved into a sample frame and sample frames must be contiguous.
  @param blockBuffer CMBlockBuffer containing audio sample frames.
  @param byteOffset byteOffset of buffer.
@@ -1066,7 +1066,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::GetBufferedAudioSampleFrameCount
-
+ 
  @param error Error description if failed
  @return Number of audio frames currently buffered, or NULL if failed.
  */
@@ -1074,7 +1074,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::FlushBufferedAudioSamples
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1086,7 +1086,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::StartScheduledPlayback
-
+ 
  @param startTime Time at which the playback starts in units of timeScale
  @param timeScale Time scale for playbackStartTime and playbackSpeed
  @param error Error description if failed
@@ -1098,7 +1098,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::StopScheduledPlayback
-
+ 
  NOTE: This method stops stream immediately.
  
  @param error Error description if failed
@@ -1108,10 +1108,10 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::StopScheduledPlayback
-
+ 
  @param timeScale Time scale for stopPlaybackAtTime and actualStopTime.
  Specify 0 to stop immediately
- @param stopPlayBackAtTime Playback time at which to stop in units of timeScale. 
+ @param stopPlayBackAtTime Playback time at which to stop in units of timeScale.
  Specify 0 to stop immediately.
  @param actualStopTime Playback time at which playback actually stopped in units of timeScale.
  Specify NULL to stop immediately
@@ -1125,7 +1125,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::GetScheduledStreamTime
-
+ 
  @param timeScale Time scale for elapsedTimeSinceSchedulerBegan
  @param streamTime Frame time
  @param playbackSpeed Scheduled playback speed
@@ -1143,7 +1143,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::GetReferenceStatus
-
+ 
  @param referenceStatus A bit-mask of the reference status. See DLABReferenceStatus for more details.
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -1153,7 +1153,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkOutput::GetHardwareReferenceClock
-
+ 
  @param timeScale Desired time scale
  @param hardwareTime Hardware reference time (in units of desiredTimeScale)
  @param timeInFrame Time in frame (in units of desiredTimeScale)
@@ -1173,7 +1173,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkKeyer::Enable for Internal Keying
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1181,7 +1181,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkKeyer::Enable for External Keying
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1189,7 +1189,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkKeyer::SetLevel
-
+ 
  @param level The level that the image is to be blended onto the frame.
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -1198,7 +1198,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkKeyer::RampUp
-
+ 
  @param numFrames  number of frames that the image is progressively blended in.
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -1207,7 +1207,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkKeyer::RampDown
-
+ 
  @param numFrames The number of frames that the image is progressively blended out.
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -1216,7 +1216,7 @@ Wrapper of IDeckLinkOutput::EnableAudioOutput
 
 /**
  Wrapper of IDeckLinkKeyer::Disable
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1254,7 +1254,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience constructer for Input Video Setting
-
+ 
  @param displayMode Video stream categoly (i.e. DLABDisplayModeNTSC, DLABDisplayModeHD1080i5994)
  @param pixelFormat Raw pixel format type (i.e. DLABPixelFormat8BitYUV, DLABPixelFormat8BitBGRA)
  @param videoInputFlag Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
@@ -1272,7 +1272,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience constructer for Input Audio Setting
-
+ 
  @param type BitsPerSample. Either 16 or 32 are supported.
  @param count Number of audio channel. 1 for Mono, 2 for Stereo. 16 max for discrete.
  @param rate Sample frame rate. Only 48000 Hz is supported.
@@ -1290,7 +1290,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Wrapper of IDeckLinkInput::SetScreenPreviewCallback and CreateCocoaScreenPreview()
-
+ 
  @param parentView Parent NSView for preview input.
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -1300,7 +1300,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Wrapper of IDeckLinkInput::EnableVideoInput
-
+ 
  @param setting Input Video Setting created by
  createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
  @param error Error description if failed
@@ -1310,21 +1310,21 @@ NS_ASSUME_NONNULL_BEGIN
                                     error:(NSError * _Nullable * _Nullable)error;
 
 /**
-Wrapper of IDeckLinkInput::EnableVideoInput
-
-@param setting Input Video Setting created by
-createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
-@param connection Specify DLABVideoConnection for input
-@param error Error description if failed
-@return YES if no error, NO if failed
-*/
+ Wrapper of IDeckLinkInput::EnableVideoInput
+ 
+ @param setting Input Video Setting created by
+ createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
+ @param connection Specify DLABVideoConnection for input
+ @param error Error description if failed
+ @return YES if no error, NO if failed
+ */
 - (BOOL) enableVideoInputWithVideoSetting:(DLABVideoSetting*)setting
                              onConnection:(DLABVideoConnection)connection
                                     error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Wrapper of IDeckLinkInput::GetAvailableVideoFrameCount
-
+ 
  @param error Error description if failed
  @return The number of available input frames, or NULL if failed.
  */
@@ -1332,7 +1332,7 @@ createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
 
 /**
  Wrapper of IDeckLinkInput::DisableVideoInput
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1344,8 +1344,8 @@ createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
 
 /**
  Wrapper of IDeckLinkInput::EnableAudioInput
-
- @param setting Input Audio Setting created by 
+ 
+ @param setting Input Audio Setting created by
  createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
  @param error Error description if failed
  @return YES if no error, NO if failed
@@ -1354,21 +1354,21 @@ createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
                                error:(NSError * _Nullable * _Nullable)error;
 
 /**
-Wrapper of IDeckLinkInput::EnableAudioInput
-
-@param setting Input Audio Setting created by
-createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
-@param connection Specify DLABAudioConnection for input
-@param error Error description if failed
-@return YES if no error, NO if failed
-*/
+ Wrapper of IDeckLinkInput::EnableAudioInput
+ 
+ @param setting Input Audio Setting created by
+ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
+ @param connection Specify DLABAudioConnection for input
+ @param error Error description if failed
+ @return YES if no error, NO if failed
+ */
 - (BOOL) enableAudioInputWithSetting:(DLABAudioSetting*)setting
                         onConnection:(DLABAudioConnection)connection
                                error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Wrapper of IDeckLinkInput::DisableAudioInput
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1376,7 +1376,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkInput::GetAvailableAudioSampleFrameCount
-
+ 
  @param error Error description if failed
  @return The number of buffered audio frames currently available, or NULL if failed.
  */
@@ -1388,7 +1388,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkInput::StartStreams
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1396,7 +1396,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkInput::StopStreams
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1404,7 +1404,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkInput::FlushStreams
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1412,7 +1412,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkInput::PauseStreams
-
+ 
  @param error Error description if failed
  @return YES if no error, NO if failed
  */
@@ -1424,7 +1424,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkInput::GetHardwareReferenceClock
-
+ 
  @param timeScale Desired time scale
  @param hardwareTime Hardware reference time
  @param timeInFrame Time in frame (in units of desired TimeScale)
@@ -1444,7 +1444,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkHDMIInputEDID::GetInt
-
+ 
  @param hdmiInputEDID DLABDeckLinkHDMIInputEDID
  @param error Error description if failed.
  @return Query result in NSNumber<int64_t>* form.
@@ -1454,7 +1454,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkHDMIInputEDID::SetInt
-
+ 
  @param value NSInteger value
  @param hdmiInputEDID DLABDeckLinkHDMIInputEDID
  @param error Error description if failed.
@@ -1466,7 +1466,7 @@ createInputAudioSettingOfSampleType:channelCount:sampleRate:error:
 
 /**
  Wrapper of IDeckLinkHDMIInputEDID::WriteToEDID
-
+ 
  @param error Error description if failed.
  @return YES if no error, NO if failed
  */

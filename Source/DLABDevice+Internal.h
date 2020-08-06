@@ -38,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABDevice instance from IDeckLink object.
-
+ 
  @param deckLink IDeckLink object.
  @return Instance of DLABDevice.
  */
@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Utility method to fill (NSError * _Nullable * _Nullable)
-
+ 
  @param description string for NSLocalizedDescriptionKey
  @param failureReason string for NSLocalizedFailureReasonErrorKey
  @param result error code
@@ -102,7 +102,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Handle IDeckLinkNotificationCallback::Notify
-
+ 
  @param topic BMDNotifications
  @param param1 first parameter in uint64_t
  @param param2 second parameter in uint64_t
@@ -347,7 +347,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Handle IDeckLinkVideoOutputCallback::ScheduledFrameCompleted
-
+ 
  @param frame IDeckLinkVideoFrame
  @param result BMDOutputFrameCompletionResult
  */
@@ -356,7 +356,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Handle IDeckLinkAudioOutputCallback::RenderAudioSamples
-
+ 
  @param preroll preroll or not
  */
 - (void) renderAudioSamplesPreroll:(BOOL)preroll;
@@ -372,7 +372,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Check output VideoFrame pool and expand if required.
-
+ 
  @return YES if no error, NO if failed
  */
 - (BOOL) prepareOutputVideoFramePool;
@@ -384,14 +384,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Reserve output VideoFrame and take it out from output VideoFrame pool
-
+ 
  @return IDeckLinkMutableVideoFrame or null if failed.
  */
 - (nullable IDeckLinkMutableVideoFrame*) reserveOutputVideoFrame;
 
 /**
  Release output VideoFrame and return it to output VideoFrame pool
-
+ 
  @param outFrame IDeckLinkMutableVideoFrame
  @return YES if no error, NO if failed
  */
@@ -399,7 +399,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Prepare output VideoFrame from PixelBuffer
-
+ 
  @param pb CVPixelBufferRef
  @return IDeckLinkMutableVideoFrame or null if failed.
  */
@@ -407,7 +407,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Validate timecode combination for current output VideoSetting
-
+ 
  @param format DLABTimecodeFormat
  @param outputVideoSetting DLABVideoSetting
  @return YES if valid combination, No if invalid combination
@@ -439,7 +439,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Call VANCHandler for output VideoFrame
-
+ 
  @param outFrame IDeckLinkMutableVideoFrame
  @param displayTime time at which to display the frame in timeScale units
  @param frameDuration duration for which to display the frame in timeScale units
@@ -481,7 +481,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Handle BMDVideoInputFormatChangedEvents
-
+ 
  @param events BMDVideoInputFormatChangedEvents
  @param displayMode IDeckLinkDisplayMode object
  @param flags BMDDetectedVideoInputFormatFlags
@@ -492,7 +492,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Handle captured videoFrame/audioPacket
-
+ 
  @param videoFrame IDeckLinkVideoInputFrame
  @param audioPacket IDeckLinkAudioInputPacket
  */
@@ -507,7 +507,7 @@ NS_ASSUME_NONNULL_BEGIN
  Utility method to create DLABTimecodeSetting from videoFrame.
  
  If videoFrame contains timecode, either RP188 or VITC family will be returned.
-
+ 
  @param videoFrame IDeckLinkVideoInputFrame
  @return DLABTimecodeSetting for videoFrame or null if failed.
  */
@@ -515,7 +515,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Prepare PixelBuffer for VideoFrame. Different stride is supported.
-
+ 
  @param videoFrame IDeckLinkVideoInputFrame
  @return CVPixelBufferRef for videoFrame or null if failed.
  */
@@ -523,7 +523,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Utility method to convert videoFrame into CMSampleBufferRef.
-
+ 
  @param videoFrame IDeckLinkVideoInputFrame
  @return CMSampleBufferRef for videoFrame or null if failed.
  */
@@ -531,7 +531,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Utility method to convert audioPacket into CMSampleBufferRef.
-
+ 
  @param audioPacket IDeckLinkAudioInputPacket
  @return CMSampleBuffer for audioPacket or null if failed.
  */
@@ -561,7 +561,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Call VANCHandler block for input VideoFrame.
-
+ 
  @param inFrame IDeckLinkVideoInputFrame
  */
 - (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame;

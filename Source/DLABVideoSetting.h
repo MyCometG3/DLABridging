@@ -148,7 +148,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  CMVideoFormatDescriptionExtension without clap (for AVSampleBufferDisplayLayer)
-*/
+ */
 @property (nonatomic, copy, readonly, nullable) NSDictionary* extensionsNoClap;
 
 /* =================================================================================== */
@@ -167,7 +167,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Dictionary from IDeckLinkDisplayMode object.
-
+ 
  @return NSDictionary with parameters from IDeckLinkDisplayMode Object.
  */
 - (NSDictionary*) dictionaryOfDisplayModeObj;
@@ -177,13 +177,13 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param error Error description if failed.
  @return YES if successfully populated. NO if failed with supplied parameters.
-*/
+ */
 - (BOOL) buildVideoFormatDescriptionWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
  Add clean aperture (clap) VideoFormatDescriptionExtension to CVPixelBuffer.
  See kCMFormatDescriptionExtension_CleanAperture.
-
+ 
  @param clapWidthN Numerator of kCMFormatDescriptionKey_CleanApertureWidthRational
  @param clapWidthD Denominator of kCMFormatDescriptionKey_CleanApertureWidthRational
  @param clapHeightN Numerator of kCMFormatDescriptionKey_CleanApertureHeightRational

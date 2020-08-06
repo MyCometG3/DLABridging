@@ -214,7 +214,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     _supportInputFormatDetection = false;
     bool newSupportsInputFormatDetection = false;
     error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInputFormatDetection,
-                                         &newSupportsInputFormatDetection);
+                                                &newSupportsInputFormatDetection);
     if (!error) _supportInputFormatDetection = newSupportsInputFormatDetection;
     
     _supportHDRMetadata = false;

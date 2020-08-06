@@ -71,7 +71,7 @@ public:
     virtual HRESULT         SetFloat(BMDDeckLinkFrameMetadataID metadataID, double value);
     virtual HRESULT         SetFlag(BMDDeckLinkFrameMetadataID metadataID, bool value);
     virtual HRESULT         SetString(BMDDeckLinkFrameMetadataID metadataID, CFStringRef value);
-
+    
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
     ULONG AddRef();

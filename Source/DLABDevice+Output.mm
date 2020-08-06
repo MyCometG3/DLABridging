@@ -295,7 +295,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
     BOOL ready = false;
     OSType cvPixelFormat = self.inputVideoSetting.cvPixelFormatType;
     assert(cvPixelFormat);
-
+    
     // take out free output frame from frame pool
     IDeckLinkMutableVideoFrame* videoFrame = [self reserveOutputVideoFrame];
     if (videoFrame) {
@@ -446,7 +446,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
                     }
                 }
             }];
-
+            
             frameAncillary->Release();
         }
     }
@@ -605,7 +605,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
                                                       supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
                                                       &actualMode,              // BMDDisplayMode = DLABDisplayMode
                                                       &supported);              // bool
-            } else
+            }
             if (pre1105) {
                 IDeckLinkOutput_v11_4 *output1104 = (IDeckLinkOutput_v11_4*)output;
                 result = output1104->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
@@ -855,25 +855,25 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     // Callback VANCHandler block
     if (self.outputVANCHandler) {
         [self callbackOutputVANCHandler:outFrame
-                                   atTime:displayTime
-                                 duration:frameDuration
-                              inTimeScale:timeScale];
+                                 atTime:displayTime
+                               duration:frameDuration
+                            inTimeScale:timeScale];
     }
     
     // Callback VANCPacketHandler block
     if (self.outputVANCPacketHandler) {
         [self callbackOutputVANCPacketHandler:outFrame
-                                         atTime:displayTime
-                                       duration:frameDuration
-                                    inTimeScale:timeScale];
+                                       atTime:displayTime
+                                     duration:frameDuration
+                                  inTimeScale:timeScale];
     }
     
     // Callback OutputFrameMetadataHandler block
     if (self.outputFrameMetadataHandler) {
         frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
-                                                            atTime:displayTime
-                                                          duration:frameDuration
-                                                       inTimeScale:timeScale];
+                                                          atTime:displayTime
+                                                        duration:frameDuration
+                                                     inTimeScale:timeScale];
     }
     
     return frameMetadata;

@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Utility method to find all devices of specified direction.
-
+ 
  @param newDirection Preferred direction(Capture/Playback/Both).
  @return Count of registered DLABDevice(s)
  */
@@ -68,7 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Query device with secified parameter.
-
+ 
  @param deckLink IDeckLink object.
  @return device instance.
  */
@@ -90,14 +90,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Private protocol DLABDeviceNotificationCallbackDelegate
-
+ 
  @param deckLink The added IDeckLink Object.
  */
 - (void) didAddDevice:(IDeckLink*)deckLink;
 
 /**
  Private protocol DLABDeviceNotificationCallbackDelegate
-
+ 
  @param deckLink The removed IDeckLink Object.
  */
 - (void) didRemoveDevice:(IDeckLink*)deckLink;
@@ -108,7 +108,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Call block in private dispatch queue / sync operation
-
+ 
  @param block block object
  */
 - (void) browser_sync:(dispatch_block_t) block;

@@ -24,12 +24,12 @@
 }
 
 - (instancetype) initWithTimecodeFormat:(DLABTimecodeFormat)format
-                                            hour:(uint8_t)hour
-                                          minute:(uint8_t)minute
-                                          second:(uint8_t)second
-                                           frame:(uint8_t)frame
-                                           flags:(DLABTimecodeFlag)flags
-                                        userBits:(DLABTimecodeUserBits)userBits
+                                   hour:(uint8_t)hour
+                                 minute:(uint8_t)minute
+                                 second:(uint8_t)second
+                                  frame:(uint8_t)frame
+                                  flags:(DLABTimecodeFlag)flags
+                               userBits:(DLABTimecodeUserBits)userBits
 {
     NSParameterAssert(format);
     
@@ -695,7 +695,7 @@
             return NULL;
         }
     }
-
+    
     return dataBuffer;
 }
 

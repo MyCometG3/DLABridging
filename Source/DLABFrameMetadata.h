@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param transferFunctionKey kCVImageBufferTransferFunction_*
  @result YES if no error. NO if unsupported.
  */
- - (BOOL)applyTransferFunction:(CFStringRef) transferFunctionKey;
+- (BOOL)applyTransferFunction:(CFStringRef) transferFunctionKey;
 
 /**
  For output: Update ColorPrimaries metadata

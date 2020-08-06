@@ -40,7 +40,7 @@ public:
     HRESULT VTRControlStateChanged(BMDDeckControlVTRControlState newState, BMDDeckControlError error);
     HRESULT DeckControlEventReceived(BMDDeckControlEvent event, BMDDeckControlError error);
     HRESULT DeckControlStatusChanged(BMDDeckControlStatusFlags flags, uint32_t mask);
-
+    
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
     ULONG AddRef();

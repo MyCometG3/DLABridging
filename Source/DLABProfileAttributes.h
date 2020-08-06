@@ -31,52 +31,52 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSNumber*) profileIDWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeSupportsInternalKeying value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<BOOL> form.
-*/
+ Query DLABAttributeSupportsInternalKeying value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<BOOL> form.
+ */
 - (nullable NSNumber*) supportsInternalKeyingWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeSupportsExternalKeying value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<BOOL> form.
-*/
+ Query DLABAttributeSupportsExternalKeying value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<BOOL> form.
+ */
 - (nullable NSNumber*) supportsExternalKeyingWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeNumberOfSubDevices value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<int64_t> form.
-*/
+ Query DLABAttributeNumberOfSubDevices value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<int64_t> form.
+ */
 - (nullable NSNumber*) numberOfSubDevicesWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeSubDeviceIndex value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<int64_t> form.
-*/
+ Query DLABAttributeSubDeviceIndex value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<int64_t> form.
+ */
 - (nullable NSNumber*) subDeviceIndexWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeSupportsDualLinkSDI value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<BOOL> form.
-*/
+ Query DLABAttributeSupportsDualLinkSDI value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<BOOL> form.
+ */
 - (nullable NSNumber*) supportsDualLinkSDIWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeSupportsQuadLinkSDI value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<BOOL> form.
-*/
+ Query DLABAttributeSupportsQuadLinkSDI value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<BOOL> form.
+ */
 - (nullable NSNumber*) supportsQuadLinkSDIWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
-Query DLABAttributeDuplex value of this attributes.
-@param error Error description if failed.
-@return value in NSNumber(<int64_t> form.
-*/
+ Query DLABAttributeDuplex value of this attributes.
+ @param error Error description if failed.
+ @return value in NSNumber(<int64_t> form.
+ */
 - (nullable NSNumber*) duplexModeWithError:(NSError**)error;
 
 /* =================================================================================== */
@@ -87,7 +87,7 @@ Query DLABAttributeDuplex value of this attributes.
 
 /**
  Getter for DLABAttribute
-
+ 
  @param attributeID DLABAttribute
  @param error Error description if failed.
  @return Query result in NSNumber<BOOL>* form.
@@ -97,7 +97,7 @@ Query DLABAttributeDuplex value of this attributes.
 
 /**
  Getter for DLABAttribute
-
+ 
  @param attributeID DLABAttribute
  @param error Error description if failed.
  @return Query result in NSNumber<int64_t>* form.
@@ -107,7 +107,7 @@ Query DLABAttributeDuplex value of this attributes.
 
 /**
  Getter for DLABAttribute
-
+ 
  @param attributeID DLABAttribute
  @param error Error description if failed.
  @return Query result in NSNumber<double>* form.
@@ -117,7 +117,7 @@ Query DLABAttributeDuplex value of this attributes.
 
 /**
  Getter for DLABAttribute
-
+ 
  @param attributeID DLABAttribute
  @param error Error description if failed.
  @return Query result in NSString* form.

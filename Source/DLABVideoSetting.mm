@@ -284,7 +284,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         // Retain
         _displayModeObj = newDisplayModeObj;
         _displayModeObj->AddRef();
-
+        
         // get properties
         HRESULT result = E_FAIL;
         
@@ -566,7 +566,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
                                             @"inputFlag" : @(inputFlag),
                                             @"outputFlag" : @(outputFlag),
                                             @"rowBytes" : @(rowBytes),
-                                            };
+    };
     return displayModeDictionary;
 }
 
@@ -868,7 +868,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
          * SpatialFirstLineEarly (9) is suit for any HD interlaced and PAL D1 source.
          * So Decompressed CMSampleBuffer is either progressive or spatialFistLineXXX.
          */
-
+        
         BMDFieldDominance fieldDominance = self.fieldDominance;
         switch (fieldDominance) {
             case bmdLowerFieldFirst: // woven-fields representation
@@ -901,9 +901,9 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         NSNumber* paspVSpacing = @(self.paspVSpacing);
         
         NSDictionary* valuePasp = @{
-                                    keyPaspHSpacing : paspHSpacing,
-                                    keyPaspVSpacing : paspVSpacing,
-                                    };
+            keyPaspHSpacing : paspHSpacing,
+            keyPaspVSpacing : paspVSpacing,
+        };
         extensions[keyPasp] = valuePasp;
     }
     self.extensionsNoClapW = extensions;
@@ -927,13 +927,13 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         NSNumber* clapVOffsetD = @(self.clapVOffsetD);
         
         NSDictionary* valueClap = @{
-                                    keyClapWidthR   : @[clapWidthN, clapWidthD],
-                                    keyClapHeightR  : @[clapHeightN, clapHeightD],
-                                    keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
-                                    keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
-                                    };
+            keyClapWidthR   : @[clapWidthN, clapWidthD],
+            keyClapHeightR  : @[clapHeightN, clapHeightD],
+            keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
+            keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
+        };
         extensions[keyClap] = valueClap;
-
+        
         self.extensionsW = extensions;
     } else {
         self.extensionsW = self.extensionsNoClap;

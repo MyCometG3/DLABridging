@@ -30,7 +30,7 @@ HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, ui
         _sdid = sdid;
         _line = line;
         _dataStreamIndex = dataStreamIndex;
-
+        
         return S_OK;
     }
     return E_INVALIDARG;

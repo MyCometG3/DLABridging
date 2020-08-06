@@ -83,7 +83,7 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
             return;
         }
         self->direction = DLABVideoIOSupportNone;
-
+        
         result = [self subscribeDeviceNotification:NO];
     }];
     

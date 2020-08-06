@@ -120,7 +120,7 @@ HRESULT DLABMetaFrame::GetFloat(BMDDeckLinkFrameMetadataID metadataID, double* v
             value = nullptr;
             result = E_INVALIDARG;
     }
-
+    
     return result;
 }
 

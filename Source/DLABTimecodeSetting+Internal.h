@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABTimecode instance from IDeckLinkTimecode object.
-
+ 
  @param format Specify value of either RP188 family or VITC family.
  @param timecodeObj IDeckLinkTimecode Object.
  @return Instance of DLABTimecode.
@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Utility method to create SMPTETime blockBuffer from SVSMPTETime (ref: TN2310)
-
+ 
  @param smpteTime A source CVSMPTETime (kCMTimeCodeFormatType_TimeCode32 or TimeCode64)
  @param sizes blockBuffer size, either sizeof(int32_t) or sizeof(int64_t)
  @param quanta temporal count per second of a picture (ceil up to int value)
@@ -57,9 +57,9 @@ NS_ASSUME_NONNULL_BEGIN
  @return timecode BlockBuffer from a CVSMPTETime, NULL if failed
  */
 - (nullable CMBlockBufferRef) createBlockBufferOfSMPTETime:(CVSMPTETime)smpteTime
-                                            sizes:(size_t)sizes
-                                           quanta:(uint32_t)quanta
-                                           tcType:(uint32_t)tcType CF_RETURNS_RETAINED;
+                                                     sizes:(size_t)sizes
+                                                    quanta:(uint32_t)quanta
+                                                    tcType:(uint32_t)tcType CF_RETURNS_RETAINED;
 
 @end
 

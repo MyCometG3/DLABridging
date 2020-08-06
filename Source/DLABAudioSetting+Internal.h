@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create DLABAudioSetting instance.
-
+ 
  @param sampleType BitsPerSample. Either 16 or 32 are supported.
  @param channelCount Number of audio channel. 1 for Mono, 2 for Stereo. 16 max for discrete.
  @param sampleRate Sample frame rate. Only 48000 Hz is supported.

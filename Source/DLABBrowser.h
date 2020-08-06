@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 /**
  Called when new device is detected as specified direction.
-
+ 
  @param device Newly detected device.
  @param sender Monitoring DLABBrowser object.
  */
@@ -71,7 +71,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Query deivce with specified parameter.
-
+ 
  @param persistentID device persistentID.
  @return device instance.
  */
@@ -87,7 +87,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Query deivce with specified parameter.
-
+ 
  @param model device modelName string
  @param display device displayName string
  @return device instance.
@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Getter for DLABDeckLinkAPIInformation
-
+ 
  @param informationID DLABDeckLinkAPIInformation
  @return Query result in NSNumber<BOOL>* form.
  */
@@ -133,7 +133,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Start detection for input.
-
+ 
  @return YES if successfully started. NO if any error.
  */
 - (BOOL) startForInput;
@@ -161,21 +161,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Register all DLABDevice(s) which support input.
-
+ 
  @return Count of registered DLABDevice(s)
  */
 - (NSUInteger) registerDevicesForInput;
 
 /**
  Register all DLABDevice(s) which support output.
-
+ 
  @return Count of registered DLABDevice(s)
  */
 - (NSUInteger) registerDevicesForOutput;
 
 /**
  Register all DLABDevice(s) which support either input/output.
-
+ 
  @return Count of registered DLABDevice(s)
  */
 - (NSUInteger) registerDevices;
