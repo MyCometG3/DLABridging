@@ -23,6 +23,8 @@
 - (void)scheduledFrameCompleted:(IDeckLinkVideoFrame *)frame
                          result:(BMDOutputFrameCompletionResult)result
 {
+    NSParameterAssert(frame);
+    
     // TODO eval BMDOutputFrameCompletionResult here
     // TODO eval GetFrameCompletionReferenceTimestamp() here
     
@@ -64,7 +66,7 @@
 {
     BOOL ret = NO;
     HRESULT result = E_FAIL;
-    DLABVideoSetting* setting = self.outputVideoSettingW;
+    DLABVideoSetting* setting = self.outputVideoSetting;
     IDeckLinkOutput* output = self.deckLinkOutput;
     if (output && setting) {
         @synchronized (self) {
@@ -201,7 +203,9 @@ NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
         int numWidthPerBlock = MAX(1,((NSNumber*)dict[kBlockWidth]).intValue);
         int numHeightPerBlock = MAX(1,((NSNumber*)dict[kBlockHeight]).intValue);
         int numPixelPerBlock = numWidthPerBlock * numHeightPerBlock;
-        pixelSize = ceil(numBitsPerBlock / numPixelPerBlock / 8.0);
+        if (numPixelPerBlock) {
+            pixelSize = ceil(numBitsPerBlock / numPixelPerBlock / 8.0);
+        }
     }
     return pixelSize;
 }
@@ -212,8 +216,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     bool result = FALSE;
     CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     if (!err) {
-        void* dst = NULL;
         void* src = CVPixelBufferGetBaseAddress(pixelBuffer);
+        void* dst = NULL;
         videoFrame->GetBytes(&dst);
         
         vImage_Buffer sourceBuffer = {0};
@@ -247,12 +251,49 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     return result;
 }
 
+NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
+    assert(pixelBuffer && videoFrame);
+    
+    BOOL ready = FALSE;
+    
+    // Simply check if stride is same
+    size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
+    size_t ofRowByte = (size_t)videoFrame->GetRowBytes();
+    size_t ofHeight = videoFrame->GetHeight();
+    BOOL rowByteOK = (pbRowByte == ofRowByte);
+    
+    // Copy pixel data from CVPixelBuffer to outputVideoFrame
+    CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    if (!err) {
+        // get buffer address for src and dst
+        void* dst = NULL;
+        void* src = CVPixelBufferGetBaseAddress(pixelBuffer);
+        videoFrame->GetBytes(&dst);
+        
+        if (dst && src) {
+            if (rowByteOK) { // bulk copy
+                memcpy(dst, src, ofRowByte * ofHeight);
+            } else { // line copy with different stride
+                size_t length = MIN(pbRowByte, ofRowByte);
+                for (size_t line = 0; line < ofHeight; line++) {
+                    char* srcAddr = (char*)src + pbRowByte * line;
+                    char* dstAddr = (char*)dst + ofRowByte * line;
+                    memcpy(dstAddr, srcAddr, length);
+                }
+            }
+            ready = true;
+        }
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    }
+    return ready;
+}
+
 - (IDeckLinkMutableVideoFrame*) outputVideoFrameWithPixelBuffer:(CVPixelBufferRef)pixelBuffer
 {
     NSParameterAssert(pixelBuffer);
     
     BOOL ready = false;
-    OSType cvPixelFormat = self.inputVideoSettingW.cvPixelFormatType;
+    OSType cvPixelFormat = self.inputVideoSetting.cvPixelFormatType;
     assert(cvPixelFormat);
 
     // take out free output frame from frame pool
@@ -271,35 +312,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
             if (self.debugUsevImageCopyBuffer) {
                 ready = copyBufferCVtoDL(self, pixelBuffer, videoFrame);
             } else {
-                // Simply check if stride is same
-                size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
-                size_t ofRowByte = (size_t)videoFrame->GetRowBytes();
-                BOOL rowByteOK = (pbRowByte == ofRowByte);
-                
-                // Copy pixel data from CVPixelBuffer to outputVideoFrame
-                CVReturn err = kCVReturnError;
-                err = CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-                if (!err) {
-                    // get buffer address for src and dst
-                    void* dst = NULL;
-                    void* src = CVPixelBufferGetBaseAddress(pixelBuffer);
-                    videoFrame->GetBytes(&dst);
-                    
-                    if (dst && src) {
-                        if (rowByteOK) { // bulk copy
-                            memcpy(dst, src, ofRowByte * ofHeight);
-                        } else { // line copy with different stride
-                            size_t length = MIN(pbRowByte, ofRowByte);
-                            for (size_t line = 0; line < ofHeight; line++) {
-                                char* srcAddr = (char*)src + pbRowByte * line;
-                                char* dstAddr = (char*)dst + ofRowByte * line;
-                                memcpy(dstAddr, srcAddr, length);
-                            }
-                        }
-                        ready = true;
-                    }
-                    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-                }
+                ready = copyPlaneCVtoDL(pixelBuffer, videoFrame);
             }
         } else {
             // Use DLABVideoConverter/vImage to convert video image
@@ -603,27 +616,34 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                                                           &supported);              // bool
             }
         }];
-        if (!result) {
-            if (supported) {
-                __block IDeckLinkDisplayMode* displayModeObj = NULL;
-                [self playback_sync:^{
-                    output->GetDisplayMode((actualMode > 0 ? actualMode : displayMode), &displayModeObj);
-                }];
-                setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
-                                                               pixelFormat:pixelFormat
-                                                           videoOutputFlag:videoOutputFlag];
-                BOOL result = TRUE;
-                result = [setting buildVideoFormatDescriptionWithError:error];
-                displayModeObj->Release();
-                if (!result) return nil;
-            }
-        } else {
+        if (result) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkOutput::DoesSupportVideoMode failed."
                   code:result
                     to:error];
             return nil;
         }
+        if (supported) {
+            __block IDeckLinkDisplayMode* displayModeObj = NULL;
+            [self playback_sync:^{
+                output->GetDisplayMode((actualMode > 0 ? actualMode : displayMode), &displayModeObj);
+            }];
+            if (displayModeObj) {
+                setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
+                                                               pixelFormat:pixelFormat
+                                                           videoOutputFlag:videoOutputFlag];
+                if (setting) {
+                    [setting buildVideoFormatDescriptionWithError:error];
+                }
+                displayModeObj->Release();
+            }
+        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (setting && setting.videoFormatDescription) {
@@ -654,8 +674,9 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         setting = [[DLABAudioSetting alloc] initWithSampleType:sampleType
                                                   channelCount:channelCount
                                                     sampleRate:sampleRate];
-        BOOL result = [setting buildAudioFormatDescriptionWithError:error];
-        if (!result) return nil;
+        if (setting) {
+            [setting buildAudioFormatDescriptionWithError:error];
+        }
     }
     
     if (setting && setting.audioFormatDescriptionW) {
@@ -683,6 +704,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->IsScheduledPlaybackRunning(&newBoolValue);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (!result) {
@@ -716,12 +743,20 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                 }];
             }
         } else {
-            self.outputPreviewCallback = NULL;
-            
-            [self playback_sync:^{
-                result = output->SetScreenPreviewCallback(NULL);
-            }];
+            if (self.outputPreviewCallback) {
+                self.outputPreviewCallback = NULL;
+                
+                [self playback_sync:^{
+                    result = output->SetScreenPreviewCallback(NULL);
+                }];
+            }
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -749,6 +784,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->EnableVideoOutput(displayMode, outputFlag);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -788,6 +829,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->DisableVideoOutput();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -800,6 +847,36 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                 to:error];
         return NO;
     }
+}
+
+static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVideoFrame *outFrame, NSInteger displayTime, NSInteger frameDuration, NSInteger timeScale) {
+    DLABFrameMetadata* frameMetadata = nil;
+    
+    // Callback VANCHandler block
+    if (self.outputVANCHandler) {
+        [self callbackOutputVANCHandler:outFrame
+                                   atTime:displayTime
+                                 duration:frameDuration
+                              inTimeScale:timeScale];
+    }
+    
+    // Callback VANCPacketHandler block
+    if (self.outputVANCPacketHandler) {
+        [self callbackOutputVANCPacketHandler:outFrame
+                                         atTime:displayTime
+                                       duration:frameDuration
+                                    inTimeScale:timeScale];
+    }
+    
+    // Callback OutputFrameMetadataHandler block
+    if (self.outputFrameMetadataHandler) {
+        frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
+                                                            atTime:displayTime
+                                                          duration:frameDuration
+                                                       inTimeScale:timeScale];
+    }
+    
+    return frameMetadata;
 }
 
 - (BOOL) instantPlaybackOfPixelBuffer:(CVPixelBufferRef)pixelBuffer
@@ -816,6 +893,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         CFRetain(pixelBuffer);
         outFrame = [self outputVideoFrameWithPixelBuffer:pixelBuffer];
         CFRelease(pixelBuffer);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (outFrame) {
@@ -824,30 +907,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         NSInteger frameDuration = self.outputVideoSetting.duration;
         NSInteger timeScale = self.outputVideoSetting.timeScale;
         
-        // Callback VANCHandler block
-        if (self.outputVANCHandler) {
-            [self callbackOutputVANCHandler:outFrame
-                                     atTime:displayTime
-                                   duration:frameDuration
-                                inTimeScale:timeScale];
-        }
-        
-        // Callback VANCPacketHandler block
-        if (self.outputVANCPacketHandler) {
-            [self callbackOutputVANCPacketHandler:outFrame
-                                           atTime:displayTime
-                                         duration:frameDuration
-                                      inTimeScale:timeScale];
-        }
-        
-        // Callback OutputFrameMetadataHandler block
-        DLABFrameMetadata* frameMetadata = nil;
-        if (self.outputFrameMetadataHandler) {
-            frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
-                                                              atTime:displayTime
-                                                            duration:frameDuration
-                                                         inTimeScale:timeScale];
-        }
+        // process callbacks
+        DLABFrameMetadata* frameMetadata = processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
         
         // sync display - blocking operation
         if (!frameMetadata) {
@@ -858,6 +919,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         
         // free output frame
         [self releaseOutputVideoFrame:outFrame];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"DLABDevice - outputVideoFrameWithPixelBuffer: failed."
+              code:paramErr
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -890,34 +957,18 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         CFRetain(pixelBuffer);
         outFrame = [self outputVideoFrameWithPixelBuffer:pixelBuffer];
         CFRelease(pixelBuffer);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     HRESULT result = E_FAIL;
     if (outFrame) {
-        // Callback VANCHandler block
-        if (self.outputVANCHandler) {
-            [self callbackOutputVANCHandler:outFrame
-                                     atTime:displayTime
-                                   duration:frameDuration
-                                inTimeScale:timeScale];
-        }
-        
-        // Callback VANCPacketHandler block
-        if (self.outputVANCPacketHandler) {
-            [self callbackOutputVANCPacketHandler:outFrame
-                                           atTime:displayTime
-                                         duration:frameDuration
-                                      inTimeScale:timeScale];
-        }
-        
-        // Callback OutputFrameMetadataHandler block
-        DLABFrameMetadata* frameMetadata = nil;
-        if (self.outputFrameMetadataHandler) {
-            frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
-                                                              atTime:displayTime
-                                                            duration:frameDuration
-                                                         inTimeScale:timeScale];
-        }
+        // process callbacks
+        DLABFrameMetadata* frameMetadata = processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
         
         // async display
         if (!frameMetadata) {
@@ -925,6 +976,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         } else {
             result = output->ScheduleVideoFrame(frameMetadata.metaframe, displayTime, frameDuration, timeScale);
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"DLABDevice - outputVideoFrameWithPixelBuffer: failed."
+              code:paramErr
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -952,19 +1009,25 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     NSParameterAssert(pixelBuffer && frameDuration && timeScale && timecodeSetting);
     
     // Validate timecode format and outputVideoSetting combination
-    BOOL validTimecode = NO;
-    DLABVideoSetting *videoSetting = self.outputVideoSettingW;
+    DLABVideoSetting *videoSetting = self.outputVideoSetting;
     if (videoSetting) {
+        BOOL validTimecode = NO;
         DLABTimecodeFormat format = timecodeSetting.format;
         validTimecode = [self validateTimecodeFormat:format
                                         videoSetting:videoSetting];
-    }
-    
-    // Reject other combination
-    if (!validTimecode) {
+        
+        // Reject other combination
+        if (!validTimecode) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Unsupported timecode settings detected."
+                  code:E_INVALIDARG
+                    to:error];
+            return NO;
+        }
+    } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"Unsupported timecode settings detected."
-              code:E_INVALIDARG
+            reason:@"DLABVideoSetting is not available."
+              code:paramErr
                 to:error];
         return NO;
     }
@@ -976,6 +1039,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         CFRetain(pixelBuffer);
         outFrame = [self outputVideoFrameWithPixelBuffer:pixelBuffer];
         CFRelease(pixelBuffer);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     NSString* reason = nil;
@@ -992,30 +1061,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
             // write userBits into outFrame
             result = outFrame->SetTimecodeUserBits(timecodeSetting.format, timecodeSetting.userBits);
             if (!result) {
-                // Callback VANCHandler block
-                if (self.outputVANCHandler) {
-                    [self callbackOutputVANCHandler:outFrame
-                                             atTime:displayTime
-                                           duration:frameDuration
-                                        inTimeScale:timeScale];
-                }
-                
-                // Callback VANCPacketHandler block
-                if (self.outputVANCPacketHandler) {
-                    [self callbackOutputVANCPacketHandler:outFrame
-                                                   atTime:displayTime
-                                                 duration:frameDuration
-                                              inTimeScale:timeScale];
-                }
-                
-                // Callback OutputFrameMetadataHandler block
-                DLABFrameMetadata* frameMetadata = nil;
-                if (self.outputFrameMetadataHandler) {
-                    frameMetadata = [self callbackOutputFrameMetadataHandler:outFrame
-                                                                      atTime:displayTime
-                                                                    duration:frameDuration
-                                                                 inTimeScale:timeScale];
-                }
+                // process callbacks
+                DLABFrameMetadata* frameMetadata = processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
                 
                 // async display
                 if (!frameMetadata) {
@@ -1032,6 +1079,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         } else {
             reason = @"IDeckLinkMutableVideoFrame::SetTimecodeFromComponents failed.";
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"DLABDevice - outputVideoFrameWithPixelBuffer: failed."
+              code:paramErr
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1059,6 +1112,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->GetBufferedVideoFrameCount(&bufferedFrameCount);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (!result) {
@@ -1093,6 +1152,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                                                channelCount,
                                                DLABAudioOutputStreamTypeContinuous);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1132,6 +1197,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->DisableAudioOutput();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1155,7 +1226,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     __block HRESULT result = E_FAIL;
     
     IDeckLinkOutput *output = self.deckLinkOutput;
-    DLABAudioSetting *setting = self.outputAudioSettingW;
+    DLABAudioSetting *setting = self.outputAudioSetting;
     if (output && setting) {
         __block uint32_t writtenTotal = 0;
         uint32_t mBytesPerFrame = setting.sampleSize;
@@ -1187,8 +1258,17 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                     if (result) break;
                 }
             }];
+            
+            if (writtenTotal) {
+                *sampleFramesWritten = writtenTotal;
+            }
         }
-        *sampleFramesWritten = writtenTotal;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"Either IDeckLinkOutput or DLABAudioSetting is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1212,7 +1292,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     __block HRESULT result = E_FAIL;
     
     IDeckLinkOutput *output = self.deckLinkOutput;
-    DLABAudioSetting *setting = self.outputAudioSettingW;
+    DLABAudioSetting *setting = self.outputAudioSetting;
     if (output && setting) {
         __block uint32_t writtenTotal = 0;
         uint32_t mBytesPerFrame = setting.sampleSize;
@@ -1265,8 +1345,17 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                     if (result) break;
                 }
             }];
+            
+            if (writtenTotal) {
+                *sampleFramesWritten = writtenTotal;
+            }
         }
-        *sampleFramesWritten = writtenTotal;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"Either IDeckLinkOutput or DLABAudioSetting is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1289,6 +1378,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->BeginAudioPreroll();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1311,6 +1406,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->EndAudioPreroll();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1335,7 +1436,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     __block HRESULT result = E_FAIL;
     
     IDeckLinkOutput *output = self.deckLinkOutput;
-    DLABAudioSetting *setting = self.outputAudioSettingW;
+    DLABAudioSetting *setting = self.outputAudioSetting;
     if (output && setting) {
         __block BMDTimeValue timeValue = streamTime;
         __block uint32_t writtenTotal = 0;
@@ -1373,8 +1474,17 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                     if (result) break;
                 }
             }];
+            
+            if (writtenTotal) {
+                *sampleFramesWritten = writtenTotal;
+            }
         }
-        *sampleFramesWritten = writtenTotal;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"Either IDeckLinkOutput or DLABAudioSetting is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1400,7 +1510,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
     __block HRESULT result = E_FAIL;
     
     IDeckLinkOutput *output = self.deckLinkOutput;
-    DLABAudioSetting *setting = self.outputAudioSettingW;
+    DLABAudioSetting *setting = self.outputAudioSetting;
     if (output && setting) {
         __block BMDTimeValue timeValue = streamTime;
         __block uint32_t writtenTotal = 0;
@@ -1457,8 +1567,17 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
                     if (result) break;
                 }
             }];
+            
+            if (writtenTotal) {
+                *sampleFramesWritten = writtenTotal;
+            }
         }
-        *sampleFramesWritten = writtenTotal;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"Either IDeckLinkOutput or DLABAudioSetting is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1482,6 +1601,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->GetBufferedAudioSampleFrameCount(&bufferedFrameCount);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (!result) {
@@ -1504,6 +1629,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->FlushBufferedAudioSamples();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1536,6 +1667,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->StartScheduledPlayback(startTime, timeScale, 1.0);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1568,6 +1705,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->StopScheduledPlayback((BMDTimeValue)stopPlayBackAtTime, &timeValue, (BMDTimeScale)timeScale);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1580,8 +1723,8 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
             reason:@"IDeckLinkOutput::StopScheduledPlayback failed."
               code:result
                 to:error];
+        return NO;
     }
-    return NO;
 }
 
 - (BOOL) getScheduledStreamTimeInTimeScale:(NSInteger)timeScale
@@ -1600,6 +1743,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->GetScheduledStreamTime(timeScale, &timeValue, &speedValue);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1632,6 +1781,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->GetReferenceStatus(&referenceStatusValue);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1664,6 +1819,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = output->GetHardwareReferenceClock(timeScale, &hwTime, &timeIF, &tickPF);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1693,6 +1854,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = keyer->Enable(false); // isExternal = false
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkKeyer is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1715,6 +1882,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = keyer->Enable(true); // isExternal = true
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkKeyer is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1739,6 +1912,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = keyer->SetLevel(level);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkKeyer is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1763,6 +1942,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = keyer->RampUp(numFrames);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkKeyer is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1787,6 +1972,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = keyer->RampDown(numFrames);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkKeyer is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1809,6 +2000,12 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         [self playback_sync:^{
             result = keyer->Disable();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkKeyer is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {

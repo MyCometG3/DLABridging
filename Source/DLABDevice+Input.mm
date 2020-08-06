@@ -30,47 +30,46 @@
     if (!delegate)
         return;
     
-    // get current inputSetting parameters
-    BMDPixelFormat pixelFormat = self.inputVideoSettingW.pixelFormat;
-    BMDVideoInputFlags inputFlag = self.inputVideoSettingW.inputFlag;
-    
-    // decide new color space
-    BOOL yuvColorSpaceNow = (pixelFormat == bmdFormat8BitYUV || pixelFormat == bmdFormat10BitYUV);
-    BOOL yuv422Ready = (flags & bmdDetectedVideoInputYCbCr422);
-    BOOL rgb444Ready = (flags & bmdDetectedVideoInputRGB444);
-    if (yuvColorSpaceNow) {
-        if (yuv422Ready) {
-            // keep original yuv color space
-        } else if (rgb444Ready) {
-            pixelFormat = bmdFormat8BitARGB; // color space switch occured
+    // Check color space change
+    BMDPixelFormat pixelFormat = self.inputVideoSetting.pixelFormat;
+    if (pixelFormat) {
+        BOOL yuvColorSpaceNow = (pixelFormat == bmdFormat8BitYUV || pixelFormat == bmdFormat10BitYUV);
+        BOOL yuv422Ready = (flags & bmdDetectedVideoInputYCbCr422);
+        BOOL rgb444Ready = (flags & bmdDetectedVideoInputRGB444);
+        if (yuvColorSpaceNow) {
+            if (yuv422Ready) {
+                // keep original yuv color space
+            } else if (rgb444Ready) {
+                pixelFormat = bmdFormat8BitARGB; // color space switch occured
+            } else {
+                pixelFormat = 0; // unexpected error - should suspend stream
+            }
         } else {
-            pixelFormat = 0; // unexpected error - should suspend stream
-        }
-    } else {
-        if (rgb444Ready) {
-            // keep original rgb color space
-        } else if (yuv422Ready) {
-            pixelFormat = bmdFormat8BitYUV; // color space switch occured
-        } else {
-            pixelFormat = 0; // unexpected error - should suspend stream
+            if (rgb444Ready) {
+                // keep original rgb color space
+            } else if (yuv422Ready) {
+                pixelFormat = bmdFormat8BitYUV; // color space switch occured
+            } else {
+                pixelFormat = 0; // unexpected error - should suspend stream
+            }
         }
     }
     
     // Prepare new inputVideoSetting object
     DLABVideoSetting* tmpSetting = nil;
     if (pixelFormat) {
+        BMDVideoInputFlags inputFlag = self.inputVideoSetting.inputFlag;
         tmpSetting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
                                                           pixelFormat:pixelFormat
                                                        videoInputFlag:inputFlag];
-        [tmpSetting buildVideoFormatDescriptionWithError:nil]; // TODO Handle error
-    } else {
-        // do nothing. let delegate handle the error.
+        if (tmpSetting) {
+            [tmpSetting buildVideoFormatDescriptionWithError:nil];
+            if (tmpSetting.videoFormatDescription) {
+                self.needsInputVideoConfigurationRefresh = TRUE;
+            }
+        }
     }
-    
-    // NOTE: tmpSetting could be nil.
-    if (tmpSetting) {
-        self.needsInputVideoConfigurationRefresh = TRUE;
-    } else {
+    if (!tmpSetting) {
         // do nothing. let delegate handle the error.
     }
     
@@ -102,37 +101,39 @@
         // Create timecodeSetting
         DLABTimecodeSetting* setting = [self createTimecodeSettingOf:videoFrame];
         
-        // Callback VANCHandler block
-        if (sampleBuffer && setting && self.inputVANCHandler) {
-            [self callbackInputVANCHandler:videoFrame];
-        }
-        
-        // Callback VANCPacketHandler block
-        if (sampleBuffer && setting && self.inputVANCPacketHandler) {
-            [self callbackInputVANCPacketHandler:videoFrame];
-        }
-        
-        // Callback InputFrameMetadataHandler block
-        if (sampleBuffer && setting && self.inputFrameMetadataHandler) {
-            [self callbackInputFrameMetadataHandler:videoFrame];
-        }
-        
-        // delegate will handle InputVideoSampleBuffer
-        if (sampleBuffer && setting) {
-            __weak typeof(self) wself = self;
-            [self delegate_async:^{
-                [delegate processCapturedVideoSample:sampleBuffer
-                                     timecodeSetting:setting
-                                            ofDevice:wself]; // async
-                CFRelease(sampleBuffer);
-            }];
-        } else if (sampleBuffer) {
-            __weak typeof(self) wself = self;
-            [self delegate_async:^{
-                [delegate processCapturedVideoSample:sampleBuffer
-                                            ofDevice:wself]; // async
-                CFRelease(sampleBuffer);
-            }];
+        if (sampleBuffer) {
+            // Callback VANCHandler block
+            if (self.inputVANCHandler) {
+                [self callbackInputVANCHandler:videoFrame];
+            }
+            
+            // Callback VANCPacketHandler block
+            if (self.inputVANCPacketHandler) {
+                [self callbackInputVANCPacketHandler:videoFrame];
+            }
+            
+            // Callback InputFrameMetadataHandler block
+            if (self.inputFrameMetadataHandler) {
+                [self callbackInputFrameMetadataHandler:videoFrame];
+            }
+            
+            // delegate will handle InputVideoSampleBuffer
+            if (setting) {
+                __weak typeof(self) wself = self;
+                [self delegate_async:^{
+                    [delegate processCapturedVideoSample:sampleBuffer
+                                         timecodeSetting:setting
+                                                ofDevice:wself]; // async
+                    CFRelease(sampleBuffer);
+                }];
+            } else {
+                __weak typeof(self) wself = self;
+                [self delegate_async:^{
+                    [delegate processCapturedVideoSample:sampleBuffer
+                                                ofDevice:wself]; // async
+                    CFRelease(sampleBuffer);
+                }];
+            }
         } else {
             // do nothing
         }
@@ -160,7 +161,7 @@
 }
 
 /* =================================================================================== */
-// MARK: Process Input videoFrame/audioPacket
+// MARK: Process Input videoFrame/audioPacket/Timecode
 /* =================================================================================== */
 
 NS_INLINE size_t pixelSizeForDL(IDeckLinkVideoFrame* videoFrame) {
@@ -207,7 +208,9 @@ NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
         int numWidthPerBlock = MAX(1,((NSNumber*)dict[kBlockWidth]).intValue);
         int numHeightPerBlock = MAX(1,((NSNumber*)dict[kBlockHeight]).intValue);
         int numPixelPerBlock = numWidthPerBlock * numHeightPerBlock;
-        pixelSize = ceil(numBitsPerBlock / numPixelPerBlock / 8.0);
+        if (numPixelPerBlock) {
+            pixelSize = ceil(numBitsPerBlock / numPixelPerBlock / 8.0);
+        }
     }
     return pixelSize;
 }
@@ -253,52 +256,41 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     return result;
 }
 
-- (DLABTimecodeSetting*) createTimecodeSettingOf:(IDeckLinkVideoInputFrame*)videoFrame
-                                          format:(BMDTimecodeFormat)format
-{
-    NSParameterAssert(videoFrame && format);
+NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBufferRef pixelBuffer) {
+    assert(videoFrame && pixelBuffer);
     
-    HRESULT result = E_FAIL;
+    BOOL ready = FALSE;
     
-    IDeckLinkTimecode* timecodeObj = NULL;
-    DLABTimecodeSetting* setting = nil;
+    // Simply check if stride is same
+    size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
+    size_t ifRowByte = videoFrame->GetRowBytes();
+    size_t ifHeight = videoFrame->GetHeight();
+    BOOL rowByteOK = (pbRowByte == ifRowByte);
     
-    result = videoFrame->GetTimecode(format, &timecodeObj);
-    if (!result && timecodeObj) {
-        setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
-                                                          timecodeObj:timecodeObj];
-    }
-    return setting;
-}
-
-- (DLABTimecodeSetting*) createTimecodeSettingOf:(IDeckLinkVideoInputFrame*)videoFrame
-{
-    NSParameterAssert(videoFrame);
-    
-    // Check videoFrame
-    DLABTimecodeSetting* setting = nil;
-    
-    BOOL useVITC = self.outputVideoSettingW.useVITC;
-    BOOL useRP188 = self.outputVideoSettingW.useRP188;
-    
-    if (useVITC) {
-        setting = [self createTimecodeSettingOf:videoFrame format:DLABTimecodeFormatVITC];
-        if (setting) return setting;
+    // Copy pixel data from inputVideoFrame to CVPixelBuffer
+    CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    if (!err) {
+        // get buffer address for src and dst
+        void* dst = CVPixelBufferGetBaseAddress(pixelBuffer);
+        void* src = NULL;
+        videoFrame->GetBytes(&src);
         
-        setting = [self createTimecodeSettingOf:videoFrame format:DLABTimecodeFormatVITCField2];
-        if (setting) return setting;
+        if (dst && src) {
+            if (rowByteOK) { // bulk copy
+                memcpy(dst, src, ifRowByte * ifHeight);
+            } else { // line copy with different stride
+                size_t length = MIN(pbRowByte, ifRowByte);
+                for (size_t line = 0; line < ifHeight; line++) {
+                    char* srcAddr = (char*)src + pbRowByte * line;
+                    char* dstAddr = (char*)dst + ifRowByte * line;
+                    memcpy(dstAddr, srcAddr, length);
+                }
+            }
+            ready = TRUE;
+        }
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
     }
-    if (useRP188) {
-        setting = [self createTimecodeSettingOf:videoFrame format:DLABTimecodeFormatRP188VITC1];
-        if (setting) return setting;
-        
-        setting = [self createTimecodeSettingOf:videoFrame format:DLABTimecodeFormatRP188VITC2];
-        if (setting) return setting;
-        
-        setting = [self createTimecodeSettingOf:videoFrame format:DLABTimecodeFormatRP188LTC];
-        if (setting) return setting;
-    }
-    return nil;
+    return ready;
 }
 
 - (CVPixelBufferRef) createPixelBufferForVideoFrame:(IDeckLinkVideoInputFrame*)videoFrame
@@ -306,7 +298,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     NSParameterAssert(videoFrame);
     
     BOOL ready = false;
-    OSType cvPixelFormat = self.inputVideoSettingW.cvPixelFormatType;
+    OSType cvPixelFormat = self.inputVideoSetting.cvPixelFormatType;
     assert(cvPixelFormat);
 
     // Check pool, and create if required
@@ -343,12 +335,6 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         CVReturn err = kCVReturnError;
         err = CVPixelBufferPoolCreatePixelBuffer(NULL, pool, &pixelBuffer);
         if (!err && pixelBuffer) {
-            // Attach formatDescriptionExtensions to new PixelBuffer
-            CFDictionaryRef dict = (__bridge CFDictionaryRef)self.inputVideoSettingW.extensions;
-            assert(dict);
-            CVBufferSetAttachments(pixelBuffer, dict, kCVAttachmentMode_ShouldPropagate);
-        }
-        if (!err && pixelBuffer) {
             // Simply check if width, height are same
             size_t pbWidth = CVPixelBufferGetWidth(pixelBuffer);
             size_t pbHeight = CVPixelBufferGetHeight(pixelBuffer);
@@ -362,34 +348,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
                 if (self.debugUsevImageCopyBuffer) {
                     ready = copyBufferDLtoCV(self, videoFrame, pixelBuffer);
                 } else {
-                    // Simply check if stride is same
-                    size_t pbRowByte = CVPixelBufferGetBytesPerRow(pixelBuffer);
-                    size_t ifRowByte = videoFrame->GetRowBytes();
-                    BOOL rowByteOK = (pbRowByte == ifRowByte);
-                    
-                    // Copy pixel data from inputVideoFrame to CVPixelBuffer
-                    err = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-                    if (!err) {
-                        // get buffer address for src and dst
-                        void* dst = CVPixelBufferGetBaseAddress(pixelBuffer);
-                        void* src = NULL;
-                        videoFrame->GetBytes(&src);
-                        
-                        if (dst && src) {
-                            if (rowByteOK) { // bulk copy
-                                memcpy(dst, src, ifRowByte * ifHeight);
-                            } else { // line copy with different stride
-                                size_t length = MIN(pbRowByte, ifRowByte);
-                                for (size_t line = 0; line < ifHeight; line++) {
-                                    char* srcAddr = (char*)src + pbRowByte * line;
-                                    char* dstAddr = (char*)dst + ifRowByte * line;
-                                    memcpy(dstAddr, srcAddr, length);
-                                }
-                            }
-                            ready = true;
-                        }
-                        CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-                    }
+                    ready = copyPlaneDLtoCV(videoFrame, pixelBuffer);
                 }
             } else {
                 // Use DLABVideoConverter/vImage to convert video image
@@ -427,14 +386,8 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     BMDTimeValue frameDuration = 0;
     BMDTimeScale timeScale = self.inputVideoSetting.timeScale;
     HRESULT result = videoFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
-    
     if (result)
         return NULL;
-    
-    // unused
-    // videoFrame->GetTimecode(...)
-    // videoFrame->GetAncillaryData(...)
-    // videoFrame->GetHardwareReferenceTimestamp(...)
     
     // Create timinginfo struct
     CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
@@ -442,12 +395,10 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     CMTime decodeTimeStamp = kCMTimeInvalid;
     CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
     
-    //
-    
     // Check if refreshing pool is required (prior to create pixelbuffer)
     if (self.needsInputVideoConfigurationRefresh) {
         // Update InputVideoFormmatDescription using videoFrame
-        BOOL result = [self.inputVideoSettingW updateInputVideoFormatDescriptionUsingVideoFrame:videoFrame];
+        BOOL result = [self.inputVideoSetting updateInputVideoFormatDescriptionUsingVideoFrame:videoFrame];
         if (!result)
             return NULL;
         
@@ -458,8 +409,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         self.needsInputVideoConfigurationRefresh = FALSE;
     }
     
-    // Prepare format description (No ownership transfer)
-    CMFormatDescriptionRef formatDescription = self.inputVideoSettingW.videoFormatDescription;
+    CMFormatDescriptionRef formatDescription = self.inputVideoSetting.videoFormatDescription;
     if (!formatDescription)
         return NULL;
     
@@ -468,10 +418,21 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     CMSampleBufferRef sampleBuffer = NULL;
     CVPixelBufferRef pixelBuffer = [self createPixelBufferForVideoFrame:videoFrame];
     if (pixelBuffer) {
-        // Copy formatDescription extensions to ImageBuffer attachments
-        CMSetAttachments(pixelBuffer,
-                         CMFormatDescriptionGetExtensions(formatDescription),
-                         kCMAttachmentMode_ShouldPropagate);
+        // Attach formatDescriptionExtensions to new PixelBuffer
+        CFDictionaryRef dict = (__bridge CFDictionaryRef)self.inputVideoSetting.extensions;
+        if (dict) {
+            CVBufferRemoveAllAttachments(pixelBuffer);
+            CVBufferSetAttachments(pixelBuffer, dict, kCVAttachmentMode_ShouldPropagate);
+        } else {
+            CMFormatDescriptionRef formatDescription = self.inputVideoSetting.videoFormatDescription;
+            if (formatDescription) {
+                CFDictionaryRef extensions = CMFormatDescriptionGetExtensions(formatDescription);
+                if (extensions) {
+                    CMRemoveAllAttachments(pixelBuffer);
+                    CMSetAttachments(pixelBuffer, extensions, kCMAttachmentMode_ShouldPropagate);
+                }
+            }
+        }
         
         // Create CMSampleBuffer for videoFrame
         err = CMSampleBufferCreateReadyWithImageBuffer(NULL,
@@ -509,7 +470,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     BMDTimeScale timeScale = bmdAudioSampleRate48kHz;
     HRESULT result2 = audioPacket->GetPacketTime(&packetTime, timeScale);
     
-    if (result1 || !buffer || result2)
+    if (!frameCount || result1 || !buffer || result2)
         return NULL;
     
     // Prepare timinginfo struct
@@ -520,12 +481,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
     
     // Prepare block info
     size_t numSamples = (size_t)frameCount;
-    size_t sampleSize = (size_t)self.inputAudioSettingW.sampleSize;
+    size_t sampleSize = (size_t)self.inputAudioSetting.sampleSize;
     size_t blockLength = numSamples * sampleSize;
     CMBlockBufferFlags flags = (kCMBlockBufferAssureMemoryNowFlag);
     
     // Prepare format description (No ownership transfer)
-    CMFormatDescriptionRef formatDescription = self.inputAudioSettingW.audioFormatDescriptionW;
+    CMFormatDescriptionRef formatDescription = self.inputAudioSetting.audioFormatDescriptionW;
     if (!formatDescription)
         return NULL;
     
@@ -572,6 +533,52 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
             CFRelease(sampleBuffer);
         return NULL;
     }
+}
+
+static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* videoFrame, BMDTimecodeFormat format) {
+    assert(videoFrame && format);
+    
+    HRESULT result = E_FAIL;
+    
+    IDeckLinkTimecode* timecodeObj = NULL;
+    DLABTimecodeSetting* setting = nil;
+    
+    result = videoFrame->GetTimecode(format, &timecodeObj);
+    if (!result && timecodeObj) {
+        setting = [[DLABTimecodeSetting alloc] initWithTimecodeFormat:format
+                                                          timecodeObj:timecodeObj];
+    }
+    return setting;
+}
+
+- (DLABTimecodeSetting*) createTimecodeSettingOf:(IDeckLinkVideoInputFrame*)videoFrame
+{
+    NSParameterAssert(videoFrame);
+    
+    // Check videoFrame
+    DLABTimecodeSetting* setting = nil;
+    
+    BOOL useVITC = self.outputVideoSetting.useVITC;
+    BOOL useRP188 = self.outputVideoSetting.useRP188;
+    
+    if (useVITC) {
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatVITC);
+        if (setting) return setting;
+        
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatVITCField2);
+        if (setting) return setting;
+    }
+    if (useRP188) {
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188VITC1);
+        if (setting) return setting;
+        
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188VITC2);
+        if (setting) return setting;
+        
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188LTC);
+        if (setting) return setting;
+    }
+    return nil;
 }
 
 /* =================================================================================== */
@@ -823,27 +830,34 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
                                                          &supported);               // bool
             }
         }];
-        if (!result) {
-            if (supported) {
-                __block IDeckLinkDisplayMode* displayModeObj = NULL;
-                [self capture_sync:^{
-                    input->GetDisplayMode((actualMode > 0 ? actualMode : displayMode), &displayModeObj);
-                }];
-                setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
-                                                               pixelFormat:pixelFormat
-                                                            videoInputFlag:videoInputFlag];
-                BOOL result = TRUE;
-                result = [setting buildVideoFormatDescriptionWithError:error];
-                displayModeObj->Release();
-                if (!result) return nil;
-            }
-        } else {
+        if (result) {
             [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
                 reason:@"IDeckLinkInput::DoesSupportVideoMode failed."
                   code:result
                     to:error];
             return nil;
         }
+        if (supported) {
+            __block IDeckLinkDisplayMode* displayModeObj = NULL;
+            [self capture_sync:^{
+                input->GetDisplayMode((actualMode > 0 ? actualMode : displayMode), &displayModeObj);
+            }];
+            if (displayModeObj) {
+                setting = [[DLABVideoSetting alloc] initWithDisplayModeObj:displayModeObj
+                                                               pixelFormat:pixelFormat
+                                                            videoInputFlag:videoInputFlag];
+                if (setting) {
+                    [setting buildVideoFormatDescriptionWithError:error];
+                }
+                displayModeObj->Release();
+            }
+        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (setting && setting.videoFormatDescription) {
@@ -874,8 +888,9 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         setting = [[DLABAudioSetting alloc] initWithSampleType:sampleType
                                                   channelCount:channelCount
                                                     sampleRate:sampleRate];
-        BOOL result = [setting buildAudioFormatDescriptionWithError:error];
-        if (!result) return nil;
+        if (setting) {
+            [setting buildAudioFormatDescriptionWithError:error];
+        }
     }
     
     if (setting && setting.audioFormatDescriptionW) {
@@ -921,6 +936,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
                 }];
             }
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -949,6 +970,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->EnableVideoInput(displayMode, format, inputFlag);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -989,6 +1016,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->GetAvailableVideoFrameCount(&availableFrameCount);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (!result) {
@@ -1011,6 +1044,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->DisableVideoInput();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1045,6 +1084,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->EnableAudioInput(sampleRate, sampleType, channelCount);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1083,6 +1128,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->DisableAudioInput();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1107,6 +1158,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->GetAvailableAudioSampleFrameCount(&availableFrameCount);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
     
     if (!result) {
@@ -1135,6 +1192,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->StartStreams();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1157,6 +1220,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->StopStreams();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1179,6 +1248,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->FlushStreams();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1201,6 +1276,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->PauseStreams();
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1236,6 +1317,12 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
         [self capture_sync:^{
             result = input->GetHardwareReferenceClock(timeScale, &hwTime, &timeIF, &tickPF);
         }];
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkInput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
     }
     
     if (!result) {
@@ -1259,78 +1346,96 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
 - (NSNumber*) intValueForHDMIInputEDID:(DLABDeckLinkHDMIInputEDID) hdmiInputEDID
                                  error:(NSError**)error
 {
+    NSParameterAssert(hdmiInputEDID);
+    
+    __block HRESULT result = E_FAIL;
+    __block int64_t newIntValue = 0;
+    
     IDeckLinkHDMIInputEDID *inputEDID = self.deckLinkHDMIInputEDID;
     if (inputEDID) {
-        HRESULT result = E_FAIL;
         BMDDeckLinkHDMIInputEDIDID edid = hdmiInputEDID;
-        int64_t newIntValue = 0;
-        result = inputEDID->GetInt(edid, &newIntValue);
-        if (!result) {
-            return @(newIntValue);
-        } else {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkHDMIInputEDID::GetInt failed."
-                  code:result
-                    to:error];
-        }
+        [self capture_sync:^{
+            result = inputEDID->GetInt(edid, &newIntValue);
+        }];
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkHDMIInputEDID is not supported."
               code:E_NOINTERFACE
                 to:error];
+        return nil;
     }
-    return nil;
+    
+    if (!result) {
+        return @(newIntValue);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkHDMIInputEDID::GetInt failed."
+              code:result
+                to:error];
+        return nil;
+    }
 }
 
 - (BOOL) setIntValue:(NSInteger)value
     forHDMIInputEDID:(DLABDeckLinkHDMIInputEDID) hdmiInputEDID
                error:(NSError**)error
 {
+    NSParameterAssert(hdmiInputEDID);
+    
+    __block HRESULT result = E_FAIL;
+    
     IDeckLinkHDMIInputEDID *inputEDID = self.deckLinkHDMIInputEDID;
     if (inputEDID) {
-        HRESULT result = E_FAIL;
         BMDDeckLinkHDMIInputEDIDID edid = hdmiInputEDID;
         int64_t newIntValue = (int64_t)value;
-        result = inputEDID->SetInt(edid, newIntValue);
-        if (!result) {
-            return YES;
-        } else {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkHDMIInputEDID::SetInt failed."
-                  code:result
-                    to:error];
-            return NO;
-        }
+        [self capture_sync:^{
+            result = inputEDID->SetInt(edid, newIntValue);
+        }];
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkHDMIInputEDID is not supported."
               code:E_NOINTERFACE
                 to:error];
+        return NO;
     }
-    return FALSE;
+    
+    if (!result) {
+        return YES;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkHDMIInputEDID::SetInt failed."
+              code:result
+                to:error];
+        return NO;
+    }
 }
 
 - (BOOL) writeToHDMIInputEDIDWithError:(NSError**)error
 {
+    __block HRESULT result = E_FAIL;
+    
     IDeckLinkHDMIInputEDID *inputEDID = self.deckLinkHDMIInputEDID;
     if (inputEDID) {
-        HRESULT result = E_FAIL;
-        result = inputEDID->WriteToEDID();
-        if (!result) {
-            return YES;
-        } else {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"IDeckLinkHDMIInputEDID::WriteToEDID failed."
-                  code:result
-                    to:error];
-        }
+        [self capture_sync:^{
+            result = inputEDID->WriteToEDID();
+        }];
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkHDMIInputEDID is not supported."
               code:E_NOINTERFACE
                 to:error];
+        return NO;
     }
-    return FALSE;
+    
+    if (!result) {
+        return YES;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkHDMIInputEDID::WriteToEDID failed."
+              code:result
+                to:error];
+        return NO;
+    }
 }
 
 @end

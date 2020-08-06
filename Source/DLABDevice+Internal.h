@@ -504,16 +504,6 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 
 /**
- Prepare TimecodeSetting for VideoFrame in specified format if available.
-
- @param videoFrame IDeckLinkVideoInputFrame
- @param format BMDTimecodeFormat
- @return DLABTimecodeSetting for videoFrame or null if failed.
- */
-- (nullable DLABTimecodeSetting*) createTimecodeSettingOf:(IDeckLinkVideoInputFrame*)videoFrame
-                                                   format:(BMDTimecodeFormat)format;
-
-/**
  Utility method to create DLABTimecodeSetting from videoFrame.
  
  If videoFrame contains timecode, either RP188 or VITC family will be returned.
