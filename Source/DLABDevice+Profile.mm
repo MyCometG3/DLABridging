@@ -23,9 +23,9 @@
 - (void) willApplyProfile:(IDeckLinkProfile*)profile stopping:(BOOL)streamsWillBeForcedToStop
 {
     NSParameterAssert(profile);
+    
     id<DLABProfileChangeDelegate> delegate = self.profileDelegate;
     if (delegate) {
-        profile->AddRef();
         DLABProfileAttributes* attrObj = [[DLABProfileAttributes alloc] initWithProfile:profile];
         if (attrObj) {
             __weak typeof(self) wself = self;
@@ -35,16 +35,15 @@
                                             stopping:streamsWillBeForcedToStop]; // sync
             }];
         }
-        profile->Release();
     }
 }
 
 - (void) didApplyProfile:(IDeckLinkProfile*)profile
 {
     NSParameterAssert(profile);
+    
     id<DLABProfileChangeDelegate> delegate = self.profileDelegate;
     if (delegate) {
-        profile->AddRef();
         DLABProfileAttributes* attrObj = [[DLABProfileAttributes alloc] initWithProfile:profile];
         if (attrObj) {
             __weak typeof(self) wself = self;
@@ -53,7 +52,6 @@
                                            toDevice:wself]; // sync
             }];
         }
-        profile->Release();
     }
 }
 
@@ -65,7 +63,7 @@
 
 @implementation DLABDevice (Profile)
 
-- (nullable NSArray<DLABProfileAttributes*>*) availableProfileAttributes
+- (NSArray<DLABProfileAttributes*>*) availableProfileAttributesWithError:(NSError**)error
 {
     IDeckLinkProfileManager *mgr = self.deckLinkProfileManager;
     if (mgr) {
@@ -90,88 +88,153 @@
             }
             itr->Release();
             
-            if (array.count) {
-                return [array copy];
-            }
+            return array;
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkProfileManager::GetProfiles failed."
+                  code:result
+                    to:error];
+            return nil;
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileManager is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
-    return nil;
 }
 
-- (BOOL) activateProfile:(NSNumber *)targetProfileID
+- (NSNumber*) activateProfile:(NSNumber *)targetProfileID error:(NSError**)error
 {
     NSParameterAssert(targetProfileID != nil);
+    
+    HRESULT result = E_FAIL;
+    
     IDeckLinkProfileManager *mgr = self.deckLinkProfileManager;
     if (mgr) {
-        HRESULT result = E_FAIL;
         BMDProfileID profileID = targetProfileID.unsignedIntValue;
         IDeckLinkProfile* profile = NULL;
-        result = mgr->GetProfile(profileID, &profile);
-        
-        if (result == S_OK && profile) {
+        mgr->GetProfile(profileID, &profile);
+        if (profile) {
             result = profile->SetActive();
             profile->Release();
-            
-            if (result == S_OK) {
-                return TRUE;
-            }
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"IDeckLinkProfileManager::GetProfiles failed."
+                  code:result
+                    to:error];
+            return nil;
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileManager is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
-    return FALSE;
+    
+    if (result == S_OK) {
+        return @YES;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfile::SetActive failed."
+              code:result
+                to:error];
+        return nil;
+    }
 }
 
-- (BOOL) checkRunningProfile:(NSNumber *)targetProfileID
+- (NSNumber*) checkRunningProfile:(NSNumber *)targetProfileID error:(NSError**)error
 {
     NSParameterAssert(targetProfileID != nil);
+    
+    HRESULT result = E_FAIL;
+    bool isActive = false;
+    
     IDeckLinkProfileManager *mgr = self.deckLinkProfileManager;
     if (mgr) {
-        HRESULT result = E_FAIL;
         BMDProfileID profileID = targetProfileID.unsignedIntValue;
         IDeckLinkProfile* profile = NULL;
-        result = mgr->GetProfile(profileID, &profile);
-        
-        if (result == S_OK && profile) {
-            bool isActive = false;
+        mgr->GetProfile(profileID, &profile);
+        if (profile) {
             result = profile->IsActive(&isActive);
             profile->Release();
-            
-            if (result == S_OK && isActive) {
-                return TRUE;
-            }
         }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileManager is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
     }
-    return FALSE;
+    
+    if (result == S_OK) {
+        return @(isActive);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfile::IsActive failed."
+              code:result
+                to:error];
+        return nil;
+    }
 }
 
-- (BOOL)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes
+- (NSNumber*)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError**)error
 {
     NSParameterAssert(attributes != nil);
+    
+    HRESULT result = E_FAIL;
+    
     IDeckLinkProfile* profile = attributes.profile;
     if (profile) {
-        HRESULT result = E_FAIL;
         result = profile->SetActive();
-        
-        if (result == S_OK) {
-            return TRUE;
-        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"DLABProfileAttributes - profile is not available."
+              code:paramErr
+                to:error];
+        return nil;
     }
-    return FALSE;
+    
+    if (result == S_OK) {
+        return @YES;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfile::SetActive failed."
+              code:result
+                to:error];
+        return nil;
+    }
 }
 
-- (BOOL)checkRunningProfileUsingAttributes:(DLABProfileAttributes*)attributes
+- (NSNumber*)checkRunningProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError**)error
 {
     NSParameterAssert(attributes != nil);
+    
+    HRESULT result = E_FAIL;
+    bool isActive = false;
+    
     IDeckLinkProfile* profile = attributes.profile;
     if (profile) {
-        HRESULT result = E_FAIL;
-        bool isActive = false;
         result = profile->IsActive(&isActive);
-        
-        if (result == S_OK && isActive) {
-            return TRUE;
-        }
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"DLABProfileAttributes - profile is not available."
+              code:paramErr
+                to:error];
+        return nil;
     }
-    return FALSE;
+    
+    if (result == S_OK) {
+        return @(isActive);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfile::IsActive failed."
+              code:result
+                to:error];
+        return nil;
+    }
 }
 
 @end

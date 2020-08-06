@@ -1487,37 +1487,45 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Array of available DLABProfileAttributes.
  
- @return Array of DLABProfileAttributes. nil when no profile support is available.
+ @param error Error description if failed.
+ @return Array of DLABProfileAttributes.
  */
-- (nullable NSArray<DLABProfileAttributes*>*) availableProfileAttributes;
+- (nullable NSArray<DLABProfileAttributes*>*) availableProfileAttributesWithError:(NSError * _Nullable * _Nullable)error;
 
 /**
  Activate specified DLABProfile.
  
- @return FALSE always if no profile support is available.
+ @param targetProfileID profileID to activate in NSNumber* form.
+ @param error Error description if failed.
+ @return @YES if success, nil if failed.
  */
-- (BOOL)activateProfile:(NSNumber*)targetProfileID;
+- (nullable NSNumber*)activateProfile:(NSNumber*)targetProfileID error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Query if specified DLABProfile is active or not.
  
- @return FALSE always if no profile support is available.
+ @param targetProfileID profileID to verify in NSNumber* form.
+ @param error Error description if failed.
+ @return @YES if active, @NO if inactive, in NSNumber<BOOL>* form.
  */
-- (BOOL)checkRunningProfile:(NSNumber*)targetProfileID;
+- (nullable NSNumber*)checkRunningProfile:(NSNumber*)targetProfileID error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Activate DLABProfile associated with DLABProfileAttributes.
- 
- @return FALSE always if no profile support is available.
+ @param attributes DLABProfileAttributes to activate
+ @param error Error description if failed.
+ @return @YES if success, nil if failed.
  */
-- (BOOL)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes;
+- (nullable NSNumber*)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Query if DLABProfile associated with DLABProfileAttributes is active or not.
  
- @return FALSE always if no profile support is available.
+ @param attributes DLABProfileAttributes to verify
+ @param error Error description if failed.
+ @return @YES if active, @NO if inactive, in NSNumber<BOOL>* form.
  */
-- (BOOL)checkRunningProfileUsingAttributes:(DLABProfileAttributes*)attributes;
+- (nullable NSNumber*)checkRunningProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError * _Nullable * _Nullable)error;
 
 @end
 
