@@ -912,6 +912,16 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         // Clean Aperture
         NSString* keyClap = (__bridge NSString*)kCMFormatDescriptionExtension_CleanAperture;
         
+        NSString* keyClapWidth = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidth;
+        NSString* keyClapHeight = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeight;
+        NSString* keyClapHOffset = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffset;
+        NSString* keyClapVOffset = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureVerticalOffset;
+        
+        NSNumber* clapWidth = @((double_t)self.clapWidthN/self.clapWidthD);
+        NSNumber* clapHeight = @((double_t)self.clapHeightN/self.clapHeightD);
+        NSNumber* clapHOffset = @((double_t)self.clapHOffsetN/self.clapHOffsetD);
+        NSNumber* clapVOffset = @((double_t)self.clapVOffsetN/self.clapVOffsetD);
+
         NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
         NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
         NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;
@@ -927,6 +937,10 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         NSNumber* clapVOffsetD = @(self.clapVOffsetD);
         
         NSDictionary* valueClap = @{
+            keyClapWidth    : clapWidth,
+            keyClapHeight   : clapHeight,
+            keyClapHOffset  : clapHOffset,
+            keyClapVOffset  : clapVOffset,
             keyClapWidthR   : @[clapWidthN, clapWidthD],
             keyClapHeightR  : @[clapHeightN, clapHeightD],
             keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
