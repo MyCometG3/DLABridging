@@ -105,7 +105,7 @@
     }
 }
 
-- (NSNumber*) activateProfile:(NSNumber *)targetProfileID error:(NSError**)error
+- (BOOL) activateProfile:(NSNumber *)targetProfileID error:(NSError**)error
 {
     NSParameterAssert(targetProfileID != nil);
     
@@ -124,24 +124,24 @@
                 reason:@"IDeckLinkProfileManager::GetProfiles failed."
                   code:result
                     to:error];
-            return nil;
+            return NO;
         }
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkProfileManager is not supported."
               code:E_NOINTERFACE
                 to:error];
-        return nil;
+        return NO;
     }
     
     if (result == S_OK) {
-        return @YES;
+        return YES;
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkProfile::SetActive failed."
               code:result
                 to:error];
-        return nil;
+        return NO;
     }
 }
 
@@ -180,7 +180,7 @@
     }
 }
 
-- (NSNumber*)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError**)error
+- (BOOL) activateProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError**)error
 {
     NSParameterAssert(attributes != nil);
     
@@ -194,17 +194,17 @@
             reason:@"DLABProfileAttributes - profile is not available."
               code:paramErr
                 to:error];
-        return nil;
+        return NO;
     }
     
     if (result == S_OK) {
-        return @YES;
+        return YES;
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkProfile::SetActive failed."
               code:result
                 to:error];
-        return nil;
+        return NO;
     }
 }
 

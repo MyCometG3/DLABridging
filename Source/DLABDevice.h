@@ -1497,9 +1497,9 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param targetProfileID profileID to activate in NSNumber* form.
  @param error Error description if failed.
- @return @YES if success, nil if failed.
+ @return YES if success, NO if failed.
  */
-- (nullable NSNumber*)activateProfile:(NSNumber*)targetProfileID error:(NSError * _Nullable * _Nullable)error;
+- (BOOL) activateProfile:(NSNumber*)targetProfileID error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Query if specified DLABProfile is active or not.
@@ -1514,9 +1514,9 @@ NS_ASSUME_NONNULL_BEGIN
  Activate DLABProfile associated with DLABProfileAttributes.
  @param attributes DLABProfileAttributes to activate
  @param error Error description if failed.
- @return @YES if success, nil if failed.
+ @return YES if success, NO if failed.
  */
-- (nullable NSNumber*)activateProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError * _Nullable * _Nullable)error;
+- (BOOL) activateProfileUsingAttributes:(DLABProfileAttributes*)attributes error:(NSError * _Nullable * _Nullable)error;
 
 /**
  Query if DLABProfile associated with DLABProfileAttributes is active or not.
