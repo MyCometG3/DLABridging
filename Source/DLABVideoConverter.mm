@@ -1342,6 +1342,9 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                 // RGBtoRGB conversion
                 matrixErr = kvImageNoError;
             }
+            if (matrixErr) {
+                NSLog(@"ERROR: vImageConvert_YpCbCrToARGB_GenerateConversion() failed.");
+            }
         }
         vImage_CGImageFormat interimFormat = {0};
         if (matrixErr == kvImageNoError) {
@@ -1376,11 +1379,15 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                                                                         bgColor,
                                                                         flags,
                                                                         &errCGtoCV);
-                assert (!errCGtoCV);
+                if (errCGtoCV || !convCGtoCV) {
+                    NSLog(@"ERROR: vImageConverter_CreateForCGToCVImageFormat() failed.(%ld)", errCGtoCV);
+                }
                 vImageCVImageFormat_Release(outFormat);
                 
                 queryTempBuffer = TRUE;
                 free(tempBuffer); tempBuffer = NULL;
+            } else {
+                NSLog(@"ERROR: vImageCVImageFormat_CreateWithCVPixelBuffer() failed.");
             }
         }
         if (errCGtoCV == kvImageNoError) {
@@ -1636,6 +1643,9 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                 // RGBtoTGB conversion
                 matrixErr = kvImageNoError;
             }
+            if (matrixErr) {
+                NSLog(@"ERROR: vImageConvert_ARGBToYpCbCr_GenerateConversion() failed.");
+            }
         }
         vImage_CGImageFormat interimFormat = {0};
         if (matrixErr == kvImageNoError) {
@@ -1670,11 +1680,15 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                                                                         bgColor,
                                                                         flags,
                                                                         &errCVtoCG);
-                assert (!errCVtoCG);
+                if (errCVtoCG || !convCVtoCG) {
+                    NSLog(@"ERROR: vImageConverter_CreateForCVToCGImageFormat() failed.(%ld)", errCVtoCG);
+                }
                 vImageCVImageFormat_Release(inFormat);
                 
                 queryTempBuffer = TRUE;
                 free(tempBuffer); tempBuffer = NULL;
+            } else {
+                NSLog(@"ERROR: vImageCVImageFormat_CreateWithCVPixelBuffer() failed.");
             }
         }
         if (errCVtoCG == kvImageNoError) {

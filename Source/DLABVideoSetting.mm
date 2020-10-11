@@ -61,6 +61,8 @@ NS_INLINE size_t cvBytesPerRow(OSType format, long width, long height)
         if (!err && pixelBuffer) {
             rowBytes = CVPixelBufferGetBytesPerRow(pixelBuffer);
             CVPixelBufferRelease(pixelBuffer);
+        } else {
+            NSLog(@"ERROR: CVPixelBufferCreate() failed.(%d)", err);
         }
     }
     return rowBytes;

@@ -443,13 +443,15 @@ NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBuff
         
         // Free pixelBuffer
         CVPixelBufferRelease(pixelBuffer);
+        if (!sampleBuffer) {
+            NSLog(@"ERROR: CMSampleBufferCreateReadyWithImageBuffer() failed.(%d)", err);
+        }
     }
     
     // Return Result
     if (!err && sampleBuffer) {
         return sampleBuffer;
     } else {
-        NSLog(@"CMSampleBufferCreateReadyWithImageBuffer() returned %d", err);
         if (sampleBuffer)
             CFRelease(sampleBuffer);
         return NULL;
