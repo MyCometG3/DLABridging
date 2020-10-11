@@ -28,13 +28,12 @@
 @property (nonatomic, assign) int32_t dlRangeMax;
 
 @property (nonatomic, assign) BOOL dlDefault16Q12;
-@property (nonatomic, assign) BOOL dlUseXRGB16U;
 @property (nonatomic, assign) vImage_YpCbCrToARGB infoToARGB;
 @property (nonatomic, assign) vImage_ARGBToYpCbCr infoToYpCbCr;
 
 @property (nonatomic, assign) vImage_Buffer dlHostBuffer; // dlBuffer in HostEndian
 @property (nonatomic, assign) vImage_Buffer interimBuffer; // interim XRGB16U format (RGB444)
-@property (nonatomic, assign) vImage_Buffer argb8888Buffer; // For dlUseXRGB16U: YUV8 <-> RGB8 <-> RGB16
+@property (nonatomic, assign) vImage_Buffer argb8888Buffer; // For useXRGB16U: YUV8 <-> RGB8 <-> RGB16
 
 @property (nonatomic, assign) vImageConverterRef convCVtoCG; // for output converter from CV to XRGB16U
 @property (nonatomic, assign) vImageConverterRef convCGtoCV; // for input converter from XRGB16U to CV;
@@ -90,6 +89,7 @@
 @synthesize dlColorSpace = dlColorSpace, cvColorSpace = cvColorSpace;
 @synthesize useDLColorSpace = useDLColorSpace;
 @synthesize useGammaSubstitute = useGammaSubstitute;
+@synthesize useXRGB16U = useXRGB16U;
 
 - (void)setDlColorSpace:(CGColorSpaceRef)newColorSpace
 {
@@ -127,7 +127,6 @@
 @synthesize dlRangeMax = dlRangeMax;
 
 @synthesize dlDefault16Q12 = dlDefault16Q12;
-@synthesize dlUseXRGB16U = dlUseXRGB16U;
 @synthesize infoToARGB = infoToARGB;
 @synthesize infoToYpCbCr = infoToYpCbCr;
 
@@ -988,7 +987,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         // bmdFormat12BitRGB
         if (dlFormat == bmdFormat10BitRGBX) { // 1010102 BE
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageConvert_RGBA1010102ToARGB16Q12(src, dest,
                                                                dlRangeMin, dlRangeMax,
                                                                permuteMap, flags);
@@ -999,7 +998,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             }
         } else if (dlFormat == bmdFormat10BitRGB) { // 2101010 BE
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageConvert_ARGB2101010ToARGB16Q12(src, dest,
                                                                dlRangeMin, dlRangeMax,
                                                                permuteMap, flags);
@@ -1033,7 +1032,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         // bmdFormat12BitRGBLE
         if (dlFormat == bmdFormat8BitARGB) {
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageCopyBuffer(src, dest, 4, flags);
             } else {
                 uint8_t copyMask = 0b0000;
@@ -1044,7 +1043,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             }
         } else if (dlFormat == bmdFormat8BitBGRA) {
             uint8_t permuteMap[4] = {3,2,1,0}; // componentOrder: B3, G2, R1, A0
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImagePermuteChannels_ARGB8888(src, dest,
                                                          permuteMap, flags);
             } else {
@@ -1056,7 +1055,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             }
         } else if (dlFormat == bmdFormat10BitRGBXLE) { // 1010102 LE
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageConvert_RGBA1010102ToARGB16Q12(src, dest,
                                                                dlRangeMin, dlRangeMax,
                                                                permuteMap, flags);
@@ -1100,7 +1099,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         // bmdFormat12BitRGB
         if (dlFormat == bmdFormat10BitRGBX) { // 1010102 BE
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageConvert_ARGB16Q12ToRGBA1010102(src, dest,
                                                                dlRangeMin, dlRangeMax,
                                                                dlRangeMin, dlRangeMax,
@@ -1112,7 +1111,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             }
         } else if (dlFormat == bmdFormat10BitRGB) { // 2101010 BE
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageConvert_ARGB16Q12ToARGB2101010(src, dest,
                                                                dlRangeMin, dlRangeMax,
                                                                dlRangeMin, dlRangeMax,
@@ -1147,7 +1146,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         // bmdFormat12BitRGBLE
         if (dlFormat == bmdFormat8BitARGB) {
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageCopyBuffer(src, dest, 4, flags);
             } else {
                 uint8_t copyMask = 0b0000;
@@ -1158,7 +1157,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             }
         } else if (dlFormat == bmdFormat8BitBGRA) {
             uint8_t permuteMap[4] = {3,2,1,0}; // componentOrder: B3, G2, R1, A0
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImagePermuteChannels_ARGB8888(src, dest,
                                                          permuteMap, flags);
             } else {
@@ -1170,7 +1169,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             }
         } else if (dlFormat == bmdFormat10BitRGBXLE) { // 1010102 LE
             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
-            if (!dlUseXRGB16U) {
+            if (!useXRGB16U) {
                 convErr = vImageConvert_ARGB16Q12ToRGBA1010102(src, dest,
                                                                dlRangeMin, dlRangeMax,
                                                                dlRangeMin, dlRangeMax,
@@ -1222,7 +1221,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         dlRangeMin = 0; dlRangeMax = 0;
         dlDefault16Q12 = FALSE;
         
-        dlUseXRGB16U = FALSE;
+        useXRGB16U = FALSE;
         infoToARGB = {0}; infoToYpCbCr = {0};
         
         free(dlHostBuffer.data); dlHostBuffer = {0};
@@ -1323,8 +1322,8 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                 if (matrixErr == kvImageNoError) {
                     infoToARGB = info;
                     
-                    // For dlUseXRGB16U: YUV8 => RGB8 => RGB16; See vImage/Conversion.h
-                    if (dlUseXRGB16U) {
+                    // For useXRGB16U: YUV8 => RGB8 => RGB16; See vImage/Conversion.h
+                    if (useXRGB16U) {
                         size_t rowBytes = (dlWidth * 4);
                         void* ptr = NULL;
                         size_t bufferSize = (rowBytes * dlHeight);
@@ -1360,7 +1359,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         }
         if (dlHostErr == kvImageNoError) {
             CGColorSpaceRef cs = (useDLColorSpace? dlColorSpace : cvColorSpace);
-            interimFormat = (dlUseXRGB16U ? formatXRGB16U(cs) :
+            interimFormat = (useXRGB16U ? formatXRGB16U(cs) :
                              (dlDefault16Q12 ? formatXRGB16Q12(cs) : formatXRGB8888(cs)));
             interimErr = vImageBuffer_Init(&interimBuffer,
                                            dlHeight, dlWidth, // rect of VideoFrame
@@ -1471,7 +1470,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             } else {
                 // Convert VideoFrame format to interimBuffer
                 if (dlFormat == bmdFormat10BitYUV) { // v210
-                    if (dlUseXRGB16U) {
+                    if (useXRGB16U) {
                         // conv: YUV10 => XRGB16Q12 => XRGB16U
                         {
                             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
@@ -1498,7 +1497,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                                                                                          kvImageNoFlags);
                     }
                 } else if (dlFormat == bmdFormat8BitYUV) { // 2vuy
-                    if (dlUseXRGB16U) {
+                    if (useXRGB16U) {
                         // conv: YUV8 => XRGB8 => XRGB16U
                         {
                             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3
@@ -1624,8 +1623,8 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                 if (matrixErr == kvImageNoError) {
                     infoToYpCbCr = info;
                     
-                    // For dlUseXRGB16U: YUV8 <= RGB8 <= RGB16; See vImage/Conversion.h
-                    if (dlUseXRGB16U) {
+                    // For useXRGB16U: YUV8 <= RGB8 <= RGB16; See vImage/Conversion.h
+                    if (useXRGB16U) {
                         size_t rowBytes = (dlWidth * 4);
                         void* ptr = NULL;
                         size_t bufferSize = (rowBytes * dlHeight);
@@ -1661,7 +1660,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         }
         if (dlHostErr == kvImageNoError) {
             CGColorSpaceRef cs = (useDLColorSpace? dlColorSpace : cvColorSpace);
-            interimFormat = (dlUseXRGB16U ? formatXRGB16U(cs) :
+            interimFormat = (useXRGB16U ? formatXRGB16U(cs) :
                              (dlDefault16Q12 ? formatXRGB16Q12(cs) : formatXRGB8888(cs)));
             interimErr = vImageBuffer_Init(&interimBuffer,
                                            dlHeight, dlWidth, // rect of VideoFrame
@@ -1804,7 +1803,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             } else {
                 // Convert interimBuffer to VideoFrame format
                 if (dlFormat == bmdFormat10BitYUV) { // v210
-                    if (dlUseXRGB16U) {
+                    if (useXRGB16U) {
                         // conv: YUV10 <= XRGB16Q12 <= XRGB16U
                         {
                             vImage_Buffer inPlace = interimBuffer;
@@ -1829,7 +1828,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                                                                                          kvImageNoFlags);
                     }
                 } else if (dlFormat == bmdFormat8BitYUV) { // 2vuy
-                    if (dlUseXRGB16U) {
+                    if (useXRGB16U) {
                         // conv: YUV8 <= XRGB8 <= XRGB16U
                         {
                             uint8_t permuteMap[4] = {0,1,2,3}; // componentOrder: A0, R1, G2, B3

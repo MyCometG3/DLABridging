@@ -54,6 +54,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// For Debugging purpose only; Set this before prepare.
 @property (nonatomic, assign) BOOL useGammaSubstitute;
 
+/// For Debugging purpose only; Use XRGB16U interimBuffer.
+@property (nonatomic, assign) BOOL useXRGB16U;
+
 /* ================================================================ */
 // MARK: - Validate VideoFrame and CVPixelBuffer (optional)
 /* ================================================================ */
