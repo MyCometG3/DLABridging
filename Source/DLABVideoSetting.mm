@@ -118,24 +118,13 @@ NS_INLINE OSType preferredCVPixelFormatFor(BMDPixelFormat dlFormat) {
 NS_INLINE NSString* nameForCVPixelFormatType(OSType cvPixelFormat)
 {
     NSString* name = nil;
-    switch (cvPixelFormat) {
-        case kCVPixelFormatType_422YpCbCr8:         name = @"422YpCbCr8"; break;
-        case kCVPixelFormatType_4444YpCbCrA8:       name = @"4444YpCbCrA8"; break;
-        case kCVPixelFormatType_4444YpCbCrA8R:      name = @"4444YpCbCrA8R"; break;
-        case kCVPixelFormatType_4444AYpCbCr8:       name = @"4444AYpCbCr8"; break;
-        case kCVPixelFormatType_4444AYpCbCr16:      name = @"4444AYpCbCr16"; break;
-        case kCVPixelFormatType_444YpCbCr8:         name = @"444YpCbCr8"; break;
-        case kCVPixelFormatType_422YpCbCr16:        name = @"422YpCbCr16"; break;
-        case kCVPixelFormatType_422YpCbCr10:        name = @"422YpCbCr10"; break;
-        case kCVPixelFormatType_444YpCbCr10:        name = @"444YpCbCr10"; break;
-        case kCVPixelFormatType_422YpCbCr8_yuvs:    name = @"422YpCbCr8_yuvs"; break;
-        case kCVPixelFormatType_422YpCbCr8FullRange:    name = @"422YpCbCr8FullRange"; break;
-            
+    switch (cvPixelFormat) { // ordered same as CVPixelBuffer.h
+        case kCVPixelFormatType_16BE555:            name = @"16BE555"; break;
         case kCVPixelFormatType_16LE555:            name = @"16LE555"; break;
         case kCVPixelFormatType_16LE5551:           name = @"16LE5551"; break;
-        case kCVPixelFormatType_16LE565:            name = @"16LE565"; break;
-        case kCVPixelFormatType_16BE555:            name = @"16BE555"; break;
         case kCVPixelFormatType_16BE565:            name = @"16BE565"; break;
+        case kCVPixelFormatType_16LE565:            name = @"16LE565"; break;
+            
         case kCVPixelFormatType_24RGB:              name = @"24RGB"; break;
         case kCVPixelFormatType_24BGR:              name = @"24BGR"; break;
         case kCVPixelFormatType_32ARGB:             name = @"32ARGB"; break;
@@ -145,14 +134,32 @@ NS_INLINE NSString* nameForCVPixelFormatType(OSType cvPixelFormat)
         case kCVPixelFormatType_64ARGB:             name = @"64ARGB"; break;
         case kCVPixelFormatType_48RGB:              name = @"48RGB"; break;
         case kCVPixelFormatType_30RGB:              name = @"30RGB"; break;
+            
+        case kCVPixelFormatType_422YpCbCr8:         name = @"422YpCbCr8"; break;
+        case kCVPixelFormatType_4444YpCbCrA8:       name = @"4444YpCbCrA8"; break;
+        case kCVPixelFormatType_4444YpCbCrA8R:      name = @"4444YpCbCrA8R"; break;
+        case kCVPixelFormatType_4444AYpCbCr8:       name = @"4444AYpCbCr8"; break;
+        case kCVPixelFormatType_4444AYpCbCr16:      name = @"4444AYpCbCr16"; break;
+        case kCVPixelFormatType_444YpCbCr8:         name = @"444YpCbCr8"; break;
+        case kCVPixelFormatType_422YpCbCr16:        name = @"422YpCbCr16"; break;
+        case kCVPixelFormatType_422YpCbCr10:        name = @"422YpCbCr10"; break;
+            
+        case kCVPixelFormatType_444YpCbCr10:        name = @"444YpCbCr10"; break;
+            
+        case kCVPixelFormatType_422YpCbCr8_yuvs:    name = @"422YpCbCr8_yuvs"; break;
+        case kCVPixelFormatType_422YpCbCr8FullRange:    name = @"422YpCbCr8FullRange"; break;
+            
         case kCVPixelFormatType_30RGBLEPackedWideGamut: name = @"30RGBLEPackedWideGamut"; break;
         case kCVPixelFormatType_ARGB2101010LEPacked:    name = @"ARGB2101010LEPacked"; break;
+            
         case kCVPixelFormatType_64RGBAHalf:         name = @"64RGBAHalf"; break;
         case kCVPixelFormatType_128RGBAFloat:       name = @"128RGBAFloat"; break;
+            
         case kCVPixelFormatType_14Bayer_GRBG:       name = @"14Bayer_GRBG"; break;
         case kCVPixelFormatType_14Bayer_RGGB:       name = @"14Bayer_RGGB"; break;
         case kCVPixelFormatType_14Bayer_BGGR:       name = @"14Bayer_BGGR"; break;
         case kCVPixelFormatType_14Bayer_GBRG:       name = @"14Bayer_GBRG"; break;
+            
         default:                                    break;
     }
     return name;
@@ -195,29 +202,31 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         case kCVPixelFormatType_422YpCbCr8FullRange:
             cvReady = true;
             break;
-        case kCVPixelFormatType_16LE555:
-        case kCVPixelFormatType_16LE5551:
-        case kCVPixelFormatType_16LE565:
         case kCVPixelFormatType_16BE555:
-        case kCVPixelFormatType_16BE565:
         case kCVPixelFormatType_24RGB:
-        case kCVPixelFormatType_24BGR:
         case kCVPixelFormatType_32ARGB:
         case kCVPixelFormatType_32BGRA:
-        case kCVPixelFormatType_32ABGR:
-        case kCVPixelFormatType_32RGBA:
-        case kCVPixelFormatType_64ARGB:
         case kCVPixelFormatType_48RGB:
-        case kCVPixelFormatType_30RGB:
-        case kCVPixelFormatType_30RGBLEPackedWideGamut:
-        case kCVPixelFormatType_ARGB2101010LEPacked:
         case kCVPixelFormatType_64RGBAHalf:
         case kCVPixelFormatType_128RGBAFloat:
-        case kCVPixelFormatType_14Bayer_GRBG:
-        case kCVPixelFormatType_14Bayer_RGGB:
-        case kCVPixelFormatType_14Bayer_BGGR:
-        case kCVPixelFormatType_14Bayer_GBRG:
             cvReady = true;
+            break;
+        case kCVPixelFormatType_16LE555:        // L555:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_16LE5551:       // 5551:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_16BE565:        // B565:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_16LE565:        // L565:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_24BGR:          // 24BG:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_32ABGR:         // ABGR:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_32RGBA:         // RGBA:-6680: CVPixelBufferCreate()
+        case kCVPixelFormatType_64ARGB:         // b64a:fail: vImageCVImageFormat_Create()
+        case kCVPixelFormatType_30RGB:          // R10k:crash: vImageConverter_CreateForCGToCVImageFormat()
+        case kCVPixelFormatType_30RGBLEPackedWideGamut: // w30r:fail: vImageCVImageFormat_Create()
+        case kCVPixelFormatType_ARGB2101010LEPacked:    // l10r:fail: vImageCVImageFormat_Create()
+        case kCVPixelFormatType_14Bayer_GRBG:   // grb4:fail: vImageCVImageFormat_Create()
+        case kCVPixelFormatType_14Bayer_RGGB:   // rgg4:fail: vImageCVImageFormat_Create()
+        case kCVPixelFormatType_14Bayer_BGGR:   // bgg4:fail: vImageCVImageFormat_Create()
+        case kCVPixelFormatType_14Bayer_GBRG:   // gbr4:fail: vImageCVImageFormat_Create()
+            cvReady = false;
             break;
         default:
             cvReady = false;
