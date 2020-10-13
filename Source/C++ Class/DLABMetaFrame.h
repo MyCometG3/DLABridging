@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
-
+#import <atomic>
 #import <DeckLinkAPI_v11_5.h>
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -80,7 +80,7 @@ public:
 private:
     IDeckLinkMutableVideoFrame* m_videoFrame;
     HDRMetadata                 m_metadata;
-    int32_t refCount;
+    std::atomic<ULONG> refCount;
 };
 
 // int

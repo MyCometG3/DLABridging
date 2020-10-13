@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
+#import <atomic>
 
 /*
  * Internal use only
@@ -42,5 +43,5 @@ public:
     
 private:
     __weak id<DLABNotificationCallbackDelegate> delegate;
-    int32_t refCount;
+    std::atomic<ULONG> refCount;
 };

@@ -11,6 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
 #import <DeckLinkAPIVideoInput_v11_5_1.h>
+#import <atomic>
 
 /*
  * Internal use only
@@ -45,5 +46,5 @@ public:
     
 private:
     __weak id<DLABInputCallbackDelegate> delegate;
-    int32_t refCount;
+    std::atomic<ULONG> refCount;
 };

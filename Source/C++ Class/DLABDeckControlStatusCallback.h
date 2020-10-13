@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
+#import <atomic>
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
@@ -48,5 +49,5 @@ public:
     
 private:
     __weak id<DLABDeckControlStatusCallbackPrivateDelegate> delegate;
-    int32_t refCount;
+    std::atomic<ULONG> refCount;
 };

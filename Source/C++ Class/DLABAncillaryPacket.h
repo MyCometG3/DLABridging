@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
-
+#import <atomic>
 #import <vector>
 
 /*
@@ -42,5 +42,5 @@ private:
     uint32_t _line;
     uint8_t _dataStreamIndex;
     std::vector<char> vbuf;
-    int32_t refCount;
+    std::atomic<ULONG> refCount;
 };

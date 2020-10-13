@@ -261,13 +261,13 @@ HRESULT DLABMetaFrame::QueryInterface(REFIID iid, LPVOID *ppv)
 
 ULONG DLABMetaFrame::AddRef()
 {
-    int32_t newRefValue = OSAtomicIncrement32(&refCount);
+    ULONG newRefValue = ++refCount;
     return newRefValue;
 }
 
 ULONG DLABMetaFrame::Release()
 {
-    int32_t newRefValue = OSAtomicDecrement32(&refCount);
+    ULONG newRefValue = --refCount;
     if (newRefValue == 0) {
         delete this;
         return 0;

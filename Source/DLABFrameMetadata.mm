@@ -268,17 +268,15 @@
     
     if (!_metaframe) return FALSE;
     
-    if (@available(macOS 10.13, *)) {
-        if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2100_HLG)) {
-            metadata.hdrElectroOpticalTransferFunc = 3;
-            return YES;
-        }
-        else if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ)) {
-            metadata.hdrElectroOpticalTransferFunc = 2;
-            return YES;
-        }
+    if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2100_HLG)) {
+        metadata.hdrElectroOpticalTransferFunc = 3;
+        return YES;
     }
-    if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2) ||
+    else if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ)) {
+        metadata.hdrElectroOpticalTransferFunc = 2;
+        return YES;
+    }
+    else if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2) ||
         CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2020)) {
         metadata.hdrElectroOpticalTransferFunc = 1;
         return YES;
