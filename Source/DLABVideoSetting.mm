@@ -86,14 +86,10 @@ NS_INLINE OSType preferredCVPixelFormatFor(BMDPixelFormat dlFormat) {
         case bmdFormat10BitRGB: // 'r210' (64-960)
         case bmdFormat10BitRGBXLE: // 'R10l' (64-960)
         case bmdFormat10BitRGBX: // 'R10b' (64-960)
-            // cvFormat = kCVPixelFormatType_30RGBLEPackedWideGamut; // 'w30r' (384-895)
-            // cvFormat = kCVPixelFormatType_ARGB2101010LEPacked; // 'l10r' (0-4095 LE)
-            // cvFormat = kCVPixelFormatType_64RGBAHalf; // 'RGhA' (16bit float LE)
             cvFormat = kCVPixelFormatType_48RGB; // 'b48r' (0-65535 BE)
             break;
         case bmdFormat12BitRGB: // 'R12B'
         case bmdFormat12BitRGBLE: // 'R12L'
-            // cvFormat = kCVPixelFormatType_64RGBAHalf; // 'RGhA' (16bit float LE)
             cvFormat = kCVPixelFormatType_48RGB; // 'b48r' (0-65535 BE)
             break;
         default:
@@ -932,7 +928,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         NSNumber* clapHeight = @((double_t)self.clapHeightN/self.clapHeightD);
         NSNumber* clapHOffset = @((double_t)self.clapHOffsetN/self.clapHOffsetD);
         NSNumber* clapVOffset = @((double_t)self.clapVOffsetN/self.clapVOffsetD);
-
+        
         NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
         NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
         NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;

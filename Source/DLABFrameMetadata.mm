@@ -277,7 +277,7 @@
         return YES;
     }
     else if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2) ||
-        CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2020)) {
+             CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2020)) {
         metadata.hdrElectroOpticalTransferFunc = 1;
         return YES;
     }

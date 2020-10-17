@@ -18,16 +18,21 @@ NS_ASSUME_NONNULL_BEGIN
  DLABVideoSetting is a container related to Video Input/Output settings.
  
  You have to ask DLABDevice to create new videoSetting object using:
+ 
  - createOutputVideoSettingOfDisplayMode:pixelFormat:outputFlag:supportedAs:error:
+ 
  - createInputVideoSettingOfDisplayMode:pixelFormat:inputFlag:supportedAs:error:
  
- # CoreVideo compatible without conversion:
- DLABPixelFormat(8BitYUV/10BitYUV/8BitARGB/8BitBGRA)
- # Corevideo compatible with conversion: (experimental)
- DLABPixelFormat(10BitRGB/10BitRGBXLE/10BitRGBX)
- # Unsupported:
- DLABPixelFormat(12BitRGB/12BitRGBLE) and others
+ @remark
+ For PixelFormat CV native pixelformat is strongly recommended.
  
+ - CoreVideo native: DLABPixelFormat(8BitYUV/10BitYUV/8BitARGB/8BitBGRA)
+ 
+ - With conversion: DLABPixelFormat(10BitRGB/10BitRGBXLE/10BitRGBX)
+ 
+ - With conversion/experimental: DLABPixelFormat(12BitRGB/12BitRGBLE)
+ 
+ - Unsupported: DLABPixelFormat(H265/DNxHR) and others
  */
 @interface DLABVideoSetting : NSObject <NSCopying>
 
