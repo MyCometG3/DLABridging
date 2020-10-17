@@ -293,7 +293,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
     NSParameterAssert(pixelBuffer);
     
     BOOL ready = false;
-    OSType cvPixelFormat = self.inputVideoSetting.cvPixelFormatType;
+    OSType cvPixelFormat = self.outputVideoSetting.cvPixelFormatType;
     assert(cvPixelFormat);
     
     // take out free output frame from frame pool
