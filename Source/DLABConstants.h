@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017-2020 MyCometG3. All rights reserved.
+//  Copyright © 2017-2021 MyCometG3. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -25,10 +25,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_11.7.zip @ 2020/11/12 UTC
+ Derived from: Blackmagic_DeckLink_SDK_12.0.zip @ 2021/01/15 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0b070000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "11.7"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c000000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.0"
  */
 
 /* =================================================================================== */
