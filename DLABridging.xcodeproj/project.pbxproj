@@ -165,8 +165,9 @@
 		163CF44A24023A7B00732F8C /* DeckLink API */ = {
 			isa = PBXGroup;
 			children = (
-				163CF44B24023A7B00732F8C /* DeckLinkAPI.h */,
+				164BBCC724C96F240076EF54 /* DeckLinkAPI_v11_5_1.h */,
 				16F134C5247A2D9300F92C14 /* DeckLinkAPI_v11_5.h */,
+				163CF44B24023A7B00732F8C /* DeckLinkAPI.h */,
 				163CF44D24023A7B00732F8C /* DeckLinkAPIConfiguration.h */,
 				163CF44F24023A7B00732F8C /* DeckLinkAPIDeckControl.h */,
 				163CF45024023A7B00732F8C /* DeckLinkAPIDiscovery.h */,
@@ -176,9 +177,8 @@
 				163CF45624023A7B00732F8C /* DeckLinkAPITypes.h */,
 				163CF45724023A7B00732F8C /* DeckLinkAPIVersion.h */,
 				163CF45A24023A7B00732F8C /* DeckLinkAPIVideoInput_v11_4.h */,
-				163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */,
-				164BBCC724C96F240076EF54 /* DeckLinkAPI_v11_5_1.h */,
 				164BBCC624C96F240076EF54 /* DeckLinkAPIVideoInput_v11_5_1.h */,
+				163CF45C24023A7B00732F8C /* DeckLinkAPIVideoOutput_v11_4.h */,
 			);
 			path = "DeckLink API";
 			sourceTree = "<group>";
