@@ -3,7 +3,7 @@
 Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 
 - __Requirement__: MacOS X 10.14 or later.
-- __Capture Device__: Blackmagic Intensity Shuttle, or other DeckLink devices.
+- __Capture Device__: Blackmagic DeckLink devices.
 - __Restriction__: Compressed capture is not supported.
 - __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh_11.4 or later.
 - __Architecture__: Universal binary (x86_64 + arm64)
@@ -110,11 +110,11 @@ NOTE: This framework is under development.
     device = nil
 
 #### Development environment
-- MacOS X 10.15.7 Catalina
-- Xcode 12.2.0
-- Swift 5.3.1
+- MacOS X 11.1 BigSur
+- Xcode 12.4.0
+- Swift 5.3.2
 
 #### License
 - The MIT License
 
-Copyright © 2017-2020年 MyCometG3. All rights reserved.
+Copyright © 2017-2021年 MyCometG3. All rights reserved.
