@@ -814,7 +814,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
                    forConfiguration:DLABConfigurationVideoOutputConnection
                               error:&err];
     if (!result) {
-        *error = err;
+        if (error) *error = err;
         return NO;
     }
     return [self enableVideoOutputWithVideoSetting:setting error:error];
@@ -1181,7 +1181,7 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
                    forConfiguration:DLABConfigurationAudioOutputAESAnalogSwitch
                               error:&err];
     if (!result) {
-        *error = err;
+        if (error) *error = err;
         return NO;
     }
     return [self enableAudioOutputWithAudioSetting:setting error:error];

@@ -1002,7 +1002,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                    forConfiguration:DLABConfigurationVideoInputConnection
                               error:&err];
     if (!result) {
-        *error = err;
+        if (error) *error = err;
         return NO;
     }
     return [self enableVideoInputWithVideoSetting:setting error:error];
@@ -1115,7 +1115,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                    forConfiguration:DLABConfigurationAudioInputConnection
                               error:&err];
     if (!result) {
-        *error = err;
+        if (error) *error = err;
         return NO;
     }
     return [self enableAudioInputWithSetting:setting error:error];
