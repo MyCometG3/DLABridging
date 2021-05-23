@@ -377,5 +377,7 @@ extern "C" {
 
 }
 
+
+
 #endif /* defined(__cplusplus) */
 #endif /* defined(BMD_DECKLINKAPISTREAMING_H) */

@@ -263,5 +263,7 @@ extern "C" {
 
 }
 
+
+
 #endif /* defined(__cplusplus) */
 #endif /* defined(BMD_DECKLINKAPICONFIGURATION_H) */

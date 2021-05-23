@@ -217,5 +217,7 @@ extern "C" {
 
 }
 
+
+
 #endif /* defined(__cplusplus) */
 #endif /* defined(BMD_DECKLINKAPIDECKCONTROL_H) */

@@ -126,5 +126,7 @@ extern "C" {
 
 }
 
+
+
 #endif /* defined(__cplusplus) */
 #endif /* defined(BMD_DECKLINKAPITYPES_H) */

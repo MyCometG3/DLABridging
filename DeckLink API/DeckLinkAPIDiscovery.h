@@ -73,5 +73,7 @@ extern "C" {
 
 }
 
+
+
 #endif /* defined(__cplusplus) */
 #endif /* defined(BMD_DECKLINKAPIDISCOVERY_H) */
