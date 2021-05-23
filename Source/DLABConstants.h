@@ -25,10 +25,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_12.0.zip @ 2021/01/15 UTC
+ Derived from: Blackmagic_DeckLink_SDK_12.1.zip @ 2021/05/17 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c000000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.0"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c010000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.1"
  */
 
 /* =================================================================================== */
@@ -126,6 +126,7 @@ typedef NS_ENUM(uint32_t, DLABOutputFrameCompletionResult)
 /* Enum BMDReferenceStatus - GenLock input status */
 typedef NS_OPTIONS(uint32_t, DLABReferenceStatus)
 {
+    DLABReferenceStatusUnlocked                                         = 0,
     DLABReferenceStatusNotSupportedByHardware                           = 1 << 0,
     DLABReferenceStatusLocked                                           = 1 << 1
 };
