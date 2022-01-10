@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2020/04/07.
-//  Copyright © 2020 MyCometG3. All rights reserved.
+//  Copyright © 2020-2022 MyCometG3. All rights reserved.
 //
 
 #import "DLABVideoConverter.h"
