@@ -1,5 +1,5 @@
 /* -LICENSE-START-
- ** Copyright (c) 2021 Blackmagic Design
+ ** Copyright (c) 2022 Blackmagic Design
  **  
  ** Permission is hereby granted, free of charge, to any person or organization 
  ** obtaining a copy of the software and accompanying documentation (the 
@@ -104,6 +104,7 @@ BMD_CONST REFIID IID_IDeckLinkAudioInputPacket                    = /* E43D5870-
 BMD_CONST REFIID IID_IDeckLinkScreenPreviewCallback               = /* B1D3F49A-85FE-4C5D-95C8-0B5D5DCCD438 */ { 0xB1,0xD3,0xF4,0x9A,0x85,0xFE,0x4C,0x5D,0x95,0xC8,0x0B,0x5D,0x5D,0xCC,0xD4,0x38 };
 BMD_CONST REFIID IID_IDeckLinkCocoaScreenPreviewCallback          = /* D174152F-8F96-4C07-83A5-DD5F5AF0A2AA */ { 0xD1,0x74,0x15,0x2F,0x8F,0x96,0x4C,0x07,0x83,0xA5,0xDD,0x5F,0x5A,0xF0,0xA2,0xAA };
 BMD_CONST REFIID IID_IDeckLinkGLScreenPreviewHelper               = /* 504E2209-CAC7-4C1A-9FB4-C5BB6274D22F */ { 0x50,0x4E,0x22,0x09,0xCA,0xC7,0x4C,0x1A,0x9F,0xB4,0xC5,0xBB,0x62,0x74,0xD2,0x2F };
+BMD_CONST REFIID IID_IDeckLinkMetalScreenPreviewHelper            = /* 1AB252C5-DACB-4AE8-A58B-5320DE9CE373 */ { 0x1A,0xB2,0x52,0xC5,0xDA,0xCB,0x4A,0xE8,0xA5,0x8B,0x53,0x20,0xDE,0x9C,0xE3,0x73 };
 BMD_CONST REFIID IID_IDeckLinkNotificationCallback                = /* B002A1EC-070D-4288-8289-BD5D36E5FF0D */ { 0xB0,0x02,0xA1,0xEC,0x07,0x0D,0x42,0x88,0x82,0x89,0xBD,0x5D,0x36,0xE5,0xFF,0x0D };
 BMD_CONST REFIID IID_IDeckLinkNotification                        = /* B85DF4C8-BDF5-47C1-8064-28162EBDD4EB */ { 0xB8,0x5D,0xF4,0xC8,0xBD,0xF5,0x47,0xC1,0x80,0x64,0x28,0x16,0x2E,0xBD,0xD4,0xEB };
 BMD_CONST REFIID IID_IDeckLinkProfileAttributes                   = /* 17D4BF8E-4911-473A-80A0-731CF6FF345B */ { 0x17,0xD4,0xBF,0x8E,0x49,0x11,0x47,0x3A,0x80,0xA0,0x73,0x1C,0xF6,0xFF,0x34,0x5B };
@@ -685,6 +686,7 @@ class IDeckLinkAudioInputPacket;
 class IDeckLinkScreenPreviewCallback;
 class IDeckLinkCocoaScreenPreviewCallback;
 class IDeckLinkGLScreenPreviewHelper;
+class IDeckLinkMetalScreenPreviewHelper;
 class IDeckLinkNotificationCallback;
 class IDeckLinkNotification;
 class IDeckLinkProfileAttributes;
@@ -1128,7 +1130,7 @@ protected:
     virtual ~IDeckLinkCocoaScreenPreviewCallback () {} // call Release method to drop reference count
 };
 
-/* Interface IDeckLinkGLScreenPreviewHelper - Created with CoCreateInstance on platforms with native COM support or from CreateOpenGLScreenPreviewHelper on other platforms. */
+/* Interface IDeckLinkGLScreenPreviewHelper - Created with CoCreateInstance on platforms with native COM support or from CreateOpenGLScreenPreviewHelper/CreateOpenGL3ScreenPreviewHelper on other platforms. */
 
 class BMD_PUBLIC IDeckLinkGLScreenPreviewHelper : public IUnknown
 {
@@ -1143,6 +1145,20 @@ public:
 
 protected:
     virtual ~IDeckLinkGLScreenPreviewHelper () {} // call Release method to drop reference count
+};
+
+/* Interface IDeckLinkMetalScreenPreviewHelper - Created with CreateMetalScreenPreviewHelper(). */
+
+class BMD_PUBLIC IDeckLinkMetalScreenPreviewHelper : public IUnknown
+{
+public:
+    virtual HRESULT Initialize (/* in */ void* device) = 0;
+    virtual HRESULT Draw (/* in */ void* cmdBuffer, /* in */ void* renderPassDescriptor, /* in */ void* viewport) = 0;
+    virtual HRESULT SetFrame (/* in */ IDeckLinkVideoFrame* theFrame) = 0;
+    virtual HRESULT Set3DPreviewFormat (/* in */ BMD3DPreviewFormat previewFormat) = 0;
+
+protected:
+    virtual ~IDeckLinkMetalScreenPreviewHelper () {} // call Release method to drop reference count
 };
 
 /* Interface IDeckLinkNotificationCallback - DeckLink Notification Callback Interface */
@@ -1302,7 +1318,9 @@ extern "C" {
     IDeckLinkDiscovery* BMD_PUBLIC CreateDeckLinkDiscoveryInstance(void);
     IDeckLinkAPIInformation* BMD_PUBLIC CreateDeckLinkAPIInformationInstance(void);
     IDeckLinkGLScreenPreviewHelper* BMD_PUBLIC CreateOpenGLScreenPreviewHelper(void);
+    IDeckLinkGLScreenPreviewHelper* BMD_PUBLIC CreateOpenGL3ScreenPreviewHelper(void);	// Requires OpenGL 3.2 support and provides improved performance and color handling
     IDeckLinkCocoaScreenPreviewCallback* BMD_PUBLIC CreateCocoaScreenPreview(/* in */ void* /* (NSView*)*/ parentView);
+    IDeckLinkMetalScreenPreviewHelper* BMD_PUBLIC CreateMetalScreenPreviewHelper(void);
     IDeckLinkVideoConversion* BMD_PUBLIC CreateVideoConversionInstance(void);
     IDeckLinkVideoFrameAncillaryPackets* BMD_PUBLIC CreateVideoFrameAncillaryPacketsInstance(void);	// For use when creating a custom IDeckLinkVideoFrame without wrapping IDeckLinkOutput::CreateVideoFrame
 
