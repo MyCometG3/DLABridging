@@ -576,13 +576,16 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
         if (setting) return setting;
     }
     if (useRP188) {
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188HighFrameRate);
+        if (setting) return setting;
+        
         setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188VITC1);
         if (setting) return setting;
         
-        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188VITC2);
-        if (setting) return setting;
-        
         setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188LTC);
+        if (setting) return setting;
+
+        setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188VITC2);
         if (setting) return setting;
     }
     return nil;
