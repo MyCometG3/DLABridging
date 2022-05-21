@@ -342,6 +342,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
 {
     BOOL validTimecode = NO;
     
+    BOOL useSERIAL = outputVideoSetting.useSERIAL;
     BOOL useVITC = outputVideoSetting.useVITC;
     BOOL useRP188 = outputVideoSetting.useRP188;
     
@@ -353,7 +354,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
     BOOL RP188LTC = (format == DLABTimecodeFormatRP188LTC);
     BOOL RP188ANY = (format == DLABTimecodeFormatRP188Any);
     
-    if ((useVITC || useRP188) && SERIAL)
+    if (useSERIAL && SERIAL)
         validTimecode = YES;        // Accept any serial timecode
     if (useVITC && (VITCF1 || VITCF2) )
         validTimecode = YES;        // SD uses VITC

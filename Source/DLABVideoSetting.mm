@@ -504,6 +504,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 @synthesize displayModeFlag = _displayModeFlag;
 @synthesize cvRowBytes = _cvRowBytes;
 @synthesize isHD = _isHD;
+@synthesize useSERIAL = _useSERIAL;
 @synthesize useVITC = _useVITC;
 @synthesize useRP188 = _useRP188;
 @synthesize inputFlag = _inputFlag;

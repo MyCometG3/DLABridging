@@ -93,14 +93,19 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) BOOL isHD;
 
 /**
- Convenience property if preferred timecode type is VITC.
+ Validate if timecode type is SERIAL.
  */
-@property (nonatomic, assign, readonly) BOOL useVITC;
+@property (nonatomic, assign) BOOL useSERIAL;
 
 /**
- Convenience property if preferred timecode type is RP188.
+ Validate if timecode type is VITC.
  */
-@property (nonatomic, assign, readonly) BOOL useRP188;
+@property (nonatomic, assign) BOOL useVITC;
+
+/**
+ Validate if timecode type is RP188.
+ */
+@property (nonatomic, assign) BOOL useRP188;
 
 /**
  Additional flag of video input (i.e. DLABVideoInputFlagEnableFormatDetection)
