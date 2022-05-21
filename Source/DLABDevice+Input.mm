@@ -560,9 +560,8 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     // Check videoFrame
     DLABTimecodeSetting* setting = nil;
     
-    BOOL useVITC = self.outputVideoSetting.useVITC;
-    BOOL useRP188 = self.outputVideoSetting.useRP188;
-    
+    BOOL useVITC = self.inputVideoSetting.useVITC;
+    BOOL useRP188 = self.inputVideoSetting.useRP188;
     if (useVITC) {
         setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatVITC);
         if (setting) return setting;

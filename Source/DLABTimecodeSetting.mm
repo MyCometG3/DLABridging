@@ -67,8 +67,7 @@
     flag = (DLABTimecodeFlag) timecodeObj->GetFlags();
     if (result != S_OK) return nil;
     
-    result = timecodeObj->GetTimecodeUserBits(&userBits);
-    if (result != S_OK) return nil;
+    timecodeObj->GetTimecodeUserBits(&userBits);
     
     return [self initWithTimecodeFormat:(DLABTimecodeFormat)format
                                    hour:hour
