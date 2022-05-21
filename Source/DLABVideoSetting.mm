@@ -253,10 +253,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         _pixelFormatW = (DLABPixelFormat)pixelFormat;
         _inputFlag = (DLABVideoInputFlag)inputFlag;
         _rowBytesW = rowBytesFor(pixelFormat, _widthW);
-        
-        _useVITC = !_isHD;
-        _useRP188 = _isHD;
-        
         _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
     }
     return self;
@@ -273,10 +269,6 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         _pixelFormatW = (DLABPixelFormat)pixelFormat;
         _outputFlag = (DLABVideoOutputFlag)outputFlag;
         _rowBytesW = rowBytesFor(pixelFormat, _widthW);
-        
-        _useVITC = !_isHD && (_outputFlag & bmdVideoOutputVITC);
-        _useRP188 = _isHD && (_outputFlag & bmdVideoOutputRP188);
-        
         _cvPixelFormatType = preferredCVPixelFormatFor(_pixelFormatW);
     }
     return self;
