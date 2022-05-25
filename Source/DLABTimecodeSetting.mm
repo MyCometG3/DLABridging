@@ -585,7 +585,6 @@
         }
         
         // Create new sampleBuffer
-        CMSampleTimingInfo timingInfoTMP = {0};
         status = CMSampleBufferCreate(kCFAllocatorDefault,
                                       dataBuffer,
                                       true,
@@ -594,7 +593,7 @@
                                       description,
                                       1,
                                       1,
-                                      &timingInfoTMP,
+                                      &timingInfo,
                                       1,
                                       &sizes,
                                       &sampleBuffer);
