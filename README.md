@@ -4,15 +4,15 @@ Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 
 - __Requirement__: macOS 12.x, 11.x, 10.15, 10.14.
 - __Capture Device__: Blackmagic DeckLink devices.
-- __Restriction__: Compressed capture is not supported.
-- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.2)
+- __Restriction__: Compressed/Synchronized captures are not supported.
+- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.3)
 - __Architecture__: Universal binary (x86_64 + arm64)
 
 NOTE: This framework is under development.
 
 #### About unsupported feature(s):
 
-    : Following interfaces are not supported. (Section # are from SDK 11.6 pdf)
+    : Following interfaces are not supported. (Section # are from SDK 12.3 pdf)
     : 2.5.8 IDeckLinkVideoFrame3DExtensions
     : 2.5.18 IDeckLinkMemoryAllocator
     : 2.5.26 IDeckLinkGLScreenPreviewHelper
@@ -26,6 +26,8 @@ NOTE: This framework is under development.
     : 2.5.40 IDeckLinkH265NALPacket
     : 2.5.41 IDeckLinkEncoderConfiguration
     : 2.5.44 IDeckLinkVideoConversion
+    : 2.5.50 IDeskLinkMetalScreenPreviewHelper
+    : 2.5.51 IDeckLinkWPFDX9ScreenPreviewHelper
     : 2.6.x Any Streaming Interface APIs
 
 #### Basic usage (capture)
@@ -110,9 +112,9 @@ NOTE: This framework is under development.
     device = nil
 
 #### Development environment
-- macOS 11.6.2 BigSur
-- Xcode 13.2.1
-- Swift 5.5.2
+- macOS 12.4 Monterey
+- Xcode 13.4
+- Swift 5.6.1
 
 #### License
 - The MIT License
