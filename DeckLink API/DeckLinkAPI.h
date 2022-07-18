@@ -1314,15 +1314,15 @@ protected:
 
 extern "C" {
 
-    IDeckLinkIterator* BMD_PUBLIC CreateDeckLinkIteratorInstance(void);
-    IDeckLinkDiscovery* BMD_PUBLIC CreateDeckLinkDiscoveryInstance(void);
-    IDeckLinkAPIInformation* BMD_PUBLIC CreateDeckLinkAPIInformationInstance(void);
-    IDeckLinkGLScreenPreviewHelper* BMD_PUBLIC CreateOpenGLScreenPreviewHelper(void);
-    IDeckLinkGLScreenPreviewHelper* BMD_PUBLIC CreateOpenGL3ScreenPreviewHelper(void);	// Requires OpenGL 3.2 support and provides improved performance and color handling
-    IDeckLinkCocoaScreenPreviewCallback* BMD_PUBLIC CreateCocoaScreenPreview(/* in */ void* /* (NSView*)*/ parentView);
-    IDeckLinkMetalScreenPreviewHelper* BMD_PUBLIC CreateMetalScreenPreviewHelper(void);
-    IDeckLinkVideoConversion* BMD_PUBLIC CreateVideoConversionInstance(void);
-    IDeckLinkVideoFrameAncillaryPackets* BMD_PUBLIC CreateVideoFrameAncillaryPacketsInstance(void);	// For use when creating a custom IDeckLinkVideoFrame without wrapping IDeckLinkOutput::CreateVideoFrame
+    BMD_PUBLIC IDeckLinkIterator* CreateDeckLinkIteratorInstance(void);
+    BMD_PUBLIC IDeckLinkDiscovery* CreateDeckLinkDiscoveryInstance(void);
+    BMD_PUBLIC IDeckLinkAPIInformation* CreateDeckLinkAPIInformationInstance(void);
+    BMD_PUBLIC IDeckLinkGLScreenPreviewHelper* CreateOpenGLScreenPreviewHelper(void);
+    BMD_PUBLIC IDeckLinkGLScreenPreviewHelper* CreateOpenGL3ScreenPreviewHelper(void);	// Requires OpenGL 3.2 support and provides improved performance and color handling
+    BMD_PUBLIC IDeckLinkCocoaScreenPreviewCallback* CreateCocoaScreenPreview(/* in */ void* /* (NSView*)*/ parentView);
+    BMD_PUBLIC IDeckLinkMetalScreenPreviewHelper* CreateMetalScreenPreviewHelper(void);
+    BMD_PUBLIC IDeckLinkVideoConversion* CreateVideoConversionInstance(void);
+    BMD_PUBLIC IDeckLinkVideoFrameAncillaryPackets* CreateVideoFrameAncillaryPacketsInstance(void);	// For use when creating a custom IDeckLinkVideoFrame without wrapping IDeckLinkOutput::CreateVideoFrame
 
 }
 

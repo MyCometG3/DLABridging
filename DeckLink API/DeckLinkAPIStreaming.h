@@ -372,8 +372,8 @@ protected:
 
 extern "C" {
 
-    IBMDStreamingDiscovery* BMD_PUBLIC CreateBMDStreamingDiscoveryInstance(void);
-    IBMDStreamingH264NALParser* BMD_PUBLIC CreateBMDStreamingH264NALParser(void);
+    BMD_PUBLIC IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance(void);
+    BMD_PUBLIC IBMDStreamingH264NALParser* CreateBMDStreamingH264NALParser(void);
 
 }
 
