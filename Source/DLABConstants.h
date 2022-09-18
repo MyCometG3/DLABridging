@@ -8,6 +8,8 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
+#import <Foundation/Foundation.h>
+
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
