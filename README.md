@@ -12,7 +12,7 @@ NOTE: This framework is under development.
 
 #### About unsupported feature(s):
 
-    : Following interfaces are not supported. (Section # are from SDK 12.3 pdf)
+    : Following interfaces are not supported. (Section # are from SDK 12.4 pdf)
     : 2.5.8 IDeckLinkVideoFrame3DExtensions
     : 2.5.18 IDeckLinkMemoryAllocator
     : 2.5.26 IDeckLinkGLScreenPreviewHelper
@@ -112,9 +112,9 @@ NOTE: This framework is under development.
     device = nil
 
 #### Development environment
-- macOS 12.4 Monterey
-- Xcode 13.4.1
-- Swift 5.6.1
+- macOS 12.6 Monterey
+- Xcode 14.0
+- Swift 5.7.0
 
 #### License
 - The MIT License
