@@ -72,6 +72,7 @@
 		16B0BF1A243BEE12004C2BDF /* DLABVideoConverter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */; };
 		16B0BF1C243DC8CC004C2BDF /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */; };
 		16B0BF1E243DC93A004C2BDF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16B0BF1D243DC93A004C2BDF /* CoreGraphics.framework */; };
+		16B81E0B29223A3600A38745 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16B81E0A29223A3600A38745 /* AudioToolbox.framework */; };
 		16F134C6247A2D9300F92C14 /* DeckLinkAPI_v11_5.h in Headers */ = {isa = PBXBuildFile; fileRef = 16F134C5247A2D9300F92C14 /* DeckLinkAPI_v11_5.h */; };
 /* End PBXBuildFile section */
 
@@ -143,6 +144,7 @@
 		16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABVideoConverter.mm; sourceTree = "<group>"; };
 		16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		16B0BF1D243DC93A004C2BDF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		16B81E0A29223A3600A38745 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		16F134C5247A2D9300F92C14 /* DeckLinkAPI_v11_5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeckLinkAPI_v11_5.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -156,6 +158,7 @@
 				164C82F01F514898001208BD /* CoreMedia.framework in Frameworks */,
 				16B0BF1E243DC93A004C2BDF /* CoreGraphics.framework in Frameworks */,
 				164C82EE1F51488A001208BD /* CoreVideo.framework in Frameworks */,
+				16B81E0B29223A3600A38745 /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +255,7 @@
 		164C82EC1F51488A001208BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				16B81E0A29223A3600A38745 /* AudioToolbox.framework */,
 				16B0BF1D243DC93A004C2BDF /* CoreGraphics.framework */,
 				16B0BF1B243DC8CC004C2BDF /* Accelerate.framework */,
 				164C82F11F5148E3001208BD /* DeckLinkAPI.framework */,
