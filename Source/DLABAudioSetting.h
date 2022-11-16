@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) uint32_t sampleSize;
 
 /**
- Number of audio channel. 2 for Stereo. 8 or 16 for discrete.
+ Number of audio channel. 2 for Stereo. 8 or 16 for discrete or special channel layout.
  */
 @property (nonatomic, assign, readonly) uint32_t channelCount;
 
@@ -70,9 +70,19 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 
 /**
- Audio FormatDescription CFObject. Call -(BOOL)buildAudioFormatDescription to populate this.
+ Audio FormatDescription CFObject. Call buildAudioFormatDescription* to populate this.
  */
 @property (nonatomic, assign, readonly, nullable) CMAudioFormatDescriptionRef audioFormatDescription;
+
+/**
+ Number of valid bytes in sample frame. e.g. HDMI 5.1ch on 16bit 8ch = 12 bytes from 16 bytes in use.
+ */
+@property (nonatomic, assign, readonly) uint32_t sampleSizeInUse;
+
+/**
+ Number of valid channels in sample frame. e.g. HDMI 5.1ch on 16bit 8ch = 6ch from 8ch in use.
+ */
+@property (nonatomic, assign, readonly) uint32_t channelCountInUse;
 
 /* =================================================================================== */
 // MARK: Public methods
@@ -81,9 +91,32 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Prepare Audio FormatDescription CFObject from current parameters.
  
+ @param error pointer to (NSError*)
  @return YES if successfully populated. NO if failed with supplied parameters.
  */
 - (BOOL) buildAudioFormatDescriptionWithError:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Prepare AudioFormatDescription CFObject using specified AudioChannelLayoutTag.
+ 
+ @param tag Set specific AudioChannelLayoutTag.
+ @param error pointer to (NSError*)
+ @return YES if successfully populated. NO if failed with supplied parameters.
+ */
+- (BOOL) buildAudioFormatDescriptionForTag:(AudioChannelLayoutTag)tag
+                                     error:(NSError * _Nullable __autoreleasing *)error;
+
+/**
+ Prepare AudioFormatDescription CFObject in HDMI Surround Channel order (L R C LFE Ls Rs Rls Rrs).
+ 
+ @param validChannels Specify the number of valid channel count (up to 8ch)
+ @param swapChOrder Set True for the device where center is at 4th channel
+ @param error pointer to (NSError*)
+ @return YES if successfully populated. NO if failed with supplied parameters.
+ */
+- (BOOL) buildAudioFormatDescriptionForHDMIAudioChannels:(uint32_t)validChannels
+                                           swap3chAnd4ch:(BOOL)swapChOrder
+                                                   error:(NSError * _Nullable __autoreleasing *)error;
 
 @end
 

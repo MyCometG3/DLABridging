@@ -1141,6 +1141,27 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
 {
     NSParameterAssert(setting);
     
+    if (self.swapHDMICh3AndCh4OnOutput != nil) {
+        NSError *err = nil;
+        BOOL newValue = self.swapHDMICh3AndCh4OnOutput.boolValue;
+        DLABConfiguration key = DLABConfigurationSwapHDMICh3AndCh4OnOutput;
+        
+        // Verify if SwapHDMICh3AndCh4 flag is available on this device
+        [self boolValueForConfiguration:key error:&err];
+        if (!err) {
+            // Update accordingly
+            [self setBoolValue:newValue forConfiguration:key error:&err];
+        }
+        
+        if (err) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"bmdDeckLinkConfigSwapHDMICh3AndCh4OnOutput flag is not supported."
+                  code:E_NOTIMPL
+                    to:error];
+            return NO;
+        }
+    }
+    
     __block HRESULT result = E_FAIL;
     BMDAudioSampleType sampleType = setting.sampleType;
     uint32_t channelCount = setting.channelCount;

@@ -484,7 +484,8 @@ NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBuff
     // Prepare block info
     size_t numSamples = (size_t)frameCount;
     size_t sampleSize = (size_t)self.inputAudioSetting.sampleSize;
-    size_t blockLength = numSamples * sampleSize;
+    size_t sampleSizeInUse = (size_t)self.inputAudioSetting.sampleSizeInUse;
+    size_t blockLength = numSamples * sampleSizeInUse;
     CMBlockBufferFlags flags = (kCMBlockBufferAssureMemoryNowFlag);
     
     // Prepare format description (No ownership transfer)
@@ -505,8 +506,19 @@ NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBuff
                                                       flags,
                                                       &blockBuffer);
     if (!err && blockBuffer) {
-        // Copy sample data into blockBuffer
-        err = CMBlockBufferReplaceDataBytes(buffer, blockBuffer, 0, blockLength);
+        if (sampleSize == sampleSizeInUse) {
+            // Copy whole sample data into blockBuffer
+            err = CMBlockBufferReplaceDataBytes(buffer, blockBuffer, 0, blockLength);
+        } else {
+            // Extract audio channel data from audioPacket
+            for (size_t frame = 0; frame < frameCount; frame++) {
+                size_t srcOffset = frame * sampleSize;
+                size_t dstOffset = frame * sampleSizeInUse;
+                void* srcPtr = (void*)((char*)buffer + srcOffset);
+                err = CMBlockBufferReplaceDataBytes(srcPtr, blockBuffer, dstOffset, sampleSizeInUse);
+                if (err) break;
+            }
+        }
         if (!err) {
             // Create CMSampleBuffer for audioPacket
             err = CMSampleBufferCreate(NULL,
@@ -519,7 +531,7 @@ NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBuff
                                        1,
                                        &timingInfo,
                                        1,
-                                       &sampleSize,
+                                       &sampleSizeInUse,
                                        &sampleBuffer);
         }
         
@@ -1082,6 +1094,27 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                                error:(NSError**)error
 {
     NSParameterAssert(setting);
+    
+    if (self.swapHDMICh3AndCh4OnInput != nil) {
+        NSError *err = nil;
+        BOOL newValue = self.swapHDMICh3AndCh4OnInput.boolValue;
+        DLABConfiguration key = DLABConfigurationSwapHDMICh3AndCh4OnInput;
+        
+        // Verify if SwapHDMICh3AndCh4 flag is available on this device
+        [self boolValueForConfiguration:key error:&err];
+        if (!err) {
+            // Update accordingly
+            [self setBoolValue:newValue forConfiguration:key error:&err];
+        }
+        
+        if (err) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"bmdDeckLinkConfigSwapHDMICh3AndCh4OnInput flag is not supported."
+                  code:E_NOTIMPL
+                    to:error];
+            return NO;
+        }
+    }
     
     __block HRESULT result = E_FAIL;
     

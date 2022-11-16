@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import "DLABAudioSetting+Internal.h"
+#import <AudioToolbox/AudioToolbox.h>
 
 @implementation DLABAudioSetting
 
@@ -140,6 +141,8 @@
 @synthesize sampleType = _sampleType;
 @synthesize sampleRate = _sampleRate;
 @dynamic audioFormatDescription;
+@synthesize sampleSizeInUse = _sampleSizeInUse;
+@synthesize channelCountInUse = _channelCountInUse;
 
 // implementation
 - (CMAudioFormatDescriptionRef) audioFormatDescription { return _audioFormatDescriptionW; }
@@ -150,7 +153,7 @@
 
 - (BOOL) buildAudioFormatDescriptionWithError:(NSError**)error
 {
-    CMAudioFormatDescriptionRef formatDescription = NULL;
+    BOOL result = FALSE;
     {
         // check parameters
         uint32_t sampleSize = self.sampleSize;
@@ -164,67 +167,231 @@
                 reason:@"Unsupported settings detected."
                   code:E_INVALIDARG
                     to:error];
-        }
-        
-        if (ready) {
-            // ASBD
-            AudioStreamBasicDescription streamBasicDescription = {
-                static_cast<Float64>(sampleRate),   //mSampleRate
-                kAudioFormatLinearPCM,              //mFormatID
-                kAudioFormatFlagIsSignedInteger,    //mFormatFlags
-                sampleSize,                         //mBytesPerPacket
-                1,                                  //mFramesPerPacket
-                sampleSize,                         //mBytesPerFrame
-                channelCount,                       //mChannelsPerFrame
-                sampleType,                         //mBitsPerChannel
-                0                                   //mReserved
-            };
-            
-            // channel layout
-            AudioChannelLayout channelLayout = { 0 };
-            NSString* layoutString = nil;
-            if (channelCount == 1) {
-                channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Mono;
-                layoutString = @"Monaural";
-            } else if (channelCount == 2) {
-                channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
-                layoutString = @"Stereo";
-            } else {
-                // 8 ch or 16 ch audio is tagged as discrete
-                uint32_t audioChannelLayoutTag = (kAudioChannelLayoutTag_DiscreteInOrder | channelCount);
-                channelLayout = { audioChannelLayoutTag, 0 };
-                layoutString = [NSString stringWithFormat:@"Discrete-%dch", channelCount];
+        } else {
+            AudioChannelLayoutTag tag = kAudioChannelLayoutTag_Unknown;
+            switch (channelCount) {
+                case 1:
+                    tag = kAudioChannelLayoutTag_Mono;
+                    break;
+                case 2:
+                    tag = kAudioChannelLayoutTag_Stereo;
+                    break;
+                default:
+                    tag = (kAudioChannelLayoutTag_DiscreteInOrder | channelCount);
+                    break;
             }
+            result = [self buildAudioFormatDescriptionForTag:tag
+                                                       error:error];
+        }
+    }
+    return result;
+}
+
+- (BOOL) buildAudioFormatDescriptionForTag:(AudioChannelLayoutTag)tag
+                                     error:(NSError**)error
+{
+    BOOL result = FALSE;
+    {
+        // check parameters
+        uint32_t sampleSize = self.sampleSize;
+        uint32_t channelCount = self.channelCount;
+        DLABAudioSampleType sampleType = self.sampleType;
+        DLABAudioSampleRate sampleRate = self.sampleRate;
+        
+        uint32_t validChannelCount = AudioChannelLayoutTag_GetNumberOfChannels(tag);
+        validChannelCount = (validChannelCount > 0 ? validChannelCount : 99); // detect bad AudioChannelLayoutTag
+        uint32_t validSampleSize = validChannelCount * (sampleType / 8);
+        
+        BOOL ready = (sampleSize && sampleType && channelCount && sampleRate && channelCount >= validChannelCount);
+        if (!ready) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Unsupported settings detected."
+                  code:E_INVALIDARG
+                    to:error];
+        } else {
+            if (channelCount != validChannelCount) {
+                NSLog(@"NOTICE: Unbalanced audio channel configuration detected. It requires ");
+                NSLog(@"        instant audio buffer reassembling (Inefficient operation).");
+            }
+            
+            // Prepare backing store
+            uint32_t asbdSize = sizeof(AudioStreamBasicDescription);
+            NSMutableData* asbdData = [[NSMutableData alloc] initWithLength:asbdSize];
+            uint32_t aclSize = sizeof(AudioChannelLayout);
+            NSMutableData* aclData = [[NSMutableData alloc] initWithLength:aclSize];
+            
+            // Configure AudioChannelLayout
+            AudioChannelLayout* aclPtr = (AudioChannelLayout*)(aclData.mutableBytes);
+            aclPtr->mChannelLayoutTag = tag;
+
+            // NOTE: validChannelCount <= channelCount, validSampleSize <= sampleSize
+            result = [self fillAudioFormatDescriptionAndAsbdData:asbdData
+                                               usingChannelCount:validChannelCount
+                                                      sampleSize:validSampleSize
+                                                         aclData:aclData
+                                                           error:error];
+        }
+    }
+    return result;
+}
+
+- (BOOL) buildAudioFormatDescriptionForHDMIAudioChannels:(uint32_t)hdmiChannels
+                                           swap3chAnd4ch:(BOOL)swapChOrder
+                                                   error:(NSError**)error
+{
+    BOOL result = FALSE;
+    {
+        // check parameters
+        uint32_t sampleSize = self.sampleSize;
+        uint32_t channelCount = self.channelCount;
+        DLABAudioSampleType sampleType = self.sampleType;
+        DLABAudioSampleRate sampleRate = self.sampleRate;
+        
+        uint32_t validChannelCount = (hdmiChannels && hdmiChannels <= 8  ? hdmiChannels : 99); // HDMI 2ch/5.1ch/7.1ch
+        // uint32_t validSampleSize = validChannelCount * (sampleType / 8);
+        
+        BOOL ready = (sampleSize && sampleType && channelCount && sampleRate && channelCount >= validChannelCount);
+        if (!ready) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Unsupported settings detected."
+                  code:E_INVALIDARG
+                    to:error];
+        } else {
+            // Prepare backing store
+            uint32_t asbdSize = sizeof(AudioStreamBasicDescription);
+            NSMutableData* asbdData = [[NSMutableData alloc] initWithLength:asbdSize];
+            uint32_t aclSize = sizeof(AudioChannelLayout) + (channelCount - 1) * sizeof(AudioChannelDescription);
+            NSMutableData* aclData = [[NSMutableData alloc] initWithLength:aclSize];
+            
+            // Configure AudioChannelLayout w/ AudioChannelDescription(s)
+            AudioChannelLayout* aclPtr = (AudioChannelLayout*)(aclData.mutableBytes);
+            aclPtr->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+            aclPtr->mNumberChannelDescriptions = channelCount;
+            
+            size_t offsetOfDesc = offsetof(struct AudioChannelLayout, mChannelDescriptions);
+            AudioChannelDescription* descPtr = (AudioChannelDescription*)((char*)aclPtr + offsetOfDesc);
+            if (validChannelCount == 1) {
+                if (swapChOrder) {
+                    // Note: Center channel is 3rd channel of layout
+                    descPtr[2].mChannelLabel = kAudioChannelLabel_Center;
+                } else {
+                    // Note: Center channel is 4th channel of layout
+                    descPtr[3].mChannelLabel = kAudioChannelLabel_Center;
+                }
+            } else {
+                uint32_t hdmiChannelOrder[8] = {
+                    kAudioChannelLabel_Left,            // = 1 : ch[0]
+                    kAudioChannelLabel_Right,           // = 2 : ch[1]
+                    kAudioChannelLabel_Center,          // = 3 : ch[2]
+                    kAudioChannelLabel_LFEScreen,       // = 4 : ch[3]
+                    kAudioChannelLabel_LeftSurround,    // = 5 : ch[4]
+                    kAudioChannelLabel_RightSurround,   // = 6 : ch[5]
+                    kAudioChannelLabel_LeftCenter,      // = 7 : ch[6]
+                    kAudioChannelLabel_RightCenter,     // = 8 : ch[7]
+                };
+                if (swapChOrder) {
+                    // For DeckLink device where HDMI Center Channel is at 4th cnannel
+                    hdmiChannelOrder[2] = kAudioChannelLabel_LFEScreen;       // = 4 : ch[2]
+                    hdmiChannelOrder[3] = kAudioChannelLabel_Center;          // = 3 : ch[3]
+                }
+                for (size_t chNum = 0; chNum < validChannelCount; chNum++) {
+                    descPtr[chNum].mChannelLabel = hdmiChannelOrder[chNum];
+                }
+            }
+            
+            // NOTE: validChannelCount <= channelCount, validSampleSize <= sampleSize
+            result = [self fillAudioFormatDescriptionAndAsbdData:asbdData
+                                               usingChannelCount:channelCount
+                                                      sampleSize:sampleSize
+                                                         aclData:aclData
+                                                           error:error];
+        }
+    }
+    return result;
+}
+
+/* =================================================================================== */
+// MARK: - Private methods
+/* =================================================================================== */
+
+- (BOOL)fillAudioFormatDescriptionAndAsbdData:(NSMutableData*)asbdData
+                            usingChannelCount:(uint32_t)channelCount
+                                   sampleSize:(uint32_t)sampleSize
+                                      aclData:(NSData*)aclData
+                                        error:(NSError**)error
+{
+    DLABAudioSampleType sampleType = self.sampleType;
+    DLABAudioSampleRate sampleRate = self.sampleRate;
+    
+    AudioChannelLayout* aclPtr = (AudioChannelLayout*)(aclData.bytes);
+    uint32_t aclSize = (uint32_t)aclData.length;
+    AudioStreamBasicDescription* asbdPtr = (AudioStreamBasicDescription*)(asbdData.mutableBytes);
+    
+    // Create layout string
+    OSStatus err = noErr;
+    NSDictionary *extensions = nil;
+    {
+        uint32_t ioPropertyDataSize = sizeof(CFStringRef);
+        CFStringRef outPropertyData = nil;
+        err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutName,
+                                     aclSize,
+                                     aclPtr,
+                                     &ioPropertyDataSize,
+                                     &outPropertyData);
+        if (outPropertyData) {
+            NSString* layoutString = [NSString stringWithString:(__bridge NSString*)outPropertyData];
+            CFRelease(outPropertyData);
             
             // format name
             NSString* keyName = (__bridge NSString*)kCMFormatDescriptionExtension_FormatName;
             NSString* rateString = (sampleRate == DLABAudioSampleRate48kHz ? @"48,000" : @"??.???");
             NSString* name = [NSString stringWithFormat:@"%@ Hz, %d-bit, %@",
                               rateString, sampleType, layoutString];
-            NSDictionary *extensions = @{keyName : name};
-            
-            // create format description
-            OSStatus err = noErr;
-            err = CMAudioFormatDescriptionCreate(NULL,          //allocator
-                                                 &streamBasicDescription,
-                                                 sizeof(channelLayout),
-                                                 &channelLayout,
-                                                 0,             //magicCookieSize
-                                                 NULL,          //magicCookie
-                                                 (__bridge CFDictionaryRef)extensions,
-                                                 &formatDescription);
-            if (!err && formatDescription) {
-                self.audioFormatDescriptionW = formatDescription;
-                CFRelease(formatDescription);
-                return TRUE;
-            } else {
-                [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                    reason:@"Failed to create CMAudioFormatDescription."
-                      code:E_INVALIDARG
-                        to:error];
-            }
+            extensions = @{keyName : name};
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Failed to AudioFormatGetProperty()."
+                  code:E_INVALIDARG
+                    to:error];
         }
     }
+    
+    if (!err) {
+        // Fill ASBD
+        asbdPtr->mSampleRate =          (Float64)sampleRate;
+        asbdPtr->mFormatID =            kAudioFormatLinearPCM;
+        asbdPtr->mFormatFlags =         kAudioFormatFlagIsSignedInteger;
+        asbdPtr->mBytesPerPacket =      sampleSize;
+        asbdPtr->mFramesPerPacket =     1;
+        asbdPtr->mBytesPerFrame =       sampleSize;
+        asbdPtr->mChannelsPerFrame =    channelCount;
+        asbdPtr->mBitsPerChannel =      sampleType;
+        
+        // create format description
+        CMAudioFormatDescriptionRef formatDescription = NULL;
+        err = CMAudioFormatDescriptionCreate(NULL,          //allocator
+                                             asbdPtr,
+                                             (size_t)aclSize,
+                                             aclPtr,
+                                             0,             //magicCookieSize
+                                             NULL,          //magicCookie
+                                             (__bridge CFDictionaryRef)extensions,
+                                             &formatDescription);
+        if (!err && formatDescription) {
+            // Update properties
+            self.audioFormatDescriptionW = formatDescription;
+            CFRelease(formatDescription);
+            _sampleSizeInUse = asbdPtr->mBytesPerFrame;
+            _channelCountInUse = asbdPtr->mChannelsPerFrame;
+            return TRUE;
+        } else {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"Failed to create CMAudioFormatDescription."
+                  code:E_INVALIDARG
+                    to:error];
+        }
+    }
+    
     return FALSE;
 }
 

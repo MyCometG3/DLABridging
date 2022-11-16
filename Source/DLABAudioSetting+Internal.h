@@ -54,6 +54,26 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, nullable) CMAudioFormatDescriptionRef audioFormatDescriptionW;
 
+/* =================================================================================== */
+// MARK: - Private methods
+/* =================================================================================== */
+
+/**
+ Utility to fill AudioStreamBasicDescription and CMAudioFormatDescription.
+
+ @param aclData NSData* of AudioChannelLayout
+ @param asbdData NSMutableData* of AudioStreamBasicDescription to fill
+ @param channelCount mChannelsPerFrame for AudioStreamBasicDescription
+ @param sampleSize mBytesPerFrame for AudioStreamBasicDescription
+ @param error pointer to (NSError*)
+ @return YES if no error, No if failed
+ */
+- (BOOL)fillAudioFormatDescriptionAndAsbdData:(NSMutableData*)asbdData
+                            usingChannelCount:(uint32_t)channelCount
+                                   sampleSize:(uint32_t)sampleSize
+                                      aclData:(NSData*)aclData
+                                        error:(NSError * _Nullable __autoreleasing *)error;
+
 @end
 
 NS_ASSUME_NONNULL_END

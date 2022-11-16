@@ -463,6 +463,22 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly, nullable) DLABAudioSetting* inputAudioSetting;
 
 /* =================================================================================== */
+// MARK: (Public) - Readwrite
+/* =================================================================================== */
+
+/**
+ Set bool value in NSNumber<BOOL>* form to update DLABConfiguration.SwapHDMICh3AndCh4OnInput.
+ NOTE: Calling enableAudio* would fail if the device does not support bmdDeckLinkConfigSwapHDMICh3AndCh4OnInput flag.
+ */
+@property (nonatomic, copy, readwrite, nullable) NSNumber* swapHDMICh3AndCh4OnInput;
+
+/**
+ Set bool value in NSNumber<BOOL>* form to update DLABConfiguration.SwapHDMICh3AndCh4OnOutput.
+ NOTE: Calling enableAudio* would fail if the device does not support bmdDeckLinkConfigSwapHDMICh3AndCh4OnOutput flag.
+ */
+@property (nonatomic, copy, readwrite, nullable) NSNumber* swapHDMICh3AndCh4OnOutput;
+
+/* =================================================================================== */
 // MARK: (Public) - Video Setting Array
 /* =================================================================================== */
 
