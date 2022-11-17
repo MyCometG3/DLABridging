@@ -271,13 +271,15 @@
             size_t offsetOfDesc = offsetof(struct AudioChannelLayout, mChannelDescriptions);
             AudioChannelDescription* descPtr = (AudioChannelDescription*)((char*)aclPtr + offsetOfDesc);
             if (validChannelCount == 1) {
-                if (swapChOrder) {
-                    // Note: Center channel is 3rd channel of layout
-                    descPtr[2].mChannelLabel = kAudioChannelLabel_Center;
-                } else {
-                    // Note: Center channel is 4th channel of layout
-                    descPtr[3].mChannelLabel = kAudioChannelLabel_Center;
-                }
+                descPtr[0].mChannelLabel = kAudioChannelLabel_Unused;
+                descPtr[1].mChannelLabel = kAudioChannelLabel_Unused;
+                descPtr[2].mChannelLabel = (swapChOrder ? kAudioChannelLabel_Unused : kAudioChannelLabel_Center);
+                descPtr[3].mChannelLabel = (swapChOrder ? kAudioChannelLabel_Center : kAudioChannelLabel_Unused);
+            } else if (validChannelCount == 3) {
+                descPtr[0].mChannelLabel = kAudioChannelLabel_Left;
+                descPtr[1].mChannelLabel = kAudioChannelLabel_Right;
+                descPtr[2].mChannelLabel = (swapChOrder ? kAudioChannelLabel_Unused : kAudioChannelLabel_Center);
+                descPtr[3].mChannelLabel = (swapChOrder ? kAudioChannelLabel_Center : kAudioChannelLabel_Unused);
             } else {
                 uint32_t hdmiChannelOrder[8] = {
                     kAudioChannelLabel_Left,            // = 1 : ch[0]
