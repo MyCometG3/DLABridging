@@ -272,7 +272,7 @@ enum _BMDTimecodeFormat {
     bmdTimecodeRP188VITC2                                        = /* 'rp12' */ 0x72703132,	// RP188 timecode where DBB1 equals VITC2 (line 9 for progressive or line 571 for interlaced/PsF)
     bmdTimecodeRP188LTC                                          = /* 'rplt' */ 0x72706C74,	// RP188 timecode where DBB1 equals LTC (line 10)
     bmdTimecodeRP188HighFrameRate                                = /* 'rphr' */ 0x72706872,	// RP188 timecode where DBB1 is an HFRTC (SMPTE ST 12-3), the only timecode allowing the frame value to go above 30
-    bmdTimecodeRP188Any                                          = /* 'rp18' */ 0x72703138,	// Convenience for capture, returning the first valid timecode in {HFRTC (if supported), VITC1, LTC, VITC2}
+    bmdTimecodeRP188Any                                          = /* 'rp18' */ 0x72703138,	// Convenience for capture, returning the first valid timecode in {HFRTC (if supported), VITC1, VITC2, LTC }
     bmdTimecodeVITC                                              = /* 'vitc' */ 0x76697463,
     bmdTimecodeVITCField2                                        = /* 'vit2' */ 0x76697432,
     bmdTimecodeSerial                                            = /* 'seri' */ 0x73657269
