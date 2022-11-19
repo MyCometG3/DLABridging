@@ -2,7 +2,7 @@
 
 Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 
-- __Requirement__: macOS 12.x, 11.x, 10.15, 10.14.
+- __Requirement__: macOS 13.x, 12.x, 11.x, 10.15, 10.14.
 - __Capture Device__: Blackmagic DeckLink devices.
 - __Restriction__: Compressed/Synchronized captures are not supported.
 - __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.4)
@@ -37,7 +37,6 @@ NOTE: This framework is under development.
     import DLABridging
     var device :DLABDevice? = nil
     var running :Bool = false
-
     do {
       let browser = DLABBrowser()
       _ = browser.registerDevicesForInput()
@@ -46,17 +45,30 @@ NOTE: This framework is under development.
     }
 
 ###### 2. Start input stream
-    do {
+    if let device = device {
       try device.setInputScreenPreviewTo(parentView)
 
+      // To capture HDMI
+      var videoConnection :DLABVideoConnection = .HDMI
+      var audioConnection :DLABAudioConnection = .embedded
+
+      // To capture SVideo+RCA
+      var videoConnection :DLABVideoConnection = .sVideo
+      var audioConnection :DLABAudioConnection = .analogRCA
+
+      // To prepare SD Video setting
       var vSetting:DLABVideoSetting? = nil
       try vSetting = device.createInputVideoSetting(of: .modeNTSC,
                                                     pixelFormat: .format8BitYUV,
                                                     inputFlag: [])
+
+      // To prepare stereo Audio setting
       var aSetting:DLABAudioSetting? = nil
       try aSetting = device.createInputAudioSetting(of: .type16bitInteger,
                                                     channelCount: 2,
                                                     sampleRate: .rate48kHz)
+
+      // To support NTSC-SD CleanAperture and PixelAspectRatio
       if let vSetting = vSetting {
         try vSetting.addClapExt(ofWidthN: 704, widthD: 1,
                                 heightN: 480, heightD: 1,
@@ -66,13 +78,24 @@ NOTE: This framework is under development.
                                 vSpacing: 33)
       }
 
-      // rebuild formatDescription with new CVPixelFormat
-      // vSetting.cvPixelFormatType = cvPixelFormat
-      // try vSetting.buildVideoFormatDescription()
+      // To capture using preferred CVPixelFormat
+      var myCVPixelFormat :OSType = kCVPixelFormatType_32BGRA
+      vSetting.cvPixelFormatType = myCVPixelFormat
+      try vSetting.buildVideoFormatDescription()
+
+      // To support HDMI surround audio; audioSetting channelCount should be 8
+      var hdmiAudioChannels = 6 // HDMI surround 5.1ch
+      var reverseCh3Ch4 = true // For layout of (ch3, ch4) == (LFE, C)
+      if let aSetting = aSetting, videoConnection == .HDMI, audioConnection == .embedded,
+        audioChannels == 8, audioChannels >= hdmiAudioChannels, hdmiAudioChannels > 0 {
+        // rebuild formatDescription to support HDMI Audio Channel order
+        try aSetting.buildAudioFormatDescription(forHDMIAudioChannels: hdmiAudioChannels,
+                                                 swap3chAnd4ch: reverseCh3Ch4)
+      }
 
       if let vSetting = vSetting, let aSetting = aSetting {
         device.inputDelegate = self
-        try device.enableVideoInput(with: vSetting, on: .HDMI)
+        try device.enableVideoInput(with: vSetting, on: videoConnection)
         try device.enableAudioInput(with: aSetting, on: audioConnection)
         try device.startStreams()
         running = true
@@ -81,7 +104,6 @@ NOTE: This framework is under development.
       print("ERROR!!")
       :
     }
-
 
 ###### 3. Handle CMSampleBuffer (Video/Audio)
     public func processCapturedVideoSample(_ sampleBuffer: CMSampleBuffer,
@@ -100,7 +122,7 @@ NOTE: This framework is under development.
 
 ###### 4. Stop input stream
     running = false
-    do {
+    if let device = device {
       try device.stopStreams()
       try device.disableVideoInput()
       try device.disableAudioInput()
@@ -111,10 +133,20 @@ NOTE: This framework is under development.
     }
     device = nil
 
+#### Developer Notice
+
+###### 1. AppEntitlements for Sandboxing
+- See: Blackmagic DeckLink SDK pdf Section 2.2.
+- Ref: "Entitlement Key Reference/App Sandbox Temporary Exception Entitlements" from Apple Developer Documentation Archive
+
+###### 2. AppEntitlements for Hardened Runtime
+- Set com.apple.security.cs.disable-library-validation to YES.
+- Ref: "Documentation/Bundle Resources/Entitlements/Hardened Runtime/Disable Library Validation Entitlement" from Apple Developer Documentation.
+
 #### Development environment
-- macOS 12.6 Monterey
-- Xcode 14.0
-- Swift 5.7.0
+- macOS 12.6.1 Monterey
+- Xcode 14.1
+- Swift 5.7.1
 
 #### License
 - The MIT License
