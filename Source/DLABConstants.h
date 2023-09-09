@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_12.4.1.zip @ 2022/11/14 UTC
+ Derived from: Blackmagic_DeckLink_SDK_12.5.1.zip @ 2023/07/03 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c040100
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.4.1"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c050100
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.5.1"
  */
 
 /* =================================================================================== */
