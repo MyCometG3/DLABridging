@@ -361,6 +361,11 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 // MARK: -
 
+@synthesize swapHDMICh3AndCh4OnInput = _swapHDMICh3AndCh4OnInput;
+@synthesize swapHDMICh3AndCh4OnOutput = _swapHDMICh3AndCh4OnOutput;
+
+// MARK: -
+
 @synthesize outputVideoSettingArray = _outputVideoSettingArray;
 @synthesize inputVideoSettingArray = _inputVideoSettingArray;
 @synthesize deckControl = _deckControl;
