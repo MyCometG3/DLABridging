@@ -595,6 +595,19 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL debugCalcPixelSizeFast;
 
 /* =================================================================================== */
+// MARK: (Public) - Custom CVPixelBufferAttributes support
+/* =================================================================================== */
+
+/**
+ Specify custom input CVPixelBufferAttibutes for input. Set nil to apply default attributes as:
+ @{
+ kCVPixelBufferBytesPerRowAlignmentKey:@(16),
+ kCVPixelBufferIOSurfacePropertiesKey:@{},
+ }
+ */
+@property (nonatomic, strong, readwrite, nullable) NSDictionary *inputPixelBufferAttributes;
+
+/* =================================================================================== */
 // MARK: (Public) - Key/Value
 /* =================================================================================== */
 

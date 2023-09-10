@@ -391,6 +391,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize debugUsevImageCopyBuffer = _debugUsevImageCopyBuffer;
 @synthesize debugCalcPixelSizeFast = _debugCalcPixelSizeFast;
 
+@synthesize inputPixelBufferAttributes = _inputPixelBufferAttributes;
+
 /* =================================================================================== */
 // MARK: - (Private) property accessor
 /* =================================================================================== */

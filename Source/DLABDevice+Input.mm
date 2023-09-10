@@ -311,12 +311,18 @@ NS_INLINE BOOL copyPlaneDLtoCV(IDeckLinkVideoInputFrame* videoFrame, CVPixelBuff
         NSString* pixelFormatKey = (__bridge NSString *)kCVPixelBufferPixelFormatTypeKey;
         NSString* widthKey = (__bridge NSString *)kCVPixelBufferWidthKey;
         NSString* heightKey = (__bridge NSString *)kCVPixelBufferHeightKey;
-        NSString* bytesPerRowAlignmentKey = (__bridge NSString *)kCVPixelBufferBytesPerRowAlignmentKey;
         NSMutableDictionary* pbAttributes = [NSMutableDictionary dictionary];
         pbAttributes[pixelFormatKey] = @(cvPixelFormat);
         pbAttributes[widthKey] = @(videoFrame->GetWidth());
         pbAttributes[heightKey] = @(videoFrame->GetHeight());
-        pbAttributes[bytesPerRowAlignmentKey] = @(16); // = 2^4 = 2 * sizeof(void*)
+        if (self.inputPixelBufferAttributes) {
+            [pbAttributes addEntriesFromDictionary:self.inputPixelBufferAttributes];
+        } else {
+            NSString* bytesPerRowAlignmentKey = (__bridge NSString *)kCVPixelBufferBytesPerRowAlignmentKey;
+            NSString* ioSurfacePropertiesKey = (__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey;
+            pbAttributes[bytesPerRowAlignmentKey] = @(16); // = 2^4 = 2 * sizeof(void*)
+            pbAttributes[ioSurfacePropertiesKey] = @{};
+        }
         
         CVReturn err = kCVReturnError;
         err = CVPixelBufferPoolCreate(NULL, (__bridge CFDictionaryRef)poolAttributes,
