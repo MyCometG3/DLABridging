@@ -927,7 +927,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
             break;
         case bmdFormat10BitRGB:     // 2101010 xRGB BigEndian
             endianSwap = true;
-            rangeMin = 64; rangeMax = 960;
+            rangeMin = 64; rangeMax = 940;
             default16Q12 = true;
             break;
         case bmdFormat10BitRGBX:    // 1010102 RGBx BigEndian

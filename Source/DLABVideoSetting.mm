@@ -83,9 +83,9 @@ NS_INLINE OSType preferredCVPixelFormatFor(BMDPixelFormat dlFormat) {
         case bmdFormat8BitBGRA: // 'BGRA'
             cvFormat = kCVPixelFormatType_32BGRA; // 'BGRA'
             break;
-        case bmdFormat10BitRGB: // 'r210' (64-960)
-        case bmdFormat10BitRGBXLE: // 'R10l' (64-960)
-        case bmdFormat10BitRGBX: // 'R10b' (64-960)
+        case bmdFormat10BitRGB: // 'r210' (64-940)
+        case bmdFormat10BitRGBXLE: // 'R10l' (64-940)
+        case bmdFormat10BitRGBX: // 'R10b' (64-940)
             cvFormat = kCVPixelFormatType_48RGB; // 'b48r' (0-65535 BE)
             break;
         case bmdFormat12BitRGB: // 'R12B'
