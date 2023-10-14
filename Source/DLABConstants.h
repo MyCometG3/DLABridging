@@ -13,7 +13,7 @@
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
- NOTE: This constants are converted from DekLink API "11.5.x"
+ NOTE: This constants are converted from DekLink API "12.7.x"
  NOTE: Basic renaming rules are:
  1. each enum type name BMDtypename => DLABtypename (DeckLink API bridging)
  1a. remove "s" at end of typename
@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_12.5.1.zip @ 2023/07/03 UTC
+ Derived from: Blackmagic_DeckLink_SDK_12.7.zip @ 2023/09/20 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c050100
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.5.1"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c070000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.7"
  */
 
 /* =================================================================================== */
@@ -330,6 +330,13 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkFrameMetadata)
     DLABDeckLinkFrameMetadataHDRMaximumFrameAverageLightLevel     = /* 'fall' */ 0x66616C6C,    // Maximum Frame Average Light Level in range 1 cd/m2 - 65535 cd/m2
 };
 
+/* Enum BMDEthernetLinkState - The state of the Ethernet link */
+typedef NS_ENUM(uint32_t, DLABEthernetLinkState) {
+    DLABEthernetLinkStateDisconnected                             = /* 'elds' */ 0x656C6473,
+    DLABEthernetLinkStateConnectedUnbound                         = /* 'elcu' */ 0x656C6375,
+    DLABEthernetLinkStateConnectedBound                           = /* 'elcb' */ 0x656C6362
+};
+
 /* Enum BMDProfileID - Identifies a profile */
 typedef NS_ENUM(uint32_t, DLABProfile)
 {
@@ -426,7 +433,8 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeVendorName                                        = /* 'vndr' */ 0x766E6472,
     DLABAttributeDisplayName                                       = /* 'dspn' */ 0x6473706E,
     DLABAttributeModelName                                         = /* 'mdln' */ 0x6D646C6E,
-    DLABAttributeDeviceHandle                                      = /* 'devh' */ 0x64657668
+    DLABAttributeDeviceHandle                                      = /* 'devh' */ 0x64657668,
+    DLABAttributeEthernetMACAddress                                = /* 'eMAC' */ 0x654D4143
 };
 
 /* Enum BMDDeckLinkAPIInformationID - DeckLinkAPI information ID */
@@ -454,6 +462,7 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     DLABDeckLinkStatusCurrentVideoInputFlags                      = /* 'cvif' */ 0x63766966,
     DLABDeckLinkStatusCurrentVideoOutputMode                      = /* 'cvom' */ 0x63766F6D,
     DLABDeckLinkStatusCurrentVideoOutputFlags                     = /* 'cvof' */ 0x63766F66,
+    DLABDeckLinkStatusEthernetLink                                = /* 'sels' */ 0x73656C73,
     DLABDeckLinkStatusPCIExpressLinkWidth                         = /* 'pwid' */ 0x70776964,
     DLABDeckLinkStatusPCIExpressLinkSpeed                         = /* 'plnk' */ 0x706C6E6B,
     DLABDeckLinkStatusLastVideoOutputPixelFormat                  = /* 'opix' */ 0x6F706978,
@@ -468,6 +477,19 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     DLABDeckLinkStatusVideoInputSignalLocked                      = /* 'visl' */ 0x7669736C,
     DLABDeckLinkStatusReferenceSignalLocked                       = /* 'refl' */ 0x7265666C,
     
+    /* Strings */
+
+    DLABDeckLinkStatusEthernetLocalIPAddress                      = /* 'seip' */ 0x73656970,
+    DLABDeckLinkStatusEthernetSubnetMask                          = /* 'sesm' */ 0x7365736D,
+    DLABDeckLinkStatusEthernetGatewayIPAddress                    = /* 'segw' */ 0x73656777,
+    DLABDeckLinkStatusEthernetPrimaryDNS                          = /* 'sepd' */ 0x73657064,
+    DLABDeckLinkStatusEthernetSecondaryDNS                        = /* 'sesd' */ 0x73657364,
+    DLABDeckLinkStatusEthernetPTPGrandmasterIdentity              = /* 'spid' */ 0x73706964,
+    DLABDeckLinkStatusEthernetVideoOutputAddress                  = /* 'soav' */ 0x736F6176,
+    DLABDeckLinkStatusEthernetAudioOutputAddress                  = /* 'soaa' */ 0x736F6161,
+    DLABDeckLinkStatusEthernetAncillaryOutputAddress              = /* 'soaA' */ 0x736F6141,
+    DLABDeckLinkStatusEthernetAudioInputChannelOrder              = /* 'saco' */ 0x7361636F,
+
     /* Bytes */
     
     DLABDeckLinkStatusReceivedEDID                                = /* 'edid' */ 0x65646964
@@ -575,6 +597,7 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationVideoOutputConversionMode                   = /* 'vocm' */ 0x766F636D,
     DLABConfigurationAnalogVideoOutputFlags                      = /* 'avof' */ 0x61766F66,
     DLABConfigurationReferenceInputTimingOffset                  = /* 'glot' */ 0x676C6F74,
+    DLABConfigurationReferenceOutputMode                         = /* 'glOm' */ 0x676C4F6D,
     DLABConfigurationVideoOutputIdleOperation                    = /* 'voio' */ 0x766F696F,
     DLABConfigurationDefaultVideoOutputMode                      = /* 'dvom' */ 0x64766F6D,
     DLABConfigurationDefaultVideoOutputModeFlags                 = /* 'dvof' */ 0x64766F66,
@@ -655,6 +678,27 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationDigitalAudioOutputScale                     = /* 'daos' */ 0x64616F73,
     DLABConfigurationHeadphoneVolume                             = /* 'hvol' */ 0x68766F6C,
     
+    /* Network Flags */
+
+    DLABConfigurationEthernetUseDHCP                             = /* 'DHCP' */ 0x44484350,
+    DLABConfigurationEthernetPTPFollowerOnly                     = /* 'PTPf' */ 0x50545066,
+    DLABConfigurationEthernetPTPUseUDPEncapsulation              = /* 'PTPU' */ 0x50545055,
+
+    /* Network Strings */
+
+    DLABConfigurationEthernetStaticLocalIPAddress                = /* 'nsip' */ 0x6E736970,
+    DLABConfigurationEthernetStaticSubnetMask                    = /* 'nssm' */ 0x6E73736D,
+    DLABConfigurationEthernetStaticGatewayIPAddress              = /* 'nsgw' */ 0x6E736777,
+    DLABConfigurationEthernetStaticPrimaryDNS                    = /* 'nspd' */ 0x6E737064,
+    DLABConfigurationEthernetStaticSecondaryDNS                  = /* 'nssd' */ 0x6E737364,
+    DLABConfigurationEthernetPTPPriority1                        = /* 'PTP1' */ 0x50545031,
+    DLABConfigurationEthernetPTPPriority2                        = /* 'PTP2' */ 0x50545032,
+    DLABConfigurationEthernetPTPDomain                           = /* 'PTPD' */ 0x50545044,
+    DLABConfigurationEthernetVideoOutputAddress                  = /* 'noav' */ 0x6E6F6176,
+    DLABConfigurationEthernetAudioOutputAddress                  = /* 'noaa' */ 0x6E6F6161,
+    DLABConfigurationEthernetAncillaryOutputAddress              = /* 'noaA' */ 0x6E6F6141,
+    DLABConfigurationEthernetAudioOutputChannelOrder             = /* 'caco' */ 0x6361636F,
+
     /* Device Information Strings */
     
     DLABConfigurationDeviceInformationLabel                      = /* 'dila' */ 0x64696C61,
@@ -960,7 +1004,7 @@ typedef NS_ENUM(uint32_t, DLABPixelFormat)
     DLABPixelFormat10BitYUV                                            = /* 'v210' */ 0x76323130,
     DLABPixelFormat8BitARGB                                            = 32,
     DLABPixelFormat8BitBGRA                                            = /* 'BGRA' */ 0x42475241,
-    DLABPixelFormat10BitRGB                                            = /* 'r210' */ 0x72323130,    // Big-endian RGB 10-bit per component with SMPTE video levels (64-960). Packed as 2:10:10:10
+    DLABPixelFormat10BitRGB                                            = /* 'r210' */ 0x72323130,    // Big-endian RGB 10-bit per component with SMPTE video levels (64-940). Packed as 2:10:10:10
     DLABPixelFormat12BitRGB                                            = /* 'R12B' */ 0x52313242,    // Big-endian RGB 12-bit per component with full range (0-4095). Packed as 12-bit per component
     DLABPixelFormat12BitRGBLE                                          = /* 'R12L' */ 0x5231324C,    // Little-endian RGB 12-bit per component with full range (0-4095). Packed as 12-bit per component
     DLABPixelFormat10BitRGBXLE                                         = /* 'R10l' */ 0x5231306C,    // Little-endian 10-bit RGB with SMPTE video levels (64-940)
@@ -1123,7 +1167,9 @@ typedef NS_OPTIONS(uint32_t, DLABVideoConnection)
     DLABVideoConnectionOpticalSDI                                 = 1 << 2,
     DLABVideoConnectionComponent                                  = 1 << 3,
     DLABVideoConnectionComposite                                  = 1 << 4,
-    DLABVideoConnectionSVideo                                     = 1 << 5
+    DLABVideoConnectionSVideo                                     = 1 << 5,
+    DLABVideoConnectionEthernet                                   = 1 << 6,
+    DLABVideoConnectionOpticalEthernet                            = 1 << 7
 };
 
 /* Enum BMDAudioConnection - Audio connection types */
