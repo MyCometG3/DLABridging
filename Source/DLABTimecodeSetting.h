@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreVideo/Corevideo.h>
 #import <CoreMedia/CoreMedia.h>
-#import "DLABConstants.h"
+#import <DLABridging/DLABConstants.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

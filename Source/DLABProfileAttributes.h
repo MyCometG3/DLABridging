@@ -9,7 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <Foundation/Foundation.h>
-#import "DLABConstants.h"
+#import <DLABridging/DLABConstants.h>
 
 /* =================================================================================== */
 // MARK: -

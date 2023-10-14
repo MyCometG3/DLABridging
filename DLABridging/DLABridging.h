@@ -21,12 +21,12 @@ FOUNDATION_EXPORT const unsigned char DLABridgingVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <DLABridging/PublicHeader.h>
 
-#import "DLABConstants.h"
-#import "DLABBrowser.h"
-#import "DLABDevice.h"
-#import "DLABAudioSetting.h"
-#import "DLABVideoSetting.h"
-#import "DLABTimecodeSetting.h"
-#import "DLABProfileAttributes.h"
-#import "DLABFrameMetadata.h"
-#import "DLABDeckControl.h"
+#import <DLABridging/DLABConstants.h>
+#import <DLABridging/DLABBrowser.h>
+#import <DLABridging/DLABDevice.h>
+#import <DLABridging/DLABAudioSetting.h>
+#import <DLABridging/DLABVideoSetting.h>
+#import <DLABridging/DLABTimecodeSetting.h>
+#import <DLABridging/DLABProfileAttributes.h>
+#import <DLABridging/DLABFrameMetadata.h>
+#import <DLABridging/DLABDeckControl.h>

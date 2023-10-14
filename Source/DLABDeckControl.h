@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DLABDevice.h"
+#import <DLABridging/DLABDevice.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

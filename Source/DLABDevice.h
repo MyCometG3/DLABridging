@@ -11,8 +11,8 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
+#import <DLABridging/DLABConstants.h>
 
-#import "DLABConstants.h"
 @class DLABDevice;
 @class DLABVideoSetting;
 @class DLABAudioSetting;
