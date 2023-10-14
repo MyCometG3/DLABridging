@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABProfileCallback.h"
+#import <DLABProfileCallback.h>
 
 DLABProfileCallback::DLABProfileCallback(id<DLABProfileCallbackPrivateDelegate> delegate)
 : delegate(delegate), refCount(1)

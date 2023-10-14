@@ -8,8 +8,8 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABTimecodeSetting.h"
-#import "DeckLinkAPI.h"
+#import <DLABTimecodeSetting.h>
+#import <DeckLinkAPI.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

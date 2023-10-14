@@ -8,8 +8,8 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABAudioSetting.h"
-#import "DLABDevice+Internal.h"
+#import <DLABAudioSetting.h>
+#import <DLABDevice+Internal.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

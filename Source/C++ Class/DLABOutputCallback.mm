@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABOutputCallback.h"
+#import <DLABOutputCallback.h>
 
 DLABOutputCallback::DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate)
 : delegate(delegate), refCount(1)

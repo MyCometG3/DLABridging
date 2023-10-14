@@ -6,7 +6,7 @@
 //  Copyright © 2020-2023 MyCometG3. All rights reserved.
 //
 
-#import "DLABDeckControl+Internal.h"
+#import <DLABDeckControl+Internal.h>
 
 const char* kDeckQueue = "DLABDeckControl.deckQueue";
 

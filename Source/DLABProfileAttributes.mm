@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABProfileAttributes+Internal.h"
+#import <DLABProfileAttributes+Internal.h>
 
 @implementation DLABProfileAttributes
 

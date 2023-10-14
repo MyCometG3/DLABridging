@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABBrowser+Internal.h"
+#import <DLABBrowser+Internal.h>
 
 const char* kBrowserQueue = "DLABDevice.browserQueue";
 

@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABDevice+Internal.h"
+#import <DLABDevice+Internal.h>
 
 /* =================================================================================== */
 // MARK: - input (internal)

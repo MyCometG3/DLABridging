@@ -6,7 +6,7 @@
 //  Copyright © 2020-2023 MyCometG3. All rights reserved.
 //
 
-#import "DLABDeckControlStatusCallback.h"
+#import <DLABDeckControlStatusCallback.h>
 
 DLABDeckControlStatusCallback::DLABDeckControlStatusCallback(id<DLABDeckControlStatusCallbackPrivateDelegate> delegate)
 : delegate(delegate), refCount(1)

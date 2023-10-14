@@ -8,11 +8,11 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABFrameMetadata.h"
-#import "DeckLinkAPI.h"
-#import "DLABMetaFrame.h"
+#import <DLABFrameMetadata.h>
+#import <DeckLinkAPI.h>
+#import <DLABMetaFrame.h>
 
-#import "DeckLinkAPI_v11_5.h"
+#import <DeckLinkAPI_v11_5.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABFrameMetadata+Internal.h"
+#import <DLABFrameMetadata+Internal.h>
 
 @implementation DLABFrameMetadata
 

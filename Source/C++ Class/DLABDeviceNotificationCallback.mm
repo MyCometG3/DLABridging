@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABDeviceNotificationCallback.h"
+#import <DLABDeviceNotificationCallback.h>
 
 DLABDeviceNotificationCallback::DLABDeviceNotificationCallback(id<DLABDeviceNotificationCallbackDelegate> delegate)
 : delegate(delegate), refCount(1)

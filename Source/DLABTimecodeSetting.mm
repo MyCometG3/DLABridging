@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABTimecodeSetting+Internal.h"
+#import <DLABTimecodeSetting+Internal.h>
 
 @implementation DLABTimecodeSetting
 

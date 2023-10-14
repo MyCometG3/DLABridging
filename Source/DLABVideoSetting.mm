@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABVideoSetting+Internal.h"
+#import <DLABVideoSetting+Internal.h>
 
 NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     long stride = 0;

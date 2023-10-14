@@ -6,10 +6,10 @@
 //  Copyright © 2020-2023 MyCometG3. All rights reserved.
 //
 
-#import "DLABDeckControl.h"
-#import "DeckLinkAPI.h"
-#import "DLABDeckControlStatusCallback.h"
-#import "DLABTimecodeSetting+Internal.h"
+#import <DLABDeckControl.h>
+#import <DeckLinkAPI.h>
+#import <DLABDeckControlStatusCallback.h>
+#import <DLABTimecodeSetting+Internal.h>
 
 /* =================================================================================== */
 

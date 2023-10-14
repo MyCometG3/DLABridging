@@ -8,25 +8,24 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABDevice.h"
+#import <DLABDevice.h>
+#import <DeckLinkAPI.h>
 
-#import "DeckLinkAPI.h"
+#import <DeckLinkAPIVideoInput_v11_4.h>
+#import <DeckLinkAPIVideoOutput_v11_4.h>
 
-#import "DeckLinkAPIVideoInput_v11_4.h"
-#import "DeckLinkAPIVideoOutput_v11_4.h"
-
-#import "DLABInputCallback.h"
-#import "DLABOutputCallback.h"
-#import "DLABAncillaryPacket.h"
-#import "DLABNotificationCallback.h"
-#import "DLABVideoSetting+Internal.h"
-#import "DLABAudioSetting+Internal.h"
-#import "DLABTimecodeSetting+Internal.h"
-#import "DLABProfileCallback.h"
-#import "DLABProfileAttributes+Internal.h"
-#import "DLABFrameMetadata+Internal.h"
-#import "DLABVideoConverter.h"
-#import "DLABDeckControl+Internal.h"
+#import <DLABInputCallback.h>
+#import <DLABOutputCallback.h>
+#import <DLABAncillaryPacket.h>
+#import <DLABNotificationCallback.h>
+#import <DLABVideoSetting+Internal.h>
+#import <DLABAudioSetting+Internal.h>
+#import <DLABTimecodeSetting+Internal.h>
+#import <DLABProfileCallback.h>
+#import <DLABProfileAttributes+Internal.h>
+#import <DLABFrameMetadata+Internal.h>
+#import <DLABVideoConverter.h>
+#import <DLABDeckControl+Internal.h>
 
 const int maxOutputVideoFrameCount = 8;
 

@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABAudioSetting+Internal.h"
+#import <DLABAudioSetting+Internal.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 @implementation DLABAudioSetting

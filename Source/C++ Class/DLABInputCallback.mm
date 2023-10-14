@@ -8,7 +8,7 @@
 
 /* This software is released under the MIT License, see LICENSE.txt. */
 
-#import "DLABInputCallback.h"
+#import <DLABInputCallback.h>
 
 DLABInputCallback::DLABInputCallback(id<DLABInputCallbackDelegate> delegate)
 : delegate(delegate), refCount(1)
