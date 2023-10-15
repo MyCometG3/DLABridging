@@ -171,7 +171,7 @@ NS_INLINE vImage_CGImageFormat formatXRGB16U(CGColorSpaceRef colorspace) {
         .bitsPerComponent = 16,
         .bitsPerPixel = 64,
         .colorSpace = colorspace,
-        .bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder16Little,
+        .bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGImageByteOrder16Little,
         .version = 0,
         .decode = NULL,
         .renderingIntent = kCGRenderingIntentDefault
@@ -184,7 +184,7 @@ NS_INLINE vImage_CGImageFormat formatXRGB16Q12(CGColorSpaceRef colorspace) {
         .bitsPerComponent = 16,
         .bitsPerPixel = 64,
         .colorSpace = colorspace,
-        .bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder16Little,
+        .bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGImageByteOrder16Little,
         .version = 0,
         .decode = kvImageDecodeArray_16Q12Format,
         .renderingIntent = kCGRenderingIntentDefault
