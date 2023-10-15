@@ -6,6 +6,8 @@
 //  Copyright © 2020-2023 MyCometG3. All rights reserved.
 //
 
+/* This software is released under the MIT License, see LICENSE.txt. */
+
 #import <Foundation/Foundation.h>
 #import <CoreVideo/CoreVideo.h>
 #import <Accelerate/Accelerate.h>

@@ -6,12 +6,12 @@
 //  Copyright © 2020-2023 MyCometG3. All rights reserved.
 //
 
+/* This software is released under the MIT License, see LICENSE.txt. */
+
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
 #import <atomic>
 #import <DeckLinkAPI_v11_5.h>
-
-/* This software is released under the MIT License, see LICENSE.txt. */
 
 /*
  * Internal use only
