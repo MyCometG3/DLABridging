@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2020/03/13.
-//  Copyright © 2020-2023 MyCometG3. All rights reserved.
+//  Copyright © 2020-2024 MyCometG3. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
