@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_12.7.zip @ 2023/09/20 UTC
+ Derived from: Blackmagic_DeckLink_SDK_12.8.zip @ 2024/01/24 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c070000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.7"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c080000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.8"
  */
 
 /* =================================================================================== */
@@ -57,7 +57,8 @@ typedef NS_OPTIONS(uint32_t, DLABSupportedVideoModeFlag)
     DLABSupportedVideoModeFlagSDISingleLink                           = 1 << 2,
     DLABSupportedVideoModeFlagSDIDualLink                             = 1 << 3,
     DLABSupportedVideoModeFlagSDIQuadLink                             = 1 << 4,
-    DLABSupportedVideoModeFlagInAnyProfile                            = 1 << 5
+    DLABSupportedVideoModeFlagInAnyProfile                            = 1 << 5,
+    DLABSupportedVideoModePsF                                         = 1 << 6
 };
 
 /* Enum BMDPacketType - Type of packet */
@@ -463,6 +464,7 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     DLABDeckLinkStatusCurrentVideoOutputMode                      = /* 'cvom' */ 0x63766F6D,
     DLABDeckLinkStatusCurrentVideoOutputFlags                     = /* 'cvof' */ 0x63766F66,
     DLABDeckLinkStatusEthernetLink                                = /* 'sels' */ 0x73656C73,
+    DLABDeckLinkStatusEthernetLinkMbps                            = /* 'sesp' */ 0x73657370,
     DLABDeckLinkStatusPCIExpressLinkWidth                         = /* 'pwid' */ 0x70776964,
     DLABDeckLinkStatusPCIExpressLinkSpeed                         = /* 'plnk' */ 0x706C6E6B,
     DLABDeckLinkStatusLastVideoOutputPixelFormat                  = /* 'opix' */ 0x6F706978,
@@ -684,6 +686,12 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationEthernetPTPFollowerOnly                     = /* 'PTPf' */ 0x50545066,
     DLABConfigurationEthernetPTPUseUDPEncapsulation              = /* 'PTPU' */ 0x50545055,
 
+    /* Network Integers */
+
+    DLABConfigurationEthernetPTPPriority1                        = /* 'PTP1' */ 0x50545031,
+    DLABConfigurationEthernetPTPPriority2                        = /* 'PTP2' */ 0x50545032,
+    DLABConfigurationEthernetPTPDomain                           = /* 'PTPD' */ 0x50545044,
+
     /* Network Strings */
 
     DLABConfigurationEthernetStaticLocalIPAddress                = /* 'nsip' */ 0x6E736970,
@@ -691,9 +699,6 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationEthernetStaticGatewayIPAddress              = /* 'nsgw' */ 0x6E736777,
     DLABConfigurationEthernetStaticPrimaryDNS                    = /* 'nspd' */ 0x6E737064,
     DLABConfigurationEthernetStaticSecondaryDNS                  = /* 'nssd' */ 0x6E737364,
-    DLABConfigurationEthernetPTPPriority1                        = /* 'PTP1' */ 0x50545031,
-    DLABConfigurationEthernetPTPPriority2                        = /* 'PTP2' */ 0x50545032,
-    DLABConfigurationEthernetPTPDomain                           = /* 'PTPD' */ 0x50545044,
     DLABConfigurationEthernetVideoOutputAddress                  = /* 'noav' */ 0x6E6F6176,
     DLABConfigurationEthernetAudioOutputAddress                  = /* 'noaa' */ 0x6E6F6161,
     DLABConfigurationEthernetAncillaryOutputAddress              = /* 'noaA' */ 0x6E6F6141,
