@@ -54,7 +54,10 @@
     __weak typeof(self) wself = self;
     id<DLABOutputPlaybackDelegate> delegate = self.outputDelegate;
     [self delegate_async:^{
-        [delegate scheduledPlaybackHasStoppedOfDevice:wself]; // async
+        SEL selector = @selector(scheduledPlaybackHasStoppedOfDevice:);
+        if ([delegate respondsToSelector:selector]) {
+            [delegate scheduledPlaybackHasStoppedOfDevice:wself]; // async
+        }
     }];
 }
 

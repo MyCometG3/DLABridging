@@ -76,10 +76,13 @@
     // delegate will handle ChangeVideoInputFormatEvent
     __weak typeof(self) wself = self;
     [self delegate_async:^{
-        [delegate processInputFormatChangeWithVideoSetting:tmpSetting
-                                                    events:events
-                                                     flags:flags
-                                                  ofDevice:wself]; // async
+        SEL selector = @selector(processInputFormatChangeWithVideoSetting:events:flags:ofDevice:);
+        if ([delegate respondsToSelector:selector]) {
+            [delegate processInputFormatChangeWithVideoSetting:tmpSetting
+                                                        events:events
+                                                         flags:flags
+                                                      ofDevice:wself]; // async
+        }
     }];
 }
 
@@ -121,9 +124,12 @@
             if (setting) {
                 __weak typeof(self) wself = self;
                 [self delegate_async:^{
-                    [delegate processCapturedVideoSample:sampleBuffer
-                                         timecodeSetting:setting
-                                                ofDevice:wself]; // async
+                    SEL selector = @selector(processCapturedVideoSample:timecodeSetting:ofDevice:);
+                    if ([delegate respondsToSelector:selector]) {
+                        [delegate processCapturedVideoSample:sampleBuffer
+                                             timecodeSetting:setting
+                                                    ofDevice:wself]; // async
+                    }
                     CFRelease(sampleBuffer);
                 }];
             } else {
