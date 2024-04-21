@@ -13,7 +13,7 @@
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
- NOTE: This constants are converted from DekLink API "12.7.x"
+ NOTE: This constants are converted from DekLink API "12.9.x"
  NOTE: Basic renaming rules are:
  1. each enum type name BMDtypename => DLABtypename (DeckLink API bridging)
  1a. remove "s" at end of typename
@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_12.8.zip @ 2024/01/24 UTC
+ Derived from: Blackmagic_DeckLink_SDK_12.9.zip @ 2024/04/10 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c080000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.8"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c090000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.9"
  */
 
 /* =================================================================================== */
@@ -73,6 +73,7 @@ typedef NS_OPTIONS(uint32_t, DLABFrameFlag)
 {
     DLABFrameFlagDefault                                          = 0,
     DLABFrameFlagFlipVertical                                     = 1 << 0,
+    DLABFrameFlagMonitorOutOnly                                   = 1 << 3,
     DLABFrameFlagContainsHDRMetadata                                  = 1 << 1,
     
     /* Flags that are applicable only to instances of IDeckLinkVideoInputFrame */
@@ -392,6 +393,7 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeSupportsHighFrameRateTimecode                     = /* 'HFRT' */ 0x48465254,
     DLABAttributeSupportsSynchronizeToCaptureGroup                 = /* 'stcg' */ 0x73746367,
     DLABAttributeSupportsSynchronizeToPlaybackGroup                = /* 'stpg' */ 0x73747067,
+    DLABAttributeDeckLinkHasMonitorOut                             = /* 'fmoo' */ 0x666D6F6F,
     
     /* Integers */
     
@@ -1007,6 +1009,7 @@ typedef NS_ENUM(uint32_t, DLABPixelFormat)
     DLABPixelFormatUnspecified                                         = 0,
     DLABPixelFormat8BitYUV                                             = /* '2vuy' */ 0x32767579,
     DLABPixelFormat10BitYUV                                            = /* 'v210' */ 0x76323130,
+    DLABPixelFormat10BitYUVA                                           = /* 'Ay10' */ 0x41793130,    // Big-endian YUVA 10 bit per component with SMPTE video levels (64-940) for YUV but full range alpha
     DLABPixelFormat8BitARGB                                            = 32,
     DLABPixelFormat8BitBGRA                                            = /* 'BGRA' */ 0x42475241,
     DLABPixelFormat10BitRGB                                            = /* 'r210' */ 0x72323130,    // Big-endian RGB 10-bit per component with SMPTE video levels (64-940). Packed as 2:10:10:10
