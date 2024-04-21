@@ -39,6 +39,10 @@
  */
 
 
+/*
+ * -- AUTOMATICALLY GENERATED - DO NOT EDIT ---
+ */
+
 #ifndef BMD_DECKLINKAPI_H
 #define BMD_DECKLINKAPI_H
 
@@ -158,6 +162,7 @@ typedef uint32_t BMDFrameFlags;
 enum _BMDFrameFlags {
     bmdFrameFlagDefault                                          = 0,
     bmdFrameFlagFlipVertical                                     = 1 << 0,
+    bmdFrameFlagMonitorOutOnly                                   = 1 << 3,
     bmdFrameContainsHDRMetadata                                  = 1 << 1,
 
     /* Flags that are applicable only to instances of IDeckLinkVideoInputFrame */
@@ -510,6 +515,7 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkSupportsHighFrameRateTimecode                     = /* 'HFRT' */ 0x48465254,
     BMDDeckLinkSupportsSynchronizeToCaptureGroup                 = /* 'stcg' */ 0x73746367,
     BMDDeckLinkSupportsSynchronizeToPlaybackGroup                = /* 'stpg' */ 0x73747067,
+    BMDDeckLinkHasMonitorOut                                     = /* 'fmoo' */ 0x666D6F6F,
 
     /* Integers */
 
