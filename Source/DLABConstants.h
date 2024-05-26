@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_12.9.zip @ 2024/04/10 UTC
+ Derived from: Blackmagic_DeckLink_SDK_14.0.zip @ 2024/05/10 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0c090000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "12.9"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0e000000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "14.0"
  */
 
 /* =================================================================================== */
@@ -295,6 +295,16 @@ typedef NS_ENUM(uint32_t, DLABDynamicRange)
     DLABDynamicRangeHDRStaticHLG                                  = 1 << 30     // High Dynamic Range HLG in accordance with ITU-R BT.2100-0
 };
 
+/* Enum BMDMezzanineType -  */
+typedef NS_ENUM(uint32_t, DLABMezzanineType)
+{
+    DLABMezzanineTypeNone                                         = 0,    // No mezzanine board
+    DLABMezzanineTypeHDMI14OpticalSDI                             = /* 'mza1' */ 0x6D7A6131,    // Mezzanine board with HDMI 1.4 and Optical SDI
+    DLABMezzanineTypeQuadSDI                                      = /* 'mz4s' */ 0x6D7A3473,    // Mezzanine board with four SDI connectors
+    DLABMezzanineTypeHDMI20OpticalSDI                             = /* 'mza2' */ 0x6D7A6132,    // Mezzanine board with HDMI 2.0 and Optical SDI
+    DLABMezzanineTypeHDMI21RS422                                  = /* 'mzhr' */ 0x6D7A6872    // Mezzanine boards with HDMI 2.1 and RS422
+};
+
 /* Enum BMDDeckLinkHDMIInputEDIDID - DeckLink HDMI Input EDID ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkHDMIInputEDID)
 {
@@ -398,6 +408,7 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     /* Integers */
     
     DLABAttributeMaximumAudioChannels                              = /* 'mach' */ 0x6D616368,
+    DLABAttributeMaximumHDMIAudioChannels                          = /* 'mhch' */ 0x6D686368,
     DLABAttributeMaximumAnalogAudioInputChannels                   = /* 'iach' */ 0x69616368,
     DLABAttributeMaximumAnalogAudioOutputChannels                  = /* 'aach' */ 0x61616368,
     DLABAttributeNumberOfSubDevices                                = /* 'nsbd' */ 0x6E736264,
@@ -420,6 +431,7 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeDuplex                                            = /* 'dupx' */ 0x64757078,
     DLABAttributeMinimumPrerollFrames                              = /* 'mprf' */ 0x6D707266,
     DLABAttributeSupportedDynamicRange                             = /* 'sudr' */ 0x73756472,
+    DLABAttributeMezzanineType                                     = /* 'mezt' */ 0x6D657A74,
     
     /* Floats */
     
