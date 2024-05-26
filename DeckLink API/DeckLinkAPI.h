@@ -408,6 +408,17 @@ enum _BMDDynamicRange {
     bmdDynamicRangeHDRStaticHLG                                  = 1 << 30	// High Dynamic Range HLG in accordance with ITU-R BT.2100-0
 };
 
+/* Enum BMDMezzanineType -  */
+
+typedef uint32_t BMDMezzanineType;
+enum _BMDMezzanineType {
+    bmdMezzanineTypeNone                                         = 0,	// No mezzanine board
+    bmdMezzanineTypeHDMI14OpticalSDI                             = /* 'mza1' */ 0x6D7A6131,	// Mezzanine board with HDMI 1.4 and Optical SDI
+    bmdMezzanineTypeQuadSDI                                      = /* 'mz4s' */ 0x6D7A3473,	// Mezzanine board with four SDI connectors
+    bmdMezzanineTypeHDMI20OpticalSDI                             = /* 'mza2' */ 0x6D7A6132,	// Mezzanine board with HDMI 2.0 and Optical SDI
+    bmdMezzanineTypeHDMI21RS422                                  = /* 'mzhr' */ 0x6D7A6872	// Mezzanine boards with HDMI 2.1 and RS422
+};
+
 /* Enum BMDDeckLinkHDMIInputEDIDID - DeckLink HDMI Input EDID ID */
 
 typedef uint32_t BMDDeckLinkHDMIInputEDIDID;
@@ -520,6 +531,7 @@ enum _BMDDeckLinkAttributeID {
     /* Integers */
 
     BMDDeckLinkMaximumAudioChannels                              = /* 'mach' */ 0x6D616368,
+    BMDDeckLinkMaximumHDMIAudioChannels                          = /* 'mhch' */ 0x6D686368,
     BMDDeckLinkMaximumAnalogAudioInputChannels                   = /* 'iach' */ 0x69616368,
     BMDDeckLinkMaximumAnalogAudioOutputChannels                  = /* 'aach' */ 0x61616368,
     BMDDeckLinkNumberOfSubDevices                                = /* 'nsbd' */ 0x6E736264,
@@ -542,6 +554,7 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkDuplex                                            = /* 'dupx' */ 0x64757078,
     BMDDeckLinkMinimumPrerollFrames                              = /* 'mprf' */ 0x6D707266,
     BMDDeckLinkSupportedDynamicRange                             = /* 'sudr' */ 0x73756472,
+    BMDDeckLinkMezzanineType                                     = /* 'mezt' */ 0x6D657A74,
 
     /* Floats */
 
