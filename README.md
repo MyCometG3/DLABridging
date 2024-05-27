@@ -5,7 +5,7 @@ Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 - __Requirement__: macOS 14.x, 13.x, 12.x, 11.x, 10.15, 10.14.
 - __Capture Device__: Blackmagic DeckLink devices/UltraStudio devices.
 - __Restriction__: Compressed/Synchronized captures are not supported.
-- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.9)
+- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.9, 14.0)
 - __Architecture__: Universal binary (x86_64 + arm64)
 
 NOTE: This framework is under development.
@@ -144,8 +144,8 @@ NOTE: This framework is under development.
 - Ref: "Documentation/Bundle Resources/Entitlements/Hardened Runtime/Disable Library Validation Entitlement" from Apple Developer Documentation.
 
 #### Development environment
-- macOS 14.4.1 Sonoma
-- Xcode 15.3
+- macOS 14.5 Sonoma
+- Xcode 15.4
 - Swift 5.10
 
 #### License
