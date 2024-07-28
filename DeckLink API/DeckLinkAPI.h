@@ -613,6 +613,11 @@ enum _BMDDeckLinkStatusID {
     bmdDeckLinkStatusBusy                                        = /* 'busy' */ 0x62757379,
     bmdDeckLinkStatusInterchangeablePanelType                    = /* 'icpt' */ 0x69637074,
     bmdDeckLinkStatusDeviceTemperature                           = /* 'dtmp' */ 0x64746D70,
+    bmdDeckLinkStatusHDMIOutputActualMode                        = /* 'hiam' */ 0x6869616D,
+    bmdDeckLinkStatusHDMIOutputActualFormatFlags                 = /* 'hiaf' */ 0x68696166,
+    bmdDeckLinkStatusHDMIOutputFRLRate                           = /* 'hiof' */ 0x68696F66,
+    bmdDeckLinkStatusHDMIInputFRLRate                            = /* 'hiif' */ 0x68696966,
+    bmdDeckLinkStatusHDMIOutputTMDSLineRate                      = /* 'hilr' */ 0x68696C72,
 
     /* Flags */
 
@@ -661,6 +666,19 @@ typedef uint32_t BMDPanelType;
 enum _BMDPanelType {
     bmdPanelNotDetected                                          = /* 'npnl' */ 0x6E706E6C,
     bmdPanelTeranexMiniSmartPanel                                = /* 'tmsm' */ 0x746D736D
+};
+
+/* Enum BMDFormatFlags - Flags to describe the video signal */
+
+typedef uint32_t BMDFormatFlags;
+enum _BMDFormatFlags {
+    bmdFormatRGB444                                              = 1 << 0,
+    bmdFormatYUV444                                              = 1 << 1,
+    bmdFormatYUV422                                              = 1 << 2,
+    bmdFormatYUV420                                              = 1 << 3,
+    bmdFormat8BitDepth                                           = 1 << 4,
+    bmdFormat10BitDepth                                          = 1 << 5,
+    bmdFormat12BitDepth                                          = 1 << 6
 };
 
 /* Enum BMDDeviceBusyState - Current device busy state */
