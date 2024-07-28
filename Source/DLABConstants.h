@@ -13,7 +13,7 @@
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
- NOTE: This constants are converted from DekLink API "12.9.x"
+ NOTE: This constants are converted from DekLink API "14.1.x"
  NOTE: Basic renaming rules are:
  1. each enum type name BMDtypename => DLABtypename (DeckLink API bridging)
  1a. remove "s" at end of typename
@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_14.0.zip @ 2024/05/10 UTC
+ Derived from: Blackmagic_DeckLink_SDK_14.1.zip @ 2024/07/11 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0e000000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "14.0"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0e010000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "14.1"
  */
 
 /* =================================================================================== */
@@ -487,6 +487,11 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     DLABDeckLinkStatusBusy                                        = /* 'busy' */ 0x62757379,
     DLABDeckLinkStatusInterchangeablePanelType                    = /* 'icpt' */ 0x69637074,
     DLABDeckLinkStatusDeviceTemperature                           = /* 'dtmp' */ 0x64746D70,
+    DLABDeckLinkStatusHDMIOutputActualMode                        = /* 'hiam' */ 0x6869616D,
+    DLABDeckLinkStatusHDMIOutputActualFormatFlags                 = /* 'hiaf' */ 0x68696166,
+    DLABDeckLinkStatusHDMIOutputFRLRate                           = /* 'hiof' */ 0x68696F66,
+    DLABDeckLinkStatusHDMIInputFRLRate                            = /* 'hiif' */ 0x68696966,
+    DLABDeckLinkStatusHDMIOutputTMDSLineRate                      = /* 'hilr' */ 0x68696C72,
     
     /* Flags */
     
@@ -532,6 +537,18 @@ typedef NS_ENUM(uint32_t, DLABPanelType)
 {
     DLABPanelTypeNotDetected                                          = /* 'npnl' */ 0x6E706E6C,
     DLABPanelTypeTeranexMiniSmartPanel                                = /* 'tmsm' */ 0x746D736D
+};
+
+/* Enum BMDFormatFlags - Flags to describe the video signal */
+typedef NS_ENUM(uint32_t, DLABFormatFlag)
+{
+    DLABFormatFlagRGB444                                              = 1 << 0,
+    DLABFormatFlagYUV444                                              = 1 << 1,
+    DLABFormatFlagYUV422                                              = 1 << 2,
+    DLABFormatFlagYUV420                                              = 1 << 3,
+    DLABFormatFlag8BitDepth                                           = 1 << 4,
+    DLABFormatFlag10BitDepth                                          = 1 << 5,
+    DLABFormatFlag12BitDepth                                          = 1 << 6
 };
 
 /* Enum BMDDeviceBusyState - Current device busy state */
