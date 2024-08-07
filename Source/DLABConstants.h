@@ -58,7 +58,16 @@ typedef NS_OPTIONS(uint32_t, DLABSupportedVideoModeFlag)
     DLABSupportedVideoModeFlagSDIDualLink                             = 1 << 3,
     DLABSupportedVideoModeFlagSDIQuadLink                             = 1 << 4,
     DLABSupportedVideoModeFlagInAnyProfile                            = 1 << 5,
-    DLABSupportedVideoModePsF                                         = 1 << 6
+    DLABSupportedVideoModeFlagPsF                                     = 1 << 6
+    ,
+    DLABSupportedVideoModePsF   NS_SWIFT_UNAVAILABLE("") __deprecated = 1 << 6,
+    DLABSupportedVideoModeFlagFlagKeying                 __deprecated = 1 << 0,
+    DLABSupportedVideoModeFlagFlagDualStream3D           __deprecated = 1 << 1,
+    DLABSupportedVideoModeFlagFlagSDISingleLink          __deprecated = 1 << 2,
+    DLABSupportedVideoModeFlagFlagSDIDualLink            __deprecated = 1 << 3,
+    DLABSupportedVideoModeFlagFlagSDIQuadLink            __deprecated = 1 << 4,
+    DLABSupportedVideoModeFlagFlagInAnyProfile           __deprecated = 1 << 5,
+    DLABSupportedVideoModeFlagFlagPsF                    __deprecated = 1 << 6
 };
 
 /* Enum BMDPacketType - Type of packet */
@@ -1080,20 +1089,32 @@ typedef NS_ENUM(uint32_t, DLABStreamingEncodingFrameRate)
 {
     /* Interlaced rates */
     
-    DLABStreamingEncodedFrameRate50i                              = /* 'e50i' */ 0x65353069,
-    DLABStreamingEncodedFrameRate5994i                            = /* 'e59i' */ 0x65353969,
-    DLABStreamingEncodedFrameRate60i                              = /* 'e60i' */ 0x65363069,
+    DLABStreamingEncodingFrameRate50i                             = /* 'e50i' */ 0x65353069,
+    DLABStreamingEncodingFrameRate5994i                           = /* 'e59i' */ 0x65353969,
+    DLABStreamingEncodingFrameRate60i                             = /* 'e60i' */ 0x65363069,
     
     /* Progressive rates */
     
-    DLABStreamingEncodedFrameRate2398p                            = /* 'e23p' */ 0x65323370,
-    DLABStreamingEncodedFrameRate24p                              = /* 'e24p' */ 0x65323470,
-    DLABStreamingEncodedFrameRate25p                              = /* 'e25p' */ 0x65323570,
-    DLABStreamingEncodedFrameRate2997p                            = /* 'e29p' */ 0x65323970,
-    DLABStreamingEncodedFrameRate30p                              = /* 'e30p' */ 0x65333070,
-    DLABStreamingEncodedFrameRate50p                              = /* 'e50p' */ 0x65353070,
-    DLABStreamingEncodedFrameRate5994p                            = /* 'e59p' */ 0x65353970,
-    DLABStreamingEncodedFrameRate60p                              = /* 'e60p' */ 0x65363070
+    DLABStreamingEncodingFrameRate2398p                           = /* 'e23p' */ 0x65323370,
+    DLABStreamingEncodingFrameRate24p                             = /* 'e24p' */ 0x65323470,
+    DLABStreamingEncodingFrameRate25p                             = /* 'e25p' */ 0x65323570,
+    DLABStreamingEncodingFrameRate2997p                           = /* 'e29p' */ 0x65323970,
+    DLABStreamingEncodingFrameRate30p                             = /* 'e30p' */ 0x65333070,
+    DLABStreamingEncodingFrameRate50p                             = /* 'e50p' */ 0x65353070,
+    DLABStreamingEncodingFrameRate5994p                           = /* 'e59p' */ 0x65353970,
+    DLABStreamingEncodingFrameRate60p                             = /* 'e60p' */ 0x65363070
+    ,
+    DLABStreamingEncodedFrameRate50i    NS_SWIFT_NAME(encodedFrameRate50i  ) __deprecated = /* 'e50i' */ 0x65353069,
+    DLABStreamingEncodedFrameRate5994i  NS_SWIFT_NAME(encodedFrameRate5994i) __deprecated = /* 'e59i' */ 0x65353969,
+    DLABStreamingEncodedFrameRate60i    NS_SWIFT_NAME(encodedFrameRate60i  ) __deprecated = /* 'e60i' */ 0x65363069,
+    DLABStreamingEncodedFrameRate2398p  NS_SWIFT_NAME(encodedFrameRate2398p) __deprecated = /* 'e23p' */ 0x65323370,
+    DLABStreamingEncodedFrameRate24p    NS_SWIFT_NAME(encodedFrameRate24p  ) __deprecated = /* 'e24p' */ 0x65323470,
+    DLABStreamingEncodedFrameRate25p    NS_SWIFT_NAME(encodedFrameRate25p  ) __deprecated = /* 'e25p' */ 0x65323570,
+    DLABStreamingEncodedFrameRate2997p  NS_SWIFT_NAME(encodedFrameRate2997p) __deprecated = /* 'e29p' */ 0x65323970,
+    DLABStreamingEncodedFrameRate30p    NS_SWIFT_NAME(encodedFrameRate30p  ) __deprecated = /* 'e30p' */ 0x65333070,
+    DLABStreamingEncodedFrameRate50p    NS_SWIFT_NAME(encodedFrameRate50p  ) __deprecated = /* 'e50p' */ 0x65353070,
+    DLABStreamingEncodedFrameRate5994p  NS_SWIFT_NAME(encodedFrameRate5994p) __deprecated = /* 'e59p' */ 0x65353970,
+    DLABStreamingEncodedFrameRate60p    NS_SWIFT_NAME(encodedFrameRate60p  ) __deprecated = /* 'e60p' */ 0x65363070
 };
 
 /* Enum BMDStreamingEncodingSupport - Output encoding mode supported flag */
