@@ -131,7 +131,8 @@ enum _BMDVideoOutputFlags {
     bmdVideoOutputVITC                                           = 1 << 1,
     bmdVideoOutputRP188                                          = 1 << 2,
     bmdVideoOutputDualStream3D                                   = 1 << 4,
-    bmdVideoOutputSynchronizeToPlaybackGroup                     = 1 << 6
+    bmdVideoOutputSynchronizeToPlaybackGroup                     = 1 << 6,
+    bmdVideoOutputDolbyVision                                    = 1 << 7
 };
 
 /* Enum BMDSupportedVideoModeFlags - Flags to describe supported video modes */
@@ -145,7 +146,8 @@ enum _BMDSupportedVideoModeFlags {
     bmdSupportedVideoModeSDIDualLink                             = 1 << 3,
     bmdSupportedVideoModeSDIQuadLink                             = 1 << 4,
     bmdSupportedVideoModeInAnyProfile                            = 1 << 5,
-    bmdSupportedVideoModePsF                                     = 1 << 6
+    bmdSupportedVideoModePsF                                     = 1 << 6,
+    bmdSupportedVideoModeDolbyVision                             = 1 << 7
 };
 
 /* Enum BMDPacketType - Type of packet */
@@ -164,6 +166,7 @@ enum _BMDFrameFlags {
     bmdFrameFlagFlipVertical                                     = 1 << 0,
     bmdFrameFlagMonitorOutOnly                                   = 1 << 3,
     bmdFrameContainsHDRMetadata                                  = 1 << 1,
+    bmdFrameContainsDolbyVisionMetadata                          = 1 << 4,
 
     /* Flags that are applicable only to instances of IDeckLinkVideoInputFrame */
 
@@ -396,7 +399,10 @@ typedef uint32_t BMDColorspace;
 enum _BMDColorspace {
     bmdColorspaceRec601                                          = /* 'r601' */ 0x72363031,
     bmdColorspaceRec709                                          = /* 'r709' */ 0x72373039,
-    bmdColorspaceRec2020                                         = /* '2020' */ 0x32303230
+    bmdColorspaceRec2020                                         = /* '2020' */ 0x32303230,
+    bmdColorspaceDolbyVisionNative                               = /* 'DoVi' */ 0x446F5669,	// For bmdDeckLinkConfigVideoOutputConversionColorspaceDestination with 12-bit RGB
+    bmdColorspaceP3D65                                           = /* 'P3D6' */ 0x50334436,	// For bmdDeckLinkConfigVideoOutputConversionColorspaceSource only
+    bmdColorspaceUnknown                                         = /* 'Ncol' */ 0x4E636F6C	// For disabling bmdDeckLinkConfigVideoOutputConversionColorspaceDestination
 };
 
 /* Enum BMDDynamicRange - SDR or HDR */
@@ -434,15 +440,16 @@ enum _BMDDeckLinkHDMIInputEDIDID {
 typedef uint32_t BMDDeckLinkFrameMetadataID;
 enum _BMDDeckLinkFrameMetadataID {
 
-    /* Colorspace Metadata - Integers */
+    /* Integers */
 
     bmdDeckLinkFrameMetadataColorspace                           = /* 'cspc' */ 0x63737063,	// Colorspace of video frame (see BMDColorspace)
-
-    /* HDR Metadata - Integers */
-
     bmdDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,	// EOTF in range 0-7 as per CEA 861.3
 
-    /* HDR Metadata - Floats */
+    /* Dolby Vision only - Bytes */
+
+    bmdDeckLinkFrameMetadataDolbyVision                          = /* 'dovi' */ 0x646F7669,	// Dolby Vision Metadata
+
+    /* CEA/SMPTE only - HDR Metadata Floats */
 
     bmdDeckLinkFrameMetadataHDRDisplayPrimariesRedX              = /* 'hdrx' */ 0x68647278,	// Red display primaries in range 0.0 - 1.0
     bmdDeckLinkFrameMetadataHDRDisplayPrimariesRedY              = /* 'hdry' */ 0x68647279,	// Red display primaries in range 0.0 - 1.0
@@ -618,6 +625,10 @@ enum _BMDDeckLinkStatusID {
     bmdDeckLinkStatusHDMIOutputFRLRate                           = /* 'hiof' */ 0x68696F66,
     bmdDeckLinkStatusHDMIInputFRLRate                            = /* 'hiif' */ 0x68696966,
     bmdDeckLinkStatusHDMIOutputTMDSLineRate                      = /* 'hilr' */ 0x68696C72,
+
+    /* Floats */
+
+    bmdDeckLinkStatusSinkSupportsDolbyVision                     = /* 'dvvr' */ 0x64767672,
 
     /* Flags */
 
