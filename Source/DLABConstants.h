@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_14.1.zip @ 2024/07/11 UTC
+ Derived from: Blackmagic_DeckLink_SDK_14.2.zip @ 2024/07/24 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0e010000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "14.1"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0e020000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "14.2"
  */
 
 /* =================================================================================== */
@@ -45,7 +45,8 @@ typedef NS_OPTIONS(uint32_t, DLABVideoOutputFlag)
     DLABVideoOutputFlagVITC                                           = 1 << 1,
     DLABVideoOutputFlagRP188                                          = 1 << 2,
     DLABVideoOutputFlagDualStream3D                                   = 1 << 4,
-    DLABVideoOutputFlagSynchronizeToPlaybackGroup                     = 1 << 6
+    DLABVideoOutputFlagSynchronizeToPlaybackGroup                     = 1 << 6,
+    DLABVideoOutputFlagDolbyVision                                    = 1 << 7
 };
 
 /* Enum BMDSupportedVideoModeFlags - Flags to describe supported video modes */
@@ -58,7 +59,8 @@ typedef NS_OPTIONS(uint32_t, DLABSupportedVideoModeFlag)
     DLABSupportedVideoModeFlagSDIDualLink                             = 1 << 3,
     DLABSupportedVideoModeFlagSDIQuadLink                             = 1 << 4,
     DLABSupportedVideoModeFlagInAnyProfile                            = 1 << 5,
-    DLABSupportedVideoModeFlagPsF                                     = 1 << 6
+    DLABSupportedVideoModeFlagPsF                                     = 1 << 6,
+    DLABSupportedVideoModeFlagDolbyVision                             = 1 << 7
     ,
     DLABSupportedVideoModePsF   NS_SWIFT_UNAVAILABLE("") __deprecated = 1 << 6,
     DLABSupportedVideoModeFlagFlagKeying                 __deprecated = 1 << 0,
@@ -84,6 +86,7 @@ typedef NS_OPTIONS(uint32_t, DLABFrameFlag)
     DLABFrameFlagFlipVertical                                     = 1 << 0,
     DLABFrameFlagMonitorOutOnly                                   = 1 << 3,
     DLABFrameFlagContainsHDRMetadata                                  = 1 << 1,
+    DLABFrameFlagContainsDolbyVisionMetadata                          = 1 << 4,
     
     /* Flags that are applicable only to instances of IDeckLinkVideoInputFrame */
     
@@ -293,7 +296,10 @@ typedef NS_ENUM(uint32_t, DLABColorspace)
 {
     DLABColorspaceRec601                                          = /* 'r601' */ 0x72363031,
     DLABColorspaceRec709                                          = /* 'r709' */ 0x72373039,
-    DLABColorspaceRec2020                                         = /* '2020' */ 0x32303230
+    DLABColorspaceRec2020                                         = /* '2020' */ 0x32303230,
+    DLABColorspaceDolbyVisionNative                               = /* 'DoVi' */ 0x446F5669,	// For bmdDeckLinkConfigVideoOutputConversionColorspaceDestination with 12-bit RGB
+    DLABColorspaceP3D65                                           = /* 'P3D6' */ 0x50334436,	// For bmdDeckLinkConfigVideoOutputConversionColorspaceSource only
+    DLABColorspaceUnknown                                         = /* 'Ncol' */ 0x4E636F6C	// For disabling bmdDeckLinkConfigVideoOutputConversionColorspaceDestination
 };
 
 /* Enum BMDDynamicRange - SDR or HDR */
@@ -327,15 +333,16 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkHDMIInputEDID)
 typedef NS_ENUM(uint32_t, DLABDeckLinkFrameMetadata)
 {
     
-    /* Colorspace Metadata - Integers */
+    /* Integers */
     
     DLABDeckLinkFrameMetadataColorspace                           = /* 'cspc' */ 0x63737063,    // Colorspace of video frame (see BMDColorspace)
+    DLABDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,	// EOTF in range 0-7 as per CEA 861.3
     
-    /* HDR Metadata - Integers */
+    /* Dolby Vision only - Bytes */
     
-    DLABDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,    // EOTF in range 0-7 as per CEA 861.3
+    DLABDeckLinkFrameMetadataDolbyVision                          = /* 'dovi' */ 0x646F7669,	// Dolby Vision Metadata
     
-    /* HDR Metadata - Floats */
+    /* CEA/SMPTE only - HDR Metadata Floats */
     
     DLABDeckLinkFrameMetadataHDRDisplayPrimariesRedX              = /* 'hdrx' */ 0x68647278,    // Red display primaries in range 0.0 - 1.0
     DLABDeckLinkFrameMetadataHDRDisplayPrimariesRedY              = /* 'hdry' */ 0x68647279,    // Red display primaries in range 0.0 - 1.0
@@ -502,6 +509,10 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     DLABDeckLinkStatusHDMIInputFRLRate                            = /* 'hiif' */ 0x68696966,
     DLABDeckLinkStatusHDMIOutputTMDSLineRate                      = /* 'hilr' */ 0x68696C72,
     
+    /* Floats */
+    
+    DLABDeckLinkStatusSinkSupportsDolbyVision                     = /* 'dvvr' */ 0x64767672,
+    
     /* Flags */
     
     DLABDeckLinkStatusVideoInputSignalLocked                      = /* 'visl' */ 0x7669736C,
@@ -632,11 +643,14 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationRec2020Output                               = /* 'rec2' */ 0x72656332,    // Ensure output is Rec.2020 colorspace
     DLABConfigurationQuadLinkSDIVideoOutputSquareDivisionSplit   = /* 'SDQS' */ 0x53445153,
     DLABConfigurationOutput1080pAsPsF                            = /* 'pfpr' */ 0x70667072,
+    DLABConfigurationOutputValidateEDIDForDolbyVision            = /* 'pred' */ 0x70726564,
     
     /* Video Output Integers */
     
     DLABConfigurationVideoOutputConnection                       = /* 'vocn' */ 0x766F636E,
     DLABConfigurationVideoOutputConversionMode                   = /* 'vocm' */ 0x766F636D,
+    DLABConfigurationVideoOutputConversionColorspaceDestination  = /* 'vccd' */ 0x76636364,	// Parameter is of type BMDColorspace
+    DLABConfigurationVideoOutputConversionColorspaceSource       = /* 'vccs' */ 0x76636373,	// Parameter is of type BMDColorspace
     DLABConfigurationAnalogVideoOutputFlags                      = /* 'avof' */ 0x61766F66,
     DLABConfigurationReferenceInputTimingOffset                  = /* 'glot' */ 0x676C6F74,
     DLABConfigurationReferenceOutputMode                         = /* 'glOm' */ 0x676C4F6D,
@@ -656,6 +670,9 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationVideoOutputCompositeChromaGain              = /* 'oicg' */ 0x6F696367,
     DLABConfigurationVideoOutputSVideoLumaGain                   = /* 'oslg' */ 0x6F736C67,
     DLABConfigurationVideoOutputSVideoChromaGain                 = /* 'oscg' */ 0x6F736367,
+    DLABConfigurationDolbyVisionCMVersion                        = /* 'dvvr' */ 0x64767672,
+    DLABConfigurationDolbyVisionMasterMinimumNits                = /* 'mnnt' */ 0x6D6E6E74,
+    DLABConfigurationDolbyVisionMasterMaximumNits                = /* 'mxnt' */ 0x6D786E74,
     
     /* Video Input Flags */
     
