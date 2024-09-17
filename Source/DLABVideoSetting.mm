@@ -803,7 +803,12 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         
         // gamma level (legacy)
         NSString* keyGamma = (__bridge NSString*)kCMFormatDescriptionExtension_GammaLevel;
-        extensions[keyGamma] = @(2.2);
+        // WORKAROUND: Under macOS 15.0 double value wont work; use float value instead
+        if (@available(macOS 15.0, *)) {
+            extensions[keyGamma] = @(2.2f);
+        } else {
+            extensions[keyGamma] = @(2.2);
+        }
     }
     {
         // Color space
@@ -922,30 +927,41 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
         NSNumber* clapHOffset = @((double_t)self.clapHOffsetN/self.clapHOffsetD);
         NSNumber* clapVOffset = @((double_t)self.clapVOffsetN/self.clapVOffsetD);
         
-        NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
-        NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
-        NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;
-        NSString* keyClapVOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational;
-        
-        NSNumber* clapWidthN = @(self.clapWidthN);
-        NSNumber* clapWidthD = @(self.clapWidthD);
-        NSNumber* clapHeightN = @(self.clapHeightN);
-        NSNumber* clapHeightD = @(self.clapHeightD);
-        NSNumber* clapHOffsetN = @(self.clapHOffsetN);
-        NSNumber* clapHOffsetD = @(self.clapHOffsetD);
-        NSNumber* clapVOffsetN = @(self.clapVOffsetN);
-        NSNumber* clapVOffsetD = @(self.clapVOffsetD);
-        
-        NSDictionary* valueClap = @{
-            keyClapWidth    : clapWidth,
-            keyClapHeight   : clapHeight,
-            keyClapHOffset  : clapHOffset,
-            keyClapVOffset  : clapVOffset,
-            keyClapWidthR   : @[clapWidthN, clapWidthD],
-            keyClapHeightR  : @[clapHeightN, clapHeightD],
-            keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
-            keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
-        };
+        NSDictionary* valueClap = nil;
+        // WORKAROUND: macOS 15.0 seems to break rational value support
+        if (@available(macOS 15.0, *)) {
+            valueClap = @{
+                keyClapWidth    : clapWidth,
+                keyClapHeight   : clapHeight,
+                keyClapHOffset  : clapHOffset,
+                keyClapVOffset  : clapVOffset,
+            };
+        } else {
+            NSString* keyClapWidthR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureWidthRational;
+            NSString* keyClapHeightR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHeightRational;
+            NSString* keyClapHOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureHorizontalOffsetRational;
+            NSString* keyClapVOffsetR = (__bridge NSString*)kCMFormatDescriptionKey_CleanApertureVerticalOffsetRational;
+            
+            NSNumber* clapWidthN = @(self.clapWidthN);
+            NSNumber* clapWidthD = @(self.clapWidthD);
+            NSNumber* clapHeightN = @(self.clapHeightN);
+            NSNumber* clapHeightD = @(self.clapHeightD);
+            NSNumber* clapHOffsetN = @(self.clapHOffsetN);
+            NSNumber* clapHOffsetD = @(self.clapHOffsetD);
+            NSNumber* clapVOffsetN = @(self.clapVOffsetN);
+            NSNumber* clapVOffsetD = @(self.clapVOffsetD);
+            
+            valueClap = @{
+                keyClapWidth    : clapWidth,
+                keyClapHeight   : clapHeight,
+                keyClapHOffset  : clapHOffset,
+                keyClapVOffset  : clapVOffset,
+                keyClapWidthR   : @[clapWidthN, clapWidthD],
+                keyClapHeightR  : @[clapHeightN, clapHeightD],
+                keyClapHOffsetR : @[clapHOffsetN, clapHOffsetD],
+                keyClapVOffsetR : @[clapVOffsetN, clapVOffsetD],
+            };
+        }
         extensions[keyClap] = valueClap;
         
         self.extensionsW = extensions;
