@@ -27,15 +27,23 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_14.2.zip @ 2024/07/24 UTC
+ Derived from: Blackmagic_DeckLink_SDK_15.0.zip @ 2025/08/01 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0e020000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "14.2"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0f000000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "15.0"
  */
 
 /* =================================================================================== */
 // MARK: - From DeckLinkAPI.h
 /* =================================================================================== */
+
+/* Enum BMDBufferAccessFlags - Flags to describe access requirements to a video frame buffer */
+typedef NS_OPTIONS(uint32_t, DLABBufferAccessFlag)
+{
+    DLABBufferAccessFlagReadAndWrite                                  = 1 << 0 | 1 << 1,
+    DLABBufferAccessFlagRead                                          = 1 << 0,
+    DLABBufferAccessFlagWrite                                         = 1 << 1
+};
 
 /* Enum BMDVideoOutputFlags - Flags to control the output of ancillary data along with video. */
 typedef NS_OPTIONS(uint32_t, DLABVideoOutputFlag)
@@ -390,6 +398,40 @@ typedef NS_ENUM(uint32_t, DLABInternalKeyingAncillaryDataSource)
     DLABInternalKeyingAncillaryDataSourceFromKeyFrame               = /* 'ikak' */ 0x696B616B
 };
 
+/* Enum BMDAudioOutputXLRDelayType - Audio output XLR delay types */
+typedef NS_ENUM(uint32_t, DLABAudioOutputXLRDelayType)
+{
+    DLABAudioOutputXLRDelayTypeTime                               = /* 'dtms' */ 0x64746D73,
+    DLABAudioOutputXLRDelayTypeFrames                             = /* 'dtfr' */ 0x64746672
+};
+
+/* Enum BMDLanguage - Languages */
+typedef NS_ENUM(uint32_t, DLABLanguage)
+{
+    DLABLanguageEnglish                                           = /* 'enUS' */ 0x656E5553,
+    DLABLanguageSimplifiedChinese                                 = /* 'zhCN' */ 0x7A68434E,
+    DLABLanguageJapanese                                          = /* 'jaJP' */ 0x6A614A50,
+    DLABLanguageKorean                                            = /* 'koKR' */ 0x6B6F4B52,
+    DLABLanguageSpanish                                           = /* 'esES' */ 0x65734553,
+    DLABLanguageGerman                                            = /* 'deDE' */ 0x64654445,
+    DLABLanguageFrench                                            = /* 'frFR' */ 0x66724652,
+    DLABLanguageRussian                                           = /* 'ruRU' */ 0x72755255,
+    DLABLanguageItalian                                           = /* 'itIT' */ 0x69744954,
+    DLABLanguagePortuguese                                        = /* 'ptBR' */ 0x70744252,
+    DLABLanguageTurkish                                           = /* 'trTR' */ 0x74725452,
+    DLABLanguagePolish                                            = /* 'plPL' */ 0x706C504C,
+    DLABLanguageUkrainian                                         = /* 'ukUA' */ 0x756B5541
+};
+
+/* Enum BMDAudioMeterType - Audio meter type */
+typedef NS_ENUM(uint32_t, DLABAudioMeterType)
+{
+    DLABAudioMeterTypeVUMinus18db                                 = /* 'vu18' */ 0x76753138,
+    DLABAudioMeterTypeVUMinus20db                                 = /* 'vu20' */ 0x76753230,
+    DLABAudioMeterTypePPMMinus18db                                = /* 'pm18' */ 0x706D3138,
+    DLABAudioMeterTypePPMMinus20db                                = /* 'pm20' */ 0x706D3230
+};
+
 /* Enum BMDDeckLinkAttributeID - DeckLink Attribute ID */
 typedef NS_ENUM(uint32_t, DLABAttribute)
 {
@@ -419,7 +461,10 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeSupportsHighFrameRateTimecode                     = /* 'HFRT' */ 0x48465254,
     DLABAttributeSupportsSynchronizeToCaptureGroup                 = /* 'stcg' */ 0x73746367,
     DLABAttributeSupportsSynchronizeToPlaybackGroup                = /* 'stpg' */ 0x73747067,
-    DLABAttributeDeckLinkHasMonitorOut                             = /* 'fmoo' */ 0x666D6F6F,
+    DLABAttributeHasMonitorOut                                     = /* 'fmoo' */ 0x666D6F6F,
+    DLABAttributeSupportsExtendedDesktop                           = /* 'dtop' */ 0x64746F70,
+    
+    DLABAttributeDeckLinkHasMonitorOut    NS_SWIFT_NAME(hasMonitorOut) __deprecated = /* 'fmoo' */ 0x666D6F6F,
     
     /* Integers */
     
@@ -448,6 +493,8 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeMinimumPrerollFrames                              = /* 'mprf' */ 0x6D707266,
     DLABAttributeSupportedDynamicRange                             = /* 'sudr' */ 0x73756472,
     DLABAttributeMezzanineType                                     = /* 'mezt' */ 0x6D657A74,
+    DLABAttributeXLRDelayMsMaximum                                 = /* 'xdtx' */ 0x78647478,
+    DLABAttributeXLRDelayFramesMaximum                             = /* 'xdfx' */ 0x78646678,
     
     /* Floats */
     
@@ -601,11 +648,57 @@ typedef NS_ENUM(uint32_t, DLAB3DPreviewFormat)
     DLAB3DPreviewFormatTopBottom                                  = /* 'topb' */ 0x746F7062
 };
 
+/* Enum BMDIPFlowDirection - BMDIPFlowDirection enumerates the direction of the IP flow. */
+typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowDirection)
+{
+    DLABDeckLinkIPFlowDirectionOutput                             = 0,
+    DLABDeckLinkIPFlowDirectionInput                              = 1
+};
+
+/* Enum BMDIPFlowType - BMDIPFlowDirection enumerates the IP flow type. */
+typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowType)
+{
+    DLABDeckLinkIPFlowTypeVideo                                   = 0,
+    DLABDeckLinkIPFlowTypeAudio                                   = 1,
+    DLABDeckLinkIPFlowTypeAncillary                               = 2
+};
+
+/* Enum BMDDeckLinkIPFlowAttributeID - DeckLink IP Flow Attribute ID */
+typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowAttribute)
+{
+
+    /* DeckLink IP Flow Attribute Integers */
+
+    DLABDeckLinkIPFlowAttributeID                                          = /* '2fai' */ 0x32666169,
+    DLABDeckLinkIPFlowAttributeDirection                                   = /* '2fad' */ 0x32666164,
+    DLABDeckLinkIPFlowAttributeType                                        = /* '2fat' */ 0x32666174
+};
+
+/* Enum BMDDeckLinkIPFlowStatusID - DeckLink IP Flow Attribute ID */
+typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowStatus)
+{
+
+    /* DeckLink IP Flow Status Strings */
+
+    DLABDeckLinkIPFlowStatusSDP                                         = /* '2fas' */ 0x32666173
+};
+
+/* Enum BMDDeckLinkIPFlowSettingID - DeckLink IP Flow Setting ID */
+typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowSetting)
+{
+
+    /* DeckLink IP Flow Setting Strings */
+
+    DLABDeckLinkIPFlowSettingPeerSDP                                     = /* '2fps' */ 0x32667073    // The peer's SDP. Must not be over 1000 bytes large.
+};
+
 /* Enum BMDNotifications - Events that can be subscribed through IDeckLinkNotification */
 typedef NS_ENUM(uint32_t, DLABNotification)
 {
     DLABNotificationPreferencesChanged                                        = /* 'pref' */ 0x70726566,
-    DLABNotificationStatusChanged                                             = /* 'stat' */ 0x73746174
+    DLABNotificationStatusChanged                                             = /* 'stat' */ 0x73746174,
+    DLABNotificationIPFlowStatusChanged                                       = /* 'bfsc' */ 0x62667363,
+    DLABNotificationIPFlowSettingChanged                                      = /* 'bfcc' */ 0x62666363
 };
 
 /* =================================================================================== */
@@ -624,12 +717,15 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationHDMI3DPackingFormat                         = /* '3dpf' */ 0x33647066,
     DLABConfigurationBypass                                      = /* 'byps' */ 0x62797073,
     DLABConfigurationClockTimingAdjustment                       = /* 'ctad' */ 0x63746164,
+    DLABConfigurationAudioMeterType                              = /* 'aumt' */ 0x61756D74,
     
     /* Audio Input/Output Flags */
     
     DLABConfigurationAnalogAudioConsumerLevels                   = /* 'aacl' */ 0x6161636C,
     DLABConfigurationSwapHDMICh3AndCh4OnInput                    = /* 'hi34' */ 0x68693334,
     DLABConfigurationSwapHDMICh3AndCh4OnOutput                   = /* 'ho34' */ 0x686F3334,
+    DLABConfigurationAnalogAudioOutputChannelsMutedByHeadphone   = /* 'amhp' */ 0x616D6870,
+    DLABConfigurationAnalogAudioOutputChannelsMutedBySpeaker     = /* 'amsp' */ 0x616D7370,
     
     /* Video Output flags */
     
@@ -644,6 +740,7 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationQuadLinkSDIVideoOutputSquareDivisionSplit   = /* 'SDQS' */ 0x53445153,
     DLABConfigurationOutput1080pAsPsF                            = /* 'pfpr' */ 0x70667072,
     DLABConfigurationOutputValidateEDIDForDolbyVision            = /* 'pred' */ 0x70726564,
+    DLABConfigurationExtendedDesktop                             = /* 'exdt' */ 0x65786474,
     
     /* Video Output Integers */
     
@@ -723,10 +820,13 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationAnalogAudioInputScaleChannel4               = /* 'ais4' */ 0x61697334,
     DLABConfigurationDigitalAudioInputScale                      = /* 'dais' */ 0x64616973,
     DLABConfigurationMicrophoneInputGain                         = /* 'micg' */ 0x6D696367,
+    DLABConfigurationAudioOutputXLRDelayFrames                   = /* 'xdfr' */ 0x78646672,
     
     /* Audio Output Integers */
     
     DLABConfigurationAudioOutputAESAnalogSwitch                  = /* 'aoaa' */ 0x616F6161,
+    DLABConfigurationAudioOutputXLRDelayTime                     = /* 'xdms' */ 0x78646D73,
+    DLABConfigurationAudioOutputXLRDelayType                     = /* 'xdty' */ 0x78647479,
     
     /* Audio Output Floats */
     
@@ -736,6 +836,7 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationAnalogAudioOutputScaleChannel4              = /* 'aos4' */ 0x616F7334,
     DLABConfigurationDigitalAudioOutputScale                     = /* 'daos' */ 0x64616F73,
     DLABConfigurationHeadphoneVolume                             = /* 'hvol' */ 0x68766F6C,
+    DLABConfigurationSpeakerVolume                               = /* 'svol' */ 0x73766F6C,
     
     /* Network Flags */
 
@@ -748,6 +849,7 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationEthernetPTPPriority1                        = /* 'PTP1' */ 0x50545031,
     DLABConfigurationEthernetPTPPriority2                        = /* 'PTP2' */ 0x50545032,
     DLABConfigurationEthernetPTPDomain                           = /* 'PTPD' */ 0x50545044,
+    DLABConfigurationEthernetPTPLogAnnounceInterval              = /* 'PTPA' */ 0x50545041,
 
     /* Network Strings */
 
@@ -772,7 +874,11 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     
     /* Deck Control Integers */
     
-    DLABConfigurationDeckControlConnection                       = /* 'dcco' */ 0x6463636F
+    DLABConfigurationDeckControlConnection                       = /* 'dcco' */ 0x6463636F,
+
+    /* UI/UX Integers */
+
+    DLABConfigurationDisplayLanguage                             = /* 'lang' */ 0x6C616E67
 };
 
 /* Enum BMDDeckLinkEncoderConfigurationID - DeckLink Encoder Configuration ID */
@@ -1221,6 +1327,7 @@ typedef int64_t DLABTimeValue;
 typedef int64_t DLABTimeScale;
 typedef uint32_t DLABTimecodeBCD;
 typedef uint32_t DLABTimecodeUserBits;
+typedef int64_t DLABIPFlowID;
 
 /* Enum BMDTimecodeFlags - Timecode flags */
 typedef NS_OPTIONS(uint32_t, DLABTimecodeFlag)
