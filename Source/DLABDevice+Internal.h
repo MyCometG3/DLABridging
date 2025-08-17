@@ -11,6 +11,14 @@
 #import <DLABDevice.h>
 #import <DeckLinkAPI.h>
 
+#import <DeckLinkAPI_v14_2_1.h>
+#import <DeckLinkAPIScreenPreviewCallback_v14_2_1.h>
+#import <DeckLinkAPIVideoFrame_v14_2_1.h>
+#import <DeckLinkAPIVideoInput_v14_2_1.h>
+#import <DeckLinkAPIVideoOutput_v14_2_1.h>
+
+#import <DeckLinkAPIVideoInput_v11_5_1.h>
+
 #import <DeckLinkAPIVideoInput_v11_4.h>
 #import <DeckLinkAPIVideoOutput_v11_4.h>
 

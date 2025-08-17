@@ -83,6 +83,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         // Validate support feature (Capture)
         if (!_deckLinkInput && supportsCapture) {
             error = _deckLink->QueryInterface(IID_IDeckLinkInput, (void **)&_deckLinkInput);
+            if (error) { // 14.2.1
+                error = _deckLink->QueryInterface(IID_IDeckLinkInput_v14_2_1, (void **)&_deckLinkInput);
+            }
             if (error) { // 11.5.1
                 error = _deckLink->QueryInterface(IID_IDeckLinkInput_v11_5_1, (void **)&_deckLinkInput);
             }
@@ -99,6 +102,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         // Validate support feature (Playback)
         if (!_deckLinkOutput && supportsPlayback) {
             error = _deckLink->QueryInterface(IID_IDeckLinkOutput, (void **)&_deckLinkOutput);
+            if (error) { // 14.2.1
+                error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v14_2_1, (void **)&_deckLinkOutput);
+            }
             if (error) { // 11.4
                 error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v11_4, (void **)&_deckLinkOutput);
             }

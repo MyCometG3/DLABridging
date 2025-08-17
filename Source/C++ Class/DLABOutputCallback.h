@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
+#import <DeckLinkAPI_v14_2_1.h>
 #import <atomic>
 
 /*

@@ -146,6 +146,8 @@
 @synthesize temp1216Buffer = temp1216Buffer;
 @synthesize queryTemp1216Buffer = queryTemp1216Buffer;
 
+@synthesize pre1403 = pre1403;
+
 /* =================================================================================== */
 // MARK: - Functions -
 /* =================================================================================== */
@@ -1204,6 +1206,45 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
 }
 
 /* =================================================================================== */
+// MARK: DL VideoBuffer Lock/Unlock Base Address (SDK 14.3 or later)
+/* =================================================================================== */
+
+NS_INLINE BOOL VideoBufferLockBaseAddress(IDeckLinkVideoFrame* videoFrame,
+                                          BMDBufferAccessFlags accessFlags,
+                                          IDeckLinkVideoBuffer** outVideoBuffer) {
+    if (!videoFrame || !outVideoBuffer) return NO;
+    *outVideoBuffer = NULL;
+    
+    IDeckLinkVideoBuffer* buf = NULL;
+    HRESULT hr = videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, (void**)&buf);
+    if (FAILED(hr)) return NO;
+    
+    hr = buf->StartAccess(accessFlags);
+    if (FAILED(hr)) {
+        buf->Release();
+        return NO;
+    }
+    
+    *outVideoBuffer = buf; // caller owns one ref
+    return YES;
+}
+
+NS_INLINE BOOL VideoBufferGetBaseAddress(IDeckLinkVideoBuffer* videoBuffer, void** pointer) {
+    if (!videoBuffer || !pointer) return NO;
+    *pointer = NULL;
+    
+    HRESULT hr = videoBuffer->GetBytes(pointer);
+    return SUCCEEDED(hr) && (*pointer != NULL);
+}
+
+NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
+                                            BMDBufferAccessFlags accessFlags) {
+    if (!videoBuffer) return;
+    (void)videoBuffer->EndAccess(accessFlags);
+    videoBuffer->Release();
+}
+
+/* =================================================================================== */
 // MARK: Public methods
 /* =================================================================================== */
 
@@ -1434,6 +1475,15 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
     }
     
     @synchronized (self) {
+        // Prepare IDeckLinkVideoBuffer for IDeckLinkVideoFrame
+        IDeckLinkVideoBuffer* videoBuffer = NULL;
+        BMDBufferAccessFlags accessFlags = bmdBufferAccessRead;
+        if (!pre1403) {
+            if (!VideoBufferLockBaseAddress(videoFrame, accessFlags , &videoBuffer)) {
+                return FALSE;
+            }
+        }
+        
         /* ================================================================ */
         // VideoFrame [(permute) dlHostBuffer] (xfer) interimBuffer (convCGtoCV) CVPixelBuffer
         /* ================================================================ */
@@ -1442,8 +1492,13 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         {
             // source vImage_Buffer
             void* ptr = NULL;
-            HRESULT result = videoFrame->GetBytes(&ptr);
-            assert (result == S_OK && ptr != NULL);
+            if (!pre1403) {
+                VideoBufferGetBaseAddress(videoBuffer, &ptr);
+            } else {
+                IDeckLinkVideoFrame_v14_2_1* videoFrame_v14_2_1 = (IDeckLinkVideoFrame_v14_2_1*)videoFrame;
+                videoFrame_v14_2_1->GetBytes(&ptr);
+            }
+            assert (ptr != NULL);
             
             vImage_Buffer sourceBuffer = {
                 .data = ptr,
@@ -1531,6 +1586,10 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                                              toInterim:&interimBuffer
                                                  flags:kvImageNoFlags];
                 }
+            }
+            
+            if (!pre1403) {
+                VideoBufferUnlockBaseAddress(videoBuffer, accessFlags);
             }
         }
         if (convErr == kvImageNoError) {
@@ -1735,6 +1794,15 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
     }
     
     @synchronized (self) {
+        // Prepare IDeckLinkVideoBuffer for IDeckLinkMutableVideoFrame
+        IDeckLinkVideoBuffer* videoBuffer = NULL;
+        BMDBufferAccessFlags accessFlags = bmdBufferAccessWrite;
+        if (!pre1403) {
+            if (!VideoBufferLockBaseAddress(videoFrame, accessFlags , &videoBuffer)) {
+                return FALSE;
+            }
+        }
+        
         /* ================================================================ */
         // CVPixelBuffer (convCVtoCG) interimBuffer (xfer) [dlHostBuffer (permute)] VideoFrame
         /* ================================================================ */
@@ -1775,8 +1843,13 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         if (convErr == kvImageNoError) {
             // target vImage_Buffer
             void* ptr = NULL;
-            HRESULT result = videoFrame->GetBytes(&ptr);
-            assert (result == S_OK && ptr != NULL);
+            if (!pre1403) {
+                VideoBufferGetBaseAddress(videoBuffer, &ptr);
+            } else {
+                IDeckLinkMutableVideoFrame_v14_2_1* videoFrame_v14_2_1 = (IDeckLinkMutableVideoFrame_v14_2_1*)videoFrame;
+                videoFrame_v14_2_1->GetBytes(&ptr);
+            }
+            assert (ptr != NULL);
             
             vImage_Buffer targetBuffer = {
                 .data = ptr,
@@ -1863,6 +1936,10 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                                                    flags:kvImageNoFlags];
                 }
             }
+        }
+        
+        if (!pre1403) {
+            VideoBufferUnlockBaseAddress(videoBuffer, accessFlags);
         }
         
         return (convErr == kvImageNoError);

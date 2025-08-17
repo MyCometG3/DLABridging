@@ -55,7 +55,8 @@ public:
     virtual long            GetRowBytes(void)       { return m_videoFrame->GetRowBytes(); }
     virtual BMDPixelFormat  GetPixelFormat(void)    { return m_videoFrame->GetPixelFormat(); }
     virtual BMDFrameFlags   GetFlags(void)          { return m_videoFrame->GetFlags() | bmdFrameContainsHDRMetadata; }
-    virtual HRESULT         GetBytes(void **buffer) { return m_videoFrame->GetBytes(buffer); }
+    // IDeckLinkVideoFrame->GetGytes() removed on SDK 14.3 or later.
+    // virtual HRESULT         GetBytes(void **buffer) { return m_videoFrame->GetBytes(buffer); }
     virtual HRESULT         GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode **timecode) { return m_videoFrame->GetTimecode(format, timecode); }
     virtual HRESULT         GetAncillaryData(IDeckLinkVideoFrameAncillary **ancillary)          { return m_videoFrame->GetAncillaryData(ancillary); }
     

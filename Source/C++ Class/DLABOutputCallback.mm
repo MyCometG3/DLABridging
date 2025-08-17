@@ -59,6 +59,11 @@ HRESULT DLABOutputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         AddRef();
         return S_OK;
     }
+    if (memcmp(&iid, &IID_IDeckLinkVideoOutputCallback_v14_2_1, sizeof(REFIID)) == 0) {
+        *ppv = (IDeckLinkVideoOutputCallback *)this;
+        AddRef();
+        return S_OK;
+    }
     if (memcmp(&iid, &IID_IDeckLinkAudioOutputCallback, sizeof(REFIID)) == 0) {
         *ppv = (IDeckLinkAudioOutputCallback *)this;
         AddRef();

@@ -76,6 +76,17 @@ uint8_t DLABAncillaryPacket::GetDataStreamIndex(void)
 HRESULT DLABAncillaryPacket::QueryInterface(REFIID iid, LPVOID *ppv)
 {
     *ppv = NULL;
+    CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
+    if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
+        *ppv = this;
+        AddRef();
+        return S_OK;
+    }
+    if (memcmp(&iid, &IID_IDeckLinkAncillaryPacket, sizeof(REFIID)) == 0) {
+        *ppv = (IDeckLinkAncillaryPacket *)this;
+        AddRef();
+        return S_OK;
+    }
     return E_NOINTERFACE;
 }
 

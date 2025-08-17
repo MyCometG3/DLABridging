@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
+#import <DeckLinkAPIVideoInput_v14_2_1.h>
 #import <DeckLinkAPIVideoInput_v11_5_1.h>
 #import <atomic>
 

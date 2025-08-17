@@ -213,15 +213,72 @@ NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
     return pixelSize;
 }
 
+NS_INLINE BOOL checkPre1403(DLABDevice *self)
+{
+    BOOL pre1403 = (self.apiVersion < 0x0e030000); // -14.2.1; BLACKMAGIC_DECKLINK_API_VERSION
+    return pre1403;
+}
+
+NS_INLINE BOOL VideoBufferLockBaseAddress(IDeckLinkMutableVideoFrame* videoFrame,
+                                          BMDBufferAccessFlags accessFlags,
+                                          IDeckLinkVideoBuffer** outVideoBuffer) {
+    if (!videoFrame || !outVideoBuffer) return NO;
+    *outVideoBuffer = NULL;
+    
+    IDeckLinkVideoBuffer* buf = NULL;
+    HRESULT hr = videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, (void**)&buf);
+    if (FAILED(hr)) return NO;
+    
+    hr = buf->StartAccess(accessFlags);
+    if (FAILED(hr)) {
+        buf->Release();
+        return NO;
+    }
+    
+    *outVideoBuffer = buf; // caller owns one ref
+    return YES;
+}
+
+NS_INLINE BOOL VideoBufferGetBaseAddress(IDeckLinkVideoBuffer* videoBuffer, void** pointer) {
+    if (!videoBuffer || !pointer) return NO;
+    *pointer = NULL;
+    
+    HRESULT hr = videoBuffer->GetBytes(pointer);
+    return SUCCEEDED(hr) && (*pointer != NULL);
+}
+
+NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
+                                            BMDBufferAccessFlags accessFlags) {
+    if (!videoBuffer) return;
+    (void)videoBuffer->EndAccess(accessFlags);
+    videoBuffer->Release();
+}
+
 NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
     assert(pixelBuffer && videoFrame);
+    
+    BOOL pre1403 = checkPre1403(self);
+    
+    IDeckLinkVideoBuffer* videoBuffer = NULL;
+    BMDBufferAccessFlags accessFlags = bmdBufferAccessWrite;
+    if (!pre1403) {
+        if (!VideoBufferLockBaseAddress(videoFrame, accessFlags , &videoBuffer)) {
+            return FALSE;
+        }
+    }
     
     bool result = FALSE;
     CVReturn err = CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     if (!err) {
         void* src = CVPixelBufferGetBaseAddress(pixelBuffer);
         void* dst = NULL;
-        videoFrame->GetBytes(&dst);
+        
+        if (!pre1403) {
+            VideoBufferGetBaseAddress(videoBuffer, &dst);
+        } else {
+            IDeckLinkMutableVideoFrame_v14_2_1* videoFrame_v14_2_1 = (IDeckLinkMutableVideoFrame_v14_2_1*)videoFrame;
+            videoFrame_v14_2_1->GetBytes(&dst);
+        }
         
         vImage_Buffer sourceBuffer = {0};
         sourceBuffer.data = src;
@@ -251,11 +308,26 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
         }
         CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     }
+    
+    if (!pre1403) {
+        VideoBufferUnlockBaseAddress(videoBuffer, accessFlags);
+    }
+    
     return result;
 }
 
-NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
+NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
     assert(pixelBuffer && videoFrame);
+    
+    BOOL pre1403 = checkPre1403(self);
+    
+    IDeckLinkVideoBuffer* videoBuffer = NULL;
+    BMDBufferAccessFlags accessFlags = bmdBufferAccessWrite;
+    if (!pre1403) {
+        if (!VideoBufferLockBaseAddress(videoFrame, accessFlags , &videoBuffer)) {
+            return FALSE;
+        }
+    }
     
     BOOL ready = FALSE;
     
@@ -271,7 +343,13 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
         // get buffer address for src and dst
         void* dst = NULL;
         void* src = CVPixelBufferGetBaseAddress(pixelBuffer);
-        videoFrame->GetBytes(&dst);
+        
+        if (!pre1403) {
+            VideoBufferGetBaseAddress(videoBuffer, &dst);
+        } else {
+            IDeckLinkMutableVideoFrame_v14_2_1* videoFrame_v14_2_1 = (IDeckLinkMutableVideoFrame_v14_2_1*)videoFrame;
+            videoFrame_v14_2_1->GetBytes(&dst);
+        }
         
         if (dst && src) {
             if (rowByteOK) { // bulk copy
@@ -288,6 +366,11 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
         }
         CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     }
+    
+    if (!pre1403) {
+        VideoBufferUnlockBaseAddress(videoBuffer, accessFlags);
+    }
+    
     return ready;
 }
 
@@ -315,7 +398,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
             if (self.debugUsevImageCopyBuffer) {
                 ready = copyBufferCVtoDL(self, pixelBuffer, videoFrame);
             } else {
-                ready = copyPlaneCVtoDL(pixelBuffer, videoFrame);
+                ready = copyPlaneCVtoDL(self, pixelBuffer, videoFrame);
             }
         } else {
             // Use DLABVideoConverter/vImage to convert video image
@@ -323,6 +406,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
             if (!converter) {
                 converter = [[DLABVideoConverter alloc] initWithCV:pixelBuffer
                                                               toDL:videoFrame];
+                converter.pre1403 = checkPre1403(self);
                 self.outputVideoConverter = converter;
             }
             if (converter) {
@@ -598,18 +682,9 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
         __block HRESULT result = E_FAIL;
         __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
+        __block bool pre1403 = (self.apiVersion < 0x0e030000); // 11.5-14.2; BLACKMAGIC_DECKLINK_API_VERSION
         __block bool pre1105 = (self.apiVersion < 0x0b050000); // 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
         [self playback_sync:^{
-            if (!pre1105) {
-                BMDVideoOutputConversionMode convertMode = bmdNoVideoOutputConversion;
-                result = output->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
-                                                      displayMode,              // BMDDisplayMode = DLABDisplayMode
-                                                      pixelFormat,              // BMDPixelFormat = DLABPixelFormat
-                                                      convertMode,              // BMDVideoOutputConversionMode = DLABVideoOutputConversionMode
-                                                      supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
-                                                      &actualMode,              // BMDDisplayMode = DLABDisplayMode
-                                                      &supported);              // bool
-            }
             if (pre1105) {
                 IDeckLinkOutput_v11_4 *output1104 = (IDeckLinkOutput_v11_4*)output;
                 result = output1104->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
@@ -618,6 +693,25 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
                                                           supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
                                                           &actualMode,              // BMDDisplayMode = DLABDisplayMode
                                                           &supported);              // bool
+            } else if (pre1403) {
+                IDeckLinkOutput_v14_2_1 *output1402 = (IDeckLinkOutput_v14_2_1*)output;
+                BMDVideoOutputConversionMode convertMode = bmdNoVideoOutputConversion;
+                result = output1402->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
+                                                          displayMode,              // BMDDisplayMode = DLABDisplayMode
+                                                          pixelFormat,              // BMDPixelFormat = DLABPixelFormat
+                                                          convertMode,              // BMDVideoOutputConversionMode = DLABVideoOutputConversionMode
+                                                          supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                          &actualMode,              // BMDDisplayMode = DLABDisplayMode
+                                                          &supported);              // bool
+            } else {
+                BMDVideoOutputConversionMode convertMode = bmdNoVideoOutputConversion;
+                result = output->DoesSupportVideoMode(videoConnection,          // BMDVideoConnection = DLABVideoConnection
+                                                      displayMode,              // BMDDisplayMode = DLABDisplayMode
+                                                      pixelFormat,              // BMDPixelFormat = DLABPixelFormat
+                                                      convertMode,              // BMDVideoOutputConversionMode = DLABVideoOutputConversionMode
+                                                      supportedVideoModeFlag,   // BMDSupportedVideoModeFlags = DLABSupportedVideoModeFlag
+                                                      &actualMode,              // BMDDisplayMode = DLABDisplayMode
+                                                      &supported);              // bool
             }
         }];
         if (result) {
@@ -736,7 +830,14 @@ NS_INLINE BOOL copyPlaneCVtoDL(CVPixelBufferRef pixelBuffer, IDeckLinkMutableVid
     if (output) {
         if (parentView) {
             IDeckLinkScreenPreviewCallback* previewCallback = NULL;
-            previewCallback = CreateCocoaScreenPreview((__bridge void*)parentView);
+            
+            BOOL pre1430 = (self.apiVersion < 0x0e030000); // -14.2.1; BLACKMAGIC_DECKLINK_API_VERSION
+            if (!pre1430) {
+                previewCallback = CreateCocoaScreenPreview((__bridge void*)parentView);
+            } else {
+                void* callback = CreateCocoaScreenPreview_v14_2_1((__bridge void*)parentView);
+                previewCallback = (IDeckLinkScreenPreviewCallback*)callback;
+            }
             
             if (previewCallback) {
                 self.outputPreviewCallback = previewCallback;
