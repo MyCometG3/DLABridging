@@ -1013,14 +1013,10 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
         NSInteger timeScale = self.outputVideoSetting.timeScale;
         
         // process callbacks
-        DLABFrameMetadata* frameMetadata = processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
+        processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
         
         // sync display - blocking operation
-        if (!frameMetadata) {
-            result = output->DisplayVideoFrameSync(outFrame);
-        } else {
-            result = output->DisplayVideoFrameSync(frameMetadata.metaframe);
-        }
+        result = output->DisplayVideoFrameSync(outFrame);
         
         // free output frame
         [self releaseOutputVideoFrame:outFrame];
@@ -1073,14 +1069,10 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     HRESULT result = E_FAIL;
     if (outFrame) {
         // process callbacks
-        DLABFrameMetadata* frameMetadata = processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
+        processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
         
         // async display
-        if (!frameMetadata) {
-            result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
-        } else {
-            result = output->ScheduleVideoFrame(frameMetadata.metaframe, displayTime, frameDuration, timeScale);
-        }
+        result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"DLABDevice - outputVideoFrameWithPixelBuffer: failed."
@@ -1167,14 +1159,10 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
             result = outFrame->SetTimecodeUserBits(timecodeSetting.format, timecodeSetting.userBits);
             if (!result) {
                 // process callbacks
-                DLABFrameMetadata* frameMetadata = processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
+                processCallbacks(self, outFrame, displayTime, frameDuration, timeScale);
                 
                 // async display
-                if (!frameMetadata) {
-                    result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
-                } else {
-                    result = output->ScheduleVideoFrame(frameMetadata.metaframe, displayTime, frameDuration, timeScale);
-                }
+                result = output->ScheduleVideoFrame(outFrame, displayTime, frameDuration, timeScale);
                 if (result) {
                     reason = @"IDeckLinkOutput::ScheduleVideoFrame failed";
                 }

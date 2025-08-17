@@ -23,12 +23,16 @@ NS_ASSUME_NONNULL_BEGIN
 /* ================================================================================== */
 
 /**
- For output: Reset metadata to default values.
- @discussion EOTF=Rec709.2; ColorPrimaries=ITU-R 2020;
- @discussion MaxDML=1000; MinDML = 0.001; MaxCLL=1000; MaxFALL=50;
+ For input/output: Perform bulk extraction of metadata from input or output frame
  @result YES if no error. NO if unsupported.
  */
-- (BOOL)applyDefault;
+- (BOOL)readMetadataFromFrame;
+
+/**
+ For output: Apply metadata in bulk to output frame
+ @result YES if no error. NO if unsupported.
+ */
+- (BOOL)writeMetadataToFrame;
 
 /**
  For output: Update TransferFunction metadata
@@ -48,9 +52,17 @@ NS_ASSUME_NONNULL_BEGIN
 // MARK: - Public Accessor
 /* ================================================================================== */
 
+/// Colorspace of video frame (see DLABColorspace)
+/// @discussion For input: Readonly. -1 if not available.
+@property (nonatomic, assign, readwrite) int64_t colorspace;
 /// EOTF in range 0-7 as per CEA 861.3
 /// @discussion For input: Readonly. -1 if not available.
 @property (nonatomic, assign, readwrite) int64_t hdrElectroOpticalTransferFunc;
+
+/// Dolby Vision Metadata
+/// @discussion For input: Readonly. nil if not available.
+@property (nonatomic, copy, readwrite, nullable) NSData* dolbyVision;
+
 /// Red display primaries in range 0.0 - 1.0
 /// @discussion For input: Readonly. -1 if not available.
 @property (nonatomic, assign, readwrite) double hdrDisplayPrimariesRedX;
@@ -87,9 +99,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// Maximum Frame Average Light Level in range 1 cd/m2 - 65535 cd/m2
 /// @discussion For input: Readonly. -1 if not available.
 @property (nonatomic, assign, readwrite) double hdrMaximumFrameAverageLightLevel;
-/// Colorspace of video frame (see DLABColorspace)
-/// @discussion Readonly. Fixed value as DLABColorSpaceRec2020
-@property (nonatomic, assign, readonly) int64_t colorspace;
 
 @end
 

@@ -10,26 +10,59 @@
 
 #import <DLABFrameMetadata.h>
 #import <DeckLinkAPI.h>
-#import <DLABMetaFrame.h>
 
 #import <DeckLinkAPI_v11_5.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLABFrameMetadata ()
+{
+    int64_t _colorspace;                        // bmdDeckLinkFrameMetadataColorspace
+    int64_t _hdrElectroOpticalTransferFunc;     // bmdDeckLinkFrameMetadataHDRElectroOpticalTransferFunc
+    NSData* _dolbyVision;                       // bmdDeckLinkFrameMetadataDolbyVision
+    double _hdrDisplayPrimariesRedX;            // bmdDeckLinkFrameMetadataHDRDisplayPrimariesRedX
+    double _hdrDisplayPrimariesRedY;            // bmdDeckLinkFrameMetadataHDRDisplayPrimariesRedY
+    double _hdrDisplayPrimariesGreenX;          // bmdDeckLinkFrameMetadataHDRDisplayPrimariesGreenX
+    double _hdrDisplayPrimariesGreenY;          // bmdDeckLinkFrameMetadataHDRDisplayPrimariesGreenY
+    double _hdrDisplayPrimariesBlueX;           // bmdDeckLinkFrameMetadataHDRDisplayPrimariesBlueX
+    double _hdrDisplayPrimariesBlueY;           // bmdDeckLinkFrameMetadataHDRDisplayPrimariesBlueY
+    double _hdrWhitePointX;                     // bmdDeckLinkFrameMetadataHDRWhitePointX
+    double _hdrWhitePointY;                     // bmdDeckLinkFrameMetadataHDRWhitePointY
+    double _hdrMaxDisplayMasteringLuminance;    // bmdDeckLinkFrameMetadataHDRMaxDisplayMasteringLuminance
+    double _hdrMinDisplayMasteringLuminance;    // bmdDeckLinkFrameMetadataHDRMinDisplayMasteringLuminance
+    double _hdrMaximumContentLightLevel;        // bmdDeckLinkFrameMetadataHDRMaximumContentLightLevel
+    double _hdrMaximumFrameAverageLightLevel;   // bmdDeckLinkFrameMetadataHDRMaximumFrameAverageLightLevel
+}
 
 - (nullable instancetype) initWithOutputFrame:(IDeckLinkMutableVideoFrame*) frame NS_DESIGNATED_INITIALIZER;
 - (nullable instancetype) initWithInputFrame:(IDeckLinkVideoFrame*) frame NS_DESIGNATED_INITIALIZER;
 
 // For Output (mutable)
 @property (nonatomic, assign, nullable, readonly) IDeckLinkMutableVideoFrame* outputFrame;
-@property (nonatomic, assign, nullable, readonly) DLABMetaFrame* metaframe;
 
 // For Input (immutable)
 @property (nonatomic, assign, nullable, readonly) IDeckLinkVideoFrame* inputFrame;
 
-//
-@property (nonatomic, assign) HDRMetadata metadata;
+/* =================================================================================== */
+
+/// Check if the input/output frame contains HDR metadata
+- (BOOL)hasHDRMetadataFlag;
+
+/// Update HDR metadata presence flag of output frame
+/// @param containsFlag YES if HDR metadata is present
+- (BOOL)applyFrameContainsHDRMetadataFlag:(BOOL)containsFlag;
+
+/// Invalidate all cached metadata
+- (void)resetMetadata;
+
+/// Apply metadata cache to output frame
+/// @param ext IDeckLinkVideoFrameMutableMetadataExtensions for output video frame
+/// @return YES if succeeded
+- (BOOL)applyMetadataUsingExtensions:(IDeckLinkVideoFrameMutableMetadataExtensions *)ext;
+
+/// Query and cache metadata
+/// @param ext IDeckLinkVideoFrameMetadataExtensions from input/output video frame
+- (void)fillMetadataUsingExtensions:(IDeckLinkVideoFrameMetadataExtensions *)ext;
 
 @end
 
