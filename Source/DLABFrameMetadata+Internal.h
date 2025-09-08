@@ -46,11 +46,11 @@ NS_ASSUME_NONNULL_BEGIN
 /* =================================================================================== */
 
 /// Check if the input/output frame contains HDR metadata
-- (BOOL)hasHDRMetadataFlag;
+- (BOOL)frameContainsHDRMetadataFlag;
 
 /// Update HDR metadata presence flag of output frame
 /// @param containsFlag YES if HDR metadata is present
-- (BOOL)applyFrameContainsHDRMetadataFlag:(BOOL)containsFlag;
+- (BOOL)setFrameContainsHDRMetadataFlag:(BOOL)containsFlag;
 
 /// Invalidate all cached metadata
 - (void)resetMetadata;
@@ -58,11 +58,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// Apply metadata cache to output frame
 /// @param ext IDeckLinkVideoFrameMutableMetadataExtensions for output video frame
 /// @return YES if succeeded
-- (BOOL)applyMetadataUsingExtensions:(IDeckLinkVideoFrameMutableMetadataExtensions *)ext;
+- (BOOL)writeMetadataUsingExtensions:(IDeckLinkVideoFrameMutableMetadataExtensions *)ext;
 
 /// Query and cache metadata
 /// @param ext IDeckLinkVideoFrameMetadataExtensions from input/output video frame
-- (void)fillMetadataUsingExtensions:(IDeckLinkVideoFrameMetadataExtensions *)ext;
+- (void)readMetadataUsingExtensions:(IDeckLinkVideoFrameMetadataExtensions *)ext;
 
 @end
 
