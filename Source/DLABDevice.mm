@@ -232,7 +232,25 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (void) shutdown
 {
-    // TODO stop output/input streams
+    // CRITICAL FIX: Properly stop streams during shutdown to prevent resource leaks
+    @try {
+        // Stop output streams if running
+        if (_deckLinkOutput) {
+            NSNumber* isRunning = [self isScheduledPlaybackRunningWithError:nil];
+            if (isRunning && [isRunning boolValue]) {
+                [self stopScheduledPlaybackWithError:nil];
+            }
+        }
+        
+        // Stop input streams if running
+        if (_deckLinkInput) {
+            // Always attempt to stop input streams (no easy way to check if running)
+            [self stopStreamsWithError:nil];
+        }
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Warning: Exception during stream shutdown: %@", exception);
+    }
     
     // Release OutputVideoFramePool
     [self freeOutputVideoFramePool];
