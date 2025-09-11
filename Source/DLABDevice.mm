@@ -978,6 +978,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) boolValueForAttribute:(DLABAttribute) attributeID
                               error:(NSError**)error
 {
+    // Add validation to ensure profile attributes interface is available
+    if (!_deckLinkProfileAttributes) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileAttributes interface not available."
+              code:E_FAIL
+                to:error];
+        return nil;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     bool newBoolValue = false;
@@ -996,6 +1005,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) intValueForAttribute:(DLABAttribute) attributeID
                              error:(NSError**)error
 {
+    // Add validation to ensure profile attributes interface is available
+    if (!_deckLinkProfileAttributes) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileAttributes interface not available."
+              code:E_FAIL
+                to:error];
+        return nil;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     int64_t newIntValue = 0;
@@ -1014,6 +1032,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) doubleValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
+    // Add validation to ensure profile attributes interface is available
+    if (!_deckLinkProfileAttributes) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileAttributes interface not available."
+              code:E_FAIL
+                to:error];
+        return nil;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     double newDoubleValue = 0;
@@ -1032,6 +1059,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
+    // Add validation to ensure profile attributes interface is available
+    if (!_deckLinkProfileAttributes) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileAttributes interface not available."
+              code:E_FAIL
+                to:error];
+        return nil;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkAttributeID attr = attributeID;
     CFStringRef newStringValue = NULL;
@@ -1130,6 +1166,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (BOOL) setBoolValue:(BOOL)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
+    // Add validation to ensure configuration interface is available
+    if (!_deckLinkConfiguration) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkConfiguration interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkConfigurationID conf = configurationID;
     bool newBoolValue = (bool)value;
@@ -1148,6 +1193,15 @@ configurationID error:(NSError**)error
 - (BOOL) setIntValue:(NSInteger)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
+    // Add validation to ensure configuration interface is available
+    if (!_deckLinkConfiguration) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkConfiguration interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkConfigurationID conf = configurationID;
     int64_t newIntValue = (int64_t)value;
@@ -1166,6 +1220,15 @@ configurationID error:(NSError**)error
 - (BOOL) setDoubleValue:(double_t)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
+    // Add validation to ensure configuration interface is available
+    if (!_deckLinkConfiguration) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkConfiguration interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkConfigurationID conf = configurationID;
     double newDoubleValue = (double)value;
@@ -1184,10 +1247,25 @@ configurationID error:(NSError**)error
 - (BOOL) setStringValue:(NSString*)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
+    NSParameterAssert(value != nil);
+    
+    // Add validation to ensure configuration interface is available
+    if (!_deckLinkConfiguration) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkConfiguration interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    
     HRESULT result = E_FAIL;
     BMDDeckLinkConfigurationID conf = configurationID;
     CFStringRef newStringValue = (CFStringRef)CFBridgingRetain(value);
     result = _deckLinkConfiguration->SetString(conf, newStringValue);
+    
+    // CRITICAL FIX: Always release the retained CFStringRef to prevent memory leak
+    CFRelease(newStringValue);
+    
     if (!result) {
         return YES;
     } else {
@@ -1201,6 +1279,15 @@ configurationID error:(NSError**)error
 
 - (BOOL) writeConfigurationToPreferencesWithError:(NSError**)error
 {
+    // Add validation to ensure configuration interface is available
+    if (!_deckLinkConfiguration) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkConfiguration interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    
     HRESULT result = E_FAIL;
     result = _deckLinkConfiguration->WriteConfigurationToPreferences();
     if (!result) {

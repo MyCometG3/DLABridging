@@ -19,16 +19,20 @@ DLABInputCallback::DLABInputCallback(id<DLABInputCallbackDelegate> delegate)
 
 HRESULT DLABInputCallback::VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags)
 {
-    if([delegate respondsToSelector:@selector(didChangeVideoInputFormat:displayMode:flags:)]) {
-        [delegate didChangeVideoInputFormat:notificationEvents displayMode:newDisplayMode flags:detectedSignalFlags];
+    // THREAD SAFETY FIX: Safely capture weak delegate to prevent crashes
+    id<DLABInputCallbackDelegate> strongDelegate = delegate;
+    if(strongDelegate && [strongDelegate respondsToSelector:@selector(didChangeVideoInputFormat:displayMode:flags:)]) {
+        [strongDelegate didChangeVideoInputFormat:notificationEvents displayMode:newDisplayMode flags:detectedSignalFlags];
     }
     return S_OK;
 }
 
 HRESULT DLABInputCallback::VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket)
 {
-    if([delegate respondsToSelector:@selector(didReceiveVideoInputFrame:audioInputPacket:)]) {
-        [delegate didReceiveVideoInputFrame:videoFrame audioInputPacket:audioPacket];
+    // THREAD SAFETY FIX: Safely capture weak delegate to prevent crashes
+    id<DLABInputCallbackDelegate> strongDelegate = delegate;
+    if(strongDelegate && [strongDelegate respondsToSelector:@selector(didReceiveVideoInputFrame:audioInputPacket:)]) {
+        [strongDelegate didReceiveVideoInputFrame:videoFrame audioInputPacket:audioPacket];
     }
     return S_OK;
 }
