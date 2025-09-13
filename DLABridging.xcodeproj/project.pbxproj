@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -169,7 +169,6 @@
 /* Begin PBXFrameworksBuildPhase section */
 		164C82811F514632001208BD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				164C82F21F5148E3001208BD /* DeckLinkAPI.framework in Frameworks */,
 				16B0BF1C243DC8CC004C2BDF /* Accelerate.framework in Frameworks */,
@@ -178,7 +177,6 @@
 				164C82EE1F51488A001208BD /* CoreVideo.framework in Frameworks */,
 				16B81E0B29223A3600A38745 /* AudioToolbox.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -320,7 +318,6 @@
 /* Begin PBXHeadersBuildPhase section */
 		164C82821F514632001208BD /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				1656BF07241B6B4700E95D3B /* DLABProfileCallback.h in Headers */,
 				164C828A1F514632001208BD /* DLABridging.h in Headers */,
@@ -372,7 +369,6 @@
 				164C82E11F514687001208BD /* DLABNotificationCallback.h in Headers */,
 				164C82E31F514687001208BD /* DLABOutputCallback.h in Headers */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
@@ -387,8 +383,6 @@
 				164C82831F514632001208BD /* Resources */,
 			);
 			buildRules = (
-			);
-			dependencies = (
 			);
 			name = DLABridging;
 			productName = DLABridging;
@@ -412,7 +406,6 @@
 				};
 			};
 			buildConfigurationList = 164C827F1F514632001208BD /* Build configuration list for PBXProject "DLABridging" */;
-			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -420,6 +413,7 @@
 				en,
 			);
 			mainGroup = 164C827B1F514632001208BD;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 164C82861F514632001208BD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -432,17 +426,14 @@
 /* Begin PBXResourcesBuildPhase section */
 		164C82831F514632001208BD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		164C82801F514632001208BD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				164C82D31F514687001208BD /* DLABAudioSetting.mm in Sources */,
 				164C82E21F514687001208BD /* DLABNotificationCallback.mm in Sources */,
@@ -466,12 +457,11 @@
 				164C82D61F514687001208BD /* DLABBrowser.mm in Sources */,
 				164C82E71F514687001208BD /* DLABTimecodeSetting.mm in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		164C828B1F514632001208BD /* Debug */ = {
+		164C828B1F514632001208BD /* Debug configuration for PBXProject "DLABridging" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -536,7 +526,7 @@
 			};
 			name = Debug;
 		};
-		164C828C1F514632001208BD /* Release */ = {
+		164C828C1F514632001208BD /* Release configuration for PBXProject "DLABridging" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -594,7 +584,7 @@
 			};
 			name = Release;
 		};
-		164C828E1F514632001208BD /* Debug */ = {
+		164C828E1F514632001208BD /* Debug configuration for PBXNativeTarget "DLABridging" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
@@ -630,7 +620,7 @@
 			};
 			name = Debug;
 		};
-		164C828F1F514632001208BD /* Release */ = {
+		164C828F1F514632001208BD /* Release configuration for PBXNativeTarget "DLABridging" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
@@ -672,19 +662,17 @@
 		164C827F1F514632001208BD /* Build configuration list for PBXProject "DLABridging" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				164C828B1F514632001208BD /* Debug */,
-				164C828C1F514632001208BD /* Release */,
+				164C828B1F514632001208BD /* Debug configuration for PBXProject "DLABridging" */,
+				164C828C1F514632001208BD /* Release configuration for PBXProject "DLABridging" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		164C828D1F514632001208BD /* Build configuration list for PBXNativeTarget "DLABridging" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				164C828E1F514632001208BD /* Debug */,
-				164C828F1F514632001208BD /* Release */,
+				164C828E1F514632001208BD /* Debug configuration for PBXNativeTarget "DLABridging" */,
+				164C828F1F514632001208BD /* Release configuration for PBXNativeTarget "DLABridging" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
