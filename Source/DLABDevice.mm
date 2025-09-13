@@ -1200,8 +1200,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 configurationID error:(NSError**)error
 {
     if (![self validateConfigurationInterfaceWithError:error
-                                           functionName:__PRETTY_FUNCTION__
-                                             lineNumber:__LINE__]) {
+                                          functionName:__PRETTY_FUNCTION__
+                                            lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1224,8 +1224,8 @@ configurationID error:(NSError**)error
 configurationID error:(NSError**)error
 {
     if (![self validateConfigurationInterfaceWithError:error
-                                           functionName:__PRETTY_FUNCTION__
-                                             lineNumber:__LINE__]) {
+                                          functionName:__PRETTY_FUNCTION__
+                                            lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1248,8 +1248,8 @@ configurationID error:(NSError**)error
 configurationID error:(NSError**)error
 {
     if (![self validateConfigurationInterfaceWithError:error
-                                           functionName:__PRETTY_FUNCTION__
-                                             lineNumber:__LINE__]) {
+                                          functionName:__PRETTY_FUNCTION__
+                                            lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1274,8 +1274,8 @@ configurationID error:(NSError**)error
     NSParameterAssert(value != nil);
     
     if (![self validateConfigurationInterfaceWithError:error
-                                           functionName:__PRETTY_FUNCTION__
-                                             lineNumber:__LINE__]) {
+                                          functionName:__PRETTY_FUNCTION__
+                                            lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1298,8 +1298,8 @@ configurationID error:(NSError**)error
 - (BOOL) writeConfigurationToPreferencesWithError:(NSError**)error
 {
     if (![self validateConfigurationInterfaceWithError:error
-                                           functionName:__PRETTY_FUNCTION__
-                                             lineNumber:__LINE__]) {
+                                          functionName:__PRETTY_FUNCTION__
+                                            lineNumber:__LINE__]) {
         return NO;
     }
     
