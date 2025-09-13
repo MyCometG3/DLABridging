@@ -673,13 +673,13 @@
     // Write FrameNumber into BlockBuffer
     if (dataBuffer) {
         if (sizes == sizeof(int32_t)){
-            int32_t frameNumber32BE = EndianS32_NtoB(frameNumber32);
+            int32_t frameNumber32BE = CFSwapInt32HostToBig(frameNumber32);
             status = CMBlockBufferReplaceDataBytes(&frameNumber32BE,
                                                    dataBuffer,
                                                    0,
                                                    sizes);
         } else if (sizes == sizeof(int64_t)) {
-            int64_t frameNumber64BE = EndianS64_NtoB(frameNumber64);
+            int64_t frameNumber64BE = CFSwapInt64HostToBig(frameNumber64);
             status = CMBlockBufferReplaceDataBytes(&frameNumber64BE,
                                                    dataBuffer,
                                                    0,
