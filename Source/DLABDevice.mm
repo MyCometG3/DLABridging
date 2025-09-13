@@ -1188,6 +1188,7 @@ configurationID error:(NSError**)error
     BMDDeckLinkConfigurationID conf = configurationID;
     CFStringRef newStringValue = (CFStringRef)CFBridgingRetain(value);
     result = _deckLinkConfiguration->SetString(conf, newStringValue);
+    CFRelease(newStringValue);
     if (!result) {
         return YES;
     } else {
