@@ -19,16 +19,18 @@ DLABOutputCallback::DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate)
 
 HRESULT DLABOutputCallback::ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result)
 {
-    if([delegate respondsToSelector:@selector(scheduledFrameCompleted:result:)]) {
-        [delegate scheduledFrameCompleted:completedFrame result:result];
+    if(delegate && [delegate respondsToSelector:@selector(scheduledFrameCompleted:result:)]) {
+        id<DLABOutputCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate scheduledFrameCompleted:completedFrame result:result];
     }
     return S_OK;
 }
 
 HRESULT DLABOutputCallback::ScheduledPlaybackHasStopped()
 {
-    if([delegate respondsToSelector:@selector(scheduledPlaybackHasStopped)]) {
-        [delegate scheduledPlaybackHasStopped];
+    if(delegate && [delegate respondsToSelector:@selector(scheduledPlaybackHasStopped)]) {
+        id<DLABOutputCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate scheduledPlaybackHasStopped];
     }
     return S_OK;
 }
@@ -37,8 +39,9 @@ HRESULT DLABOutputCallback::ScheduledPlaybackHasStopped()
 
 HRESULT DLABOutputCallback::RenderAudioSamples(bool preroll)
 {
-    if([delegate respondsToSelector:@selector(renderAudioSamplesPreroll:)]) {
-        [delegate renderAudioSamplesPreroll:preroll ? YES : NO];
+    if(delegate && [delegate respondsToSelector:@selector(renderAudioSamplesPreroll:)]) {
+        id<DLABOutputCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate renderAudioSamplesPreroll:preroll ? YES : NO];
     }
     return S_OK;
 }

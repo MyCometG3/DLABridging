@@ -19,16 +19,18 @@ DLABInputCallback::DLABInputCallback(id<DLABInputCallbackDelegate> delegate)
 
 HRESULT DLABInputCallback::VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags)
 {
-    if([delegate respondsToSelector:@selector(didChangeVideoInputFormat:displayMode:flags:)]) {
-        [delegate didChangeVideoInputFormat:notificationEvents displayMode:newDisplayMode flags:detectedSignalFlags];
+    if(delegate && [delegate respondsToSelector:@selector(didChangeVideoInputFormat:displayMode:flags:)]) {
+        id<DLABInputCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate didChangeVideoInputFormat:notificationEvents displayMode:newDisplayMode flags:detectedSignalFlags];
     }
     return S_OK;
 }
 
 HRESULT DLABInputCallback::VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket)
 {
-    if([delegate respondsToSelector:@selector(didReceiveVideoInputFrame:audioInputPacket:)]) {
-        [delegate didReceiveVideoInputFrame:videoFrame audioInputPacket:audioPacket];
+    if(delegate && [delegate respondsToSelector:@selector(didReceiveVideoInputFrame:audioInputPacket:)]) {
+        id<DLABInputCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate didReceiveVideoInputFrame:videoFrame audioInputPacket:audioPacket];
     }
     return S_OK;
 }
