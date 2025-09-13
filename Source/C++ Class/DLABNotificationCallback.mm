@@ -17,9 +17,8 @@ DLABNotificationCallback::DLABNotificationCallback(id<DLABNotificationCallbackDe
 
 HRESULT DLABNotificationCallback::Notify(BMDNotifications topic, uint64_t param1, uint64_t param2)
 {
-    // THREAD SAFETY FIX: Safely capture weak delegate to prevent crashes
-    id<DLABNotificationCallbackDelegate> strongDelegate = delegate;
-    if (strongDelegate && [strongDelegate respondsToSelector:@selector(notify:param1:param2:)]) {
+    if (delegate && [delegate respondsToSelector:@selector(notify:param1:param2:)]) {
+        id<DLABNotificationCallbackDelegate> strongDelegate = delegate;
         [strongDelegate notify:topic param1:param1 param2:param2];
     }
     return S_OK;

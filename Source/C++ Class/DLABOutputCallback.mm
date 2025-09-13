@@ -19,9 +19,8 @@ DLABOutputCallback::DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate)
 
 HRESULT DLABOutputCallback::ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result)
 {
-    // THREAD SAFETY FIX: Safely capture weak delegate to prevent crashes
-    id<DLABOutputCallbackDelegate> strongDelegate = delegate;
-    if(strongDelegate && [strongDelegate respondsToSelector:@selector(scheduledFrameCompleted:result:)]) {
+    if(delegate && [delegate respondsToSelector:@selector(scheduledFrameCompleted:result:)]) {
+        id<DLABOutputCallbackDelegate> strongDelegate = delegate;
         [strongDelegate scheduledFrameCompleted:completedFrame result:result];
     }
     return S_OK;
@@ -29,9 +28,8 @@ HRESULT DLABOutputCallback::ScheduledFrameCompleted(IDeckLinkVideoFrame *complet
 
 HRESULT DLABOutputCallback::ScheduledPlaybackHasStopped()
 {
-    // THREAD SAFETY FIX: Safely capture weak delegate to prevent crashes
-    id<DLABOutputCallbackDelegate> strongDelegate = delegate;
-    if(strongDelegate && [strongDelegate respondsToSelector:@selector(scheduledPlaybackHasStopped)]) {
+    if(delegate && [delegate respondsToSelector:@selector(scheduledPlaybackHasStopped)]) {
+        id<DLABOutputCallbackDelegate> strongDelegate = delegate;
         [strongDelegate scheduledPlaybackHasStopped];
     }
     return S_OK;
@@ -41,9 +39,8 @@ HRESULT DLABOutputCallback::ScheduledPlaybackHasStopped()
 
 HRESULT DLABOutputCallback::RenderAudioSamples(bool preroll)
 {
-    // THREAD SAFETY FIX: Safely capture weak delegate to prevent crashes
-    id<DLABOutputCallbackDelegate> strongDelegate = delegate;
-    if(strongDelegate && [strongDelegate respondsToSelector:@selector(renderAudioSamplesPreroll:)]) {
+    if(delegate && [delegate respondsToSelector:@selector(renderAudioSamplesPreroll:)]) {
+        id<DLABOutputCallbackDelegate> strongDelegate = delegate;
         [strongDelegate renderAudioSamplesPreroll:preroll ? YES : NO];
     }
     return S_OK;
