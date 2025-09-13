@@ -2,32 +2,42 @@
 
 Simple Objective-C++ wrapper for Blackmagic DeckLink API (C++ APIs).
 
-- __Requirement__: macOS 15.x, 14.x, 13.x, 12.x, 11.x, 10.15, 10.14.
+- __Requirement__: macOS 15.x, 14.x, 13.x, 12.x, 11.x.
 - __Capture Device__: Blackmagic DeckLink devices/UltraStudio devices.
 - __Restriction__: Compressed/Synchronized captures are not supported.
-- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.9, 14.0-14.2)
+- __Dependency__: DeckLinkAPI.framework from Blackmagic_Desktop_Video_Macintosh (11.4-11.7, 12.0-12.9, 14.0-14.2, **15.0**)
 - __Architecture__: Universal binary (x86_64 + arm64)
 
 NOTE: This framework is under development.
 
 #### About unsupported feature(s):
 
-    : Following interfaces are not supported. (Section # are from SDK 12.9 pdf)
+    : Following interfaces are not supported. (Section # are from SDK 15.0 pdf)
     : 2.5.8 IDeckLinkVideoFrame3DExtensions
-    : 2.5.18 IDeckLinkMemoryAllocator
-    : 2.5.26 IDeckLinkGLScreenPreviewHelper
-    : 2.5.27 IDeckLinkCocoaScreenPreviewCallback
-    : 2.5.28 IDeckLinkDX9ScreenPreviewHelper
-    : 2.5.35 IDeckLinkEncoderInput
-    : 2.5.36 IDeckLinkEncoderInputCallback
-    : 2.5.37 IDeckLinkEncoderPacket
-    : 2.5.38 IDeckLinkEncoderVideoPacket
-    : 2.5.39 IDeckLinkEncoderAudioPacket
-    : 2.5.40 IDeckLinkH265NALPacket
-    : 2.5.41 IDeckLinkEncoderConfiguration
-    : 2.5.44 IDeckLinkVideoConversion
-    : 2.5.50 IDeskLinkMetalScreenPreviewHelper
-    : 2.5.51 IDeckLinkWPFDX9ScreenPreviewHelper
+    : 2.5.25 IDeckLinkGLScreenPreviewHelper
+    : 2.5.26 IDeckLinkCocoaScreenPreviewCallback
+    : 2.5.27 IDeckLinkDX9ScreenPreviewHelper
+    : 2.5.34 IDeckLinkEncoderInput
+    : 2.5.35 IDeckLinkEncoderInputCallback
+    : 2.5.36 IDeckLinkEncoderPacket
+    : 2.5.37 IDeckLinkEncoderVideoPacket
+    : 2.5.38 IDeckLinkEncoderAudioPacket
+    : 2.5.39 IDeckLinkH265NALPacket
+    : 2.5.40 IDeckLinkEncoderConfiguration
+    : 2.5.43 IDeckLinkVideoConversion
+    : 2.5.49 IDeskLinkMetalScreenPreviewHelper
+    : 2.5.50 IDeckLinkWPFDX9ScreenPreviewHelper
+    : 2.5.51 IDeckLinkMacOutput
+    : 2.5.52 IDeckLinkMacVideoBuffer
+    : 2.5.53 IDeckLinkVideoBuffer
+    : 2.5.54 IDeckLinkVideoBufferAllocatorProvider
+    : 2.5.55 IDeckLinkVideoBufferAllocator
+    : 2.5.57 IDeckLinkIPExtensions
+    : 2.5.58 IDeckLinkIPFlowIterator
+    : 2.5.59 IDeckLinkIPFlow
+    : 2.5.60 IDeckLinkIPFlowAttributes
+    : 2.5.61 IDeckLinkIPFlowStatus
+    : 2.5.62 IDeckLinkIPFlowSetting
     : 2.6.x Any Streaming Interface APIs
 
 #### Basic usage (capture)
@@ -144,11 +154,11 @@ NOTE: This framework is under development.
 - Ref: "Documentation/Bundle Resources/Entitlements/Hardened Runtime/Disable Library Validation Entitlement" from Apple Developer Documentation.
 
 #### Development environment
-- macOS 15.0 Sequoia
-- Xcode 16.0
-- Swift 6.0
+- macOS 15.6.1 Sequoia
+- Xcode 16.4
+- Swift 6.1.2
 
 #### License
 - The MIT License
 
-Copyright © 2017-2024年 MyCometG3. All rights reserved.
+Copyright © 2017-2025年 MyCometG3. All rights reserved.

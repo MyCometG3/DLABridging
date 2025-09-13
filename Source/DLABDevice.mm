@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2017/08/26.
-//  Copyright © 2017-2024 MyCometG3. All rights reserved.
+//  Copyright © 2017-2025 MyCometG3. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -1280,10 +1280,7 @@ configurationID error:(NSError**)error
     BMDDeckLinkConfigurationID conf = configurationID;
     CFStringRef newStringValue = (CFStringRef)CFBridgingRetain(value);
     result = _deckLinkConfiguration->SetString(conf, newStringValue);
-    
-    // CRITICAL FIX: Always release the retained CFStringRef to prevent memory leak
     CFRelease(newStringValue);
-    
     if (!result) {
         return YES;
     } else {

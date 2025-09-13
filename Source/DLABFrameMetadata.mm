@@ -3,7 +3,7 @@
 //  DLABridging
 //
 //  Created by Takashi Mochizuki on 2020/03/15.
-//  Copyright © 2020-2024 MyCometG3. All rights reserved.
+//  Copyright © 2020-2025 MyCometG3. All rights reserved.
 //
 
 /* This software is released under the MIT License, see LICENSE.txt. */
@@ -38,7 +38,7 @@
             return nil;
         }
         // Query and cache HDRMetadata
-        [self fillMetadataUsingExtensions:ext];
+        [self readMetadataUsingExtensions:ext];
         ext->Release();
         
         //
@@ -75,7 +75,7 @@
         }
         
         // Query and cache HDRMetadata
-        [self fillMetadataUsingExtensions:ext];
+        [self readMetadataUsingExtensions:ext];
         ext->Release();
         
         //
@@ -173,7 +173,7 @@
 /* ================================================================================== */
 
 /// Check if the input/output frame contains HDR metadata
-- (BOOL)hasHDRMetadataFlag {
+- (BOOL)frameContainsHDRMetadataFlag {
     IDeckLinkVideoFrame* targetFrame = self.outputFrame ? self.outputFrame : self.inputFrame;
     if (!targetFrame) return NO;
     
@@ -183,7 +183,7 @@
 }
 
 /// Update HDR metadata presence flag of output frame
-- (BOOL)applyFrameContainsHDRMetadataFlag:(BOOL)containsFlag {
+- (BOOL)setFrameContainsHDRMetadataFlag:(BOOL)containsFlag {
     if (!self.outputFrame) return NO;
     
     HRESULT result = S_OK;
@@ -219,7 +219,7 @@
 }
 
 /// Apply metadata cache to output frame
-- (BOOL)applyMetadataUsingExtensions:(IDeckLinkVideoFrameMutableMetadataExtensions *)ext {
+- (BOOL)writeMetadataUsingExtensions:(IDeckLinkVideoFrameMutableMetadataExtensions *)ext {
     NSParameterAssert(ext);
     
     HRESULT result = S_OK;
@@ -321,16 +321,16 @@
     }
     
     // Ensure output frame has bmdFrameContainsHDRMetadata flag
-    HRESULT hr = [self applyFrameContainsHDRMetadataFlag:YES];
+    HRESULT hr = [self setFrameContainsHDRMetadataFlag:YES];
     
     return hr == S_OK ? YES : NO;
 }
 
 /// Query and cache metadata
-- (void)fillMetadataUsingExtensions:(IDeckLinkVideoFrameMetadataExtensions *)ext {
+- (void)readMetadataUsingExtensions:(IDeckLinkVideoFrameMetadataExtensions *)ext {
     NSParameterAssert(ext);
     
-    if (![self hasHDRMetadataFlag]) {
+    if (![self frameContainsHDRMetadataFlag]) {
         return;
     }
     
@@ -440,7 +440,7 @@
     }
     
     // Query and cache HDRMetadata
-    [self fillMetadataUsingExtensions:ext];
+    [self readMetadataUsingExtensions:ext];
     ext->Release();
     
     return YES;
@@ -463,17 +463,17 @@
     }
     
     // Apply HDRMetadata cache to output frame
-    BOOL result = [self applyMetadataUsingExtensions:ext];
+    BOOL result = [self writeMetadataUsingExtensions:ext];
     ext->Release();
     
     return result;
 }
 
 /*
- kCVImageBufferTransferFunction_ITU_R_2100_HLG      // HLG
- kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ    // PQ
- kCVImageBufferTransferFunction_ITU_R_709_2         // HDR
- kCVImageBufferTransferFunction_ITU_R_2020          // HDR
+ kCVImageBufferTransferFunction_ITU_R_2100_HLG      // HLG HDR (Broadcast/Live)
+ kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ    // PQ HDR (HDR10/Dolby Vision/UHD-BD)
+ kCVImageBufferTransferFunction_ITU_R_709_2         // HD SDR (Rec.709/BT.1886)
+ kCVImageBufferTransferFunction_ITU_R_2020          // UHD SDR (Rec.2020 gamma = Rec.709)
  */
 
 // For output: Update TransferFunction metadata
@@ -493,17 +493,19 @@
     }
     else if (CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2) ||
              CFEqual(transferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2020)) {
-        _hdrElectroOpticalTransferFunc = 1;
+        // CEA-861.3 EOTF code 1 ("Traditional HDR gamma") is rarely used in practice.
+        // For standard SDR workflows, code 0 ("Traditional SDR gamma") is typically applied.
+        _hdrElectroOpticalTransferFunc = 0;
         return YES;
     }
     return NO;
 }
 
 /*
- kCVImageBufferColorPrimaries_ITU_R_2020    // HD-HDR
- kCVImageBufferColorPrimaries_P3_D65
- kCVImageBufferColorPrimaries_DCI_P3
- kCVImageBufferColorPrimaries_ITU_R_709_2   // HD
+ kCVImageBufferColorPrimaries_ITU_R_2020    // Rec.2020 Wide Gamut (UHD SDR/HDR)
+ kCVImageBufferColorPrimaries_P3_D65        // Display P3 (D65) - Wide
+ kCVImageBufferColorPrimaries_DCI_P3        // DCI-P3 (Illuminant C, Cinema)
+ kCVImageBufferColorPrimaries_ITU_R_709_2   // Rec.709 / sRGB (HD)
  */
 
 // For output: Update ColorPrimaries metadata
