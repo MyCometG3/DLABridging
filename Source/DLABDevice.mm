@@ -544,9 +544,11 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 /* =================================================================================== */
 
 - (BOOL) validateProfileAttributesInterfaceWithError:(NSError**)error
+                                        functionName:(const char*)functionName
+                                          lineNumber:(int)lineNumber
 {
     if (!_deckLinkProfileAttributes) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+        [self post:[NSString stringWithFormat:@"%s (%d)", functionName, lineNumber]
             reason:@"IDeckLinkProfileAttributes interface not available."
               code:E_FAIL
                 to:error];
@@ -556,9 +558,11 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 }
 
 - (BOOL) validateConfigurationInterfaceWithError:(NSError**)error
+                                    functionName:(const char*)functionName
+                                      lineNumber:(int)lineNumber
 {
     if (!_deckLinkConfiguration) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+        [self post:[NSString stringWithFormat:@"%s (%d)", functionName, lineNumber]
             reason:@"IDeckLinkConfiguration interface not available."
               code:E_FAIL
                 to:error];
@@ -1019,7 +1023,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) boolValueForAttribute:(DLABAttribute) attributeID
                               error:(NSError**)error
 {
-    if (![self validateProfileAttributesInterfaceWithError:error]) {
+    if (![self validateProfileAttributesInterfaceWithError:error
+                                              functionName:__PRETTY_FUNCTION__
+                                                lineNumber:__LINE__]) {
         return nil;
     }
     
@@ -1041,7 +1047,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) intValueForAttribute:(DLABAttribute) attributeID
                              error:(NSError**)error
 {
-    if (![self validateProfileAttributesInterfaceWithError:error]) {
+    if (![self validateProfileAttributesInterfaceWithError:error
+                                              functionName:__PRETTY_FUNCTION__
+                                                lineNumber:__LINE__]) {
         return nil;
     }
     
@@ -1063,7 +1071,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) doubleValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
-    if (![self validateProfileAttributesInterfaceWithError:error]) {
+    if (![self validateProfileAttributesInterfaceWithError:error
+                                              functionName:__PRETTY_FUNCTION__
+                                                lineNumber:__LINE__]) {
         return nil;
     }
     
@@ -1085,7 +1095,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
-    if (![self validateProfileAttributesInterfaceWithError:error]) {
+    if (![self validateProfileAttributesInterfaceWithError:error
+                                              functionName:__PRETTY_FUNCTION__
+                                                lineNumber:__LINE__]) {
         return nil;
     }
     
@@ -1187,7 +1199,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (BOOL) setBoolValue:(BOOL)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
-    if (![self validateConfigurationInterfaceWithError:error]) {
+    if (![self validateConfigurationInterfaceWithError:error
+                                           functionName:__PRETTY_FUNCTION__
+                                             lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1209,7 +1223,9 @@ configurationID error:(NSError**)error
 - (BOOL) setIntValue:(NSInteger)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
-    if (![self validateConfigurationInterfaceWithError:error]) {
+    if (![self validateConfigurationInterfaceWithError:error
+                                           functionName:__PRETTY_FUNCTION__
+                                             lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1231,7 +1247,9 @@ configurationID error:(NSError**)error
 - (BOOL) setDoubleValue:(double_t)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
-    if (![self validateConfigurationInterfaceWithError:error]) {
+    if (![self validateConfigurationInterfaceWithError:error
+                                           functionName:__PRETTY_FUNCTION__
+                                             lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1255,7 +1273,9 @@ configurationID error:(NSError**)error
 {
     NSParameterAssert(value != nil);
     
-    if (![self validateConfigurationInterfaceWithError:error]) {
+    if (![self validateConfigurationInterfaceWithError:error
+                                           functionName:__PRETTY_FUNCTION__
+                                             lineNumber:__LINE__]) {
         return NO;
     }
     
@@ -1277,7 +1297,9 @@ configurationID error:(NSError**)error
 
 - (BOOL) writeConfigurationToPreferencesWithError:(NSError**)error
 {
-    if (![self validateConfigurationInterfaceWithError:error]) {
+    if (![self validateConfigurationInterfaceWithError:error
+                                           functionName:__PRETTY_FUNCTION__
+                                             lineNumber:__LINE__]) {
         return NO;
     }
     
