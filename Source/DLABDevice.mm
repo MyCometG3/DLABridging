@@ -232,24 +232,19 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (void) shutdown
 {
-    // CRITICAL FIX: Properly stop streams during shutdown to prevent resource leaks
-    @try {
-        // Stop output streams if running
-        if (_deckLinkOutput) {
-            NSNumber* isRunning = [self isScheduledPlaybackRunningWithError:nil];
-            if (isRunning && [isRunning boolValue]) {
-                [self stopScheduledPlaybackWithError:nil];
-            }
-        }
-        
-        // Stop input streams if running
-        if (_deckLinkInput) {
-            // Always attempt to stop input streams (no easy way to check if running)
-            [self stopStreamsWithError:nil];
+    // Stop streams during shutdown to prevent resource leaks
+    // Stop output streams if running
+    if (_deckLinkOutput) {
+        NSNumber* isRunning = [self isScheduledPlaybackRunningWithError:nil];
+        if (isRunning && [isRunning boolValue]) {
+            [self stopScheduledPlaybackWithError:nil];
         }
     }
-    @catch (NSException *exception) {
-        NSLog(@"Warning: Exception during stream shutdown: %@", exception);
+    
+    // Stop input streams if running
+    if (_deckLinkInput) {
+        // Always attempt to stop input streams (no easy way to check if running)
+        [self stopStreamsWithError:nil];
     }
     
     // Release OutputVideoFramePool
@@ -542,6 +537,34 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         return YES;
     }
     return NO;
+}
+
+/* =================================================================================== */
+// MARK: - (Private) - validation helpers
+/* =================================================================================== */
+
+- (BOOL) validateProfileAttributesInterfaceWithError:(NSError**)error
+{
+    if (!_deckLinkProfileAttributes) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkProfileAttributes interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL) validateConfigurationInterfaceWithError:(NSError**)error
+{
+    if (!_deckLinkConfiguration) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkConfiguration interface not available."
+              code:E_FAIL
+                to:error];
+        return NO;
+    }
+    return YES;
 }
 
 /* =================================================================================== */
@@ -996,12 +1019,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) boolValueForAttribute:(DLABAttribute) attributeID
                               error:(NSError**)error
 {
-    // Add validation to ensure profile attributes interface is available
-    if (!_deckLinkProfileAttributes) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkProfileAttributes interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateProfileAttributesInterfaceWithError:error]) {
         return nil;
     }
     
@@ -1023,12 +1041,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) intValueForAttribute:(DLABAttribute) attributeID
                              error:(NSError**)error
 {
-    // Add validation to ensure profile attributes interface is available
-    if (!_deckLinkProfileAttributes) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkProfileAttributes interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateProfileAttributesInterfaceWithError:error]) {
         return nil;
     }
     
@@ -1050,12 +1063,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) doubleValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
-    // Add validation to ensure profile attributes interface is available
-    if (!_deckLinkProfileAttributes) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkProfileAttributes interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateProfileAttributesInterfaceWithError:error]) {
         return nil;
     }
     
@@ -1077,12 +1085,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
-    // Add validation to ensure profile attributes interface is available
-    if (!_deckLinkProfileAttributes) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkProfileAttributes interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateProfileAttributesInterfaceWithError:error]) {
         return nil;
     }
     
@@ -1184,12 +1187,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (BOOL) setBoolValue:(BOOL)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
-    // Add validation to ensure configuration interface is available
-    if (!_deckLinkConfiguration) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateConfigurationInterfaceWithError:error]) {
         return NO;
     }
     
@@ -1211,12 +1209,7 @@ configurationID error:(NSError**)error
 - (BOOL) setIntValue:(NSInteger)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
-    // Add validation to ensure configuration interface is available
-    if (!_deckLinkConfiguration) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateConfigurationInterfaceWithError:error]) {
         return NO;
     }
     
@@ -1238,12 +1231,7 @@ configurationID error:(NSError**)error
 - (BOOL) setDoubleValue:(double_t)value forConfiguration:(DLABConfiguration)
 configurationID error:(NSError**)error
 {
-    // Add validation to ensure configuration interface is available
-    if (!_deckLinkConfiguration) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateConfigurationInterfaceWithError:error]) {
         return NO;
     }
     
@@ -1267,12 +1255,7 @@ configurationID error:(NSError**)error
 {
     NSParameterAssert(value != nil);
     
-    // Add validation to ensure configuration interface is available
-    if (!_deckLinkConfiguration) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateConfigurationInterfaceWithError:error]) {
         return NO;
     }
     
@@ -1294,12 +1277,7 @@ configurationID error:(NSError**)error
 
 - (BOOL) writeConfigurationToPreferencesWithError:(NSError**)error
 {
-    // Add validation to ensure configuration interface is available
-    if (!_deckLinkConfiguration) {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration interface not available."
-              code:E_FAIL
-                to:error];
+    if (![self validateConfigurationInterfaceWithError:error]) {
         return NO;
     }
     
