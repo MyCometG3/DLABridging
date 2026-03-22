@@ -13,7 +13,7 @@
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
- NOTE: This constants are converted from DekLink API "14.1.x"
+ NOTE: This constants are converted from DekLink API "15.3"
  NOTE: Basic renaming rules are:
  1. each enum type name BMDtypename => DLABtypename (DeckLink API bridging)
  1a. remove "s" at end of typename
@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_15.0.zip @ 2025/08/01 UTC
+ Derived from: Blackmagic_DeckLink_SDK_15.3.zip @ 2025/11/24 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0f000000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "15.0"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0f030000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "15.3"
  */
 
 /* =================================================================================== */
@@ -463,6 +463,9 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeSupportsSynchronizeToPlaybackGroup                = /* 'stpg' */ 0x73747067,
     DLABAttributeHasMonitorOut                                     = /* 'fmoo' */ 0x666D6F6F,
     DLABAttributeSupportsExtendedDesktop                           = /* 'dtop' */ 0x64746F70,
+    DLABAttributeHANCRequiresInputFilterConfiguration              = /* 'hrif' */ 0x68726966,
+    DLABAttributeSupportsHANCOutput                                = /* 'dsho' */ 0x6473686F,
+    DLABAttributeSupportsHANCInput                                 = /* 'dshi' */ 0x64736869,
     
     DLABAttributeDeckLinkHasMonitorOut    NS_SWIFT_NAME(hasMonitorOut) __deprecated = /* 'fmoo' */ 0x666D6F6F,
     
@@ -495,6 +498,8 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeMezzanineType                                     = /* 'mezt' */ 0x6D657A74,
     DLABAttributeXLRDelayMsMaximum                                 = /* 'xdtx' */ 0x78647478,
     DLABAttributeXLRDelayFramesMaximum                             = /* 'xdfx' */ 0x78646678,
+    DLABAttributeOutputHANCUserDataWordsLimit                      = /* 'mhow' */ 0x6D686F77,
+    DLABAttributeInputHANCUserDataWordsLimit                       = /* 'mhiw' */ 0x6D686977,
     
     /* Floats */
     
@@ -648,6 +653,13 @@ typedef NS_ENUM(uint32_t, DLAB3DPreviewFormat)
     DLAB3DPreviewFormatTopBottom                                  = /* 'topb' */ 0x746F7062
 };
 
+/* Enum BMDAncillaryDataSpace - BMDAncillaryDataSpace enumerates the location of an ancillary packet. */
+typedef NS_ENUM(uint32_t, DLABAncillaryDataSpace)
+{
+    DLABAncillaryDataSpaceVANC                                    = 0,
+    DLABAncillaryDataSpaceHANC                                    = 1
+};
+
 /* Enum BMDIPFlowDirection - BMDIPFlowDirection enumerates the direction of the IP flow. */
 typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowDirection)
 {
@@ -655,7 +667,7 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowDirection)
     DLABDeckLinkIPFlowDirectionInput                              = 1
 };
 
-/* Enum BMDIPFlowType - BMDIPFlowDirection enumerates the IP flow type. */
+/* Enum BMDIPFlowType - BMDIPFlowType enumerates the IP flow type. */
 typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowType)
 {
     DLABDeckLinkIPFlowTypeVideo                                   = 0,
