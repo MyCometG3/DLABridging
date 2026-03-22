@@ -343,7 +343,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 // public hash - NSObject
 - (NSUInteger) hash
 {
-    NSUInteger value = (NSUInteger)(_widthW^_heightW) ^ (NSUInteger)(_displayMode^_pixelFormatW);
+    NSUInteger value = ((NSUInteger)_widthW ^ (NSUInteger)_heightW) ^ ((NSUInteger)_displayMode ^ (NSUInteger)_pixelFormatW);
     return value;
 }
 
