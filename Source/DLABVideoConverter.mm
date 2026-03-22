@@ -291,9 +291,9 @@ NS_INLINE vImageTransferFunction tfHD12(void)
         .c0 =       1.0993,
         .c1 =       1.0,
         .c2 =       0.0,
+        .c3 =       -0.0993,
         .gamma =    0.45,
         .cutoff =   0.0181,
-        .c3 =       -0.0993,
         .c4 =       4.5,
         .c5 =       0.0,
     };
@@ -306,9 +306,9 @@ NS_INLINE vImageTransferFunction tfHD(void)
         .c0 =       1.099,
         .c1 =       1.0,
         .c2 =       0.0,
+        .c3 =       -0.099,
         .gamma =    0.45,
         .cutoff =   0.018,
-        .c3 =       -0.099,
         .c4 =       4.5,
         .c5 =       0.0,
     };
@@ -321,9 +321,9 @@ NS_INLINE vImageTransferFunction tfSD(void)
         .c0 =       1.099,
         .c1 =       1.0,
         .c2 =       0.0,
+        .c3 =       -0.099,
         .gamma =    0.45,
         .cutoff =   0.018,
-        .c3 =       -0.099,
         .c4 =       4.5,
         .c5 =       0.0,
     };
@@ -355,10 +355,14 @@ NS_INLINE vImageTransferFunction func601(BOOL strict)
 NS_INLINE vImageRGBPrimaries prim2020(void)
 {
     const vImageRGBPrimaries p2020 = {
-        .red_x =    0.708,  .red_y =    0.292,
-        .green_x =  0.170,  .green_y =  0.797,
-        .blue_x =   0.131,  .blue_y =   0.046,
-        .white_x =  0.3127, .white_y =  0.3290,
+        .red_x =    0.708,
+        .green_x =  0.170,
+        .blue_x =   0.131,
+        .white_x =  0.3127,
+        .red_y =    0.292,
+        .green_y =  0.797,
+        .blue_y =   0.046,
+        .white_y =  0.3290,
     };
     return p2020;
 }
@@ -366,10 +370,14 @@ NS_INLINE vImageRGBPrimaries prim2020(void)
 NS_INLINE vImageRGBPrimaries prim709(void)
 {
     const vImageRGBPrimaries p709 = {
-        .red_x =    0.640,  .red_y =    0.330,
-        .green_x =  0.300,  .green_y =  0.600,
-        .blue_x =   0.150,  .blue_y =   0.060,
-        .white_x =  0.3127, .white_y =  0.3290,
+        .red_x =    0.640,
+        .green_x =  0.300,
+        .blue_x =   0.150,
+        .white_x =  0.3127,
+        .red_y =    0.330,
+        .green_y =  0.600,
+        .blue_y =   0.060,
+        .white_y =  0.3290,
     };
     return p709;
 }
@@ -377,10 +385,14 @@ NS_INLINE vImageRGBPrimaries prim709(void)
 NS_INLINE vImageRGBPrimaries prim601_625(void)
 {
     const vImageRGBPrimaries p601_625 = {
-        .red_x =    0.640,  .red_y =    0.330,
-        .green_x =  0.290,  .green_y =  0.600,
-        .blue_x =   0.150,  .blue_y =   0.060,
-        .white_x =  0.3127, .white_y =  0.3290,
+        .red_x =    0.640,
+        .green_x =  0.290,
+        .blue_x =   0.150,
+        .white_x =  0.3127,
+        .red_y =    0.330,
+        .green_y =  0.600,
+        .blue_y =   0.060,
+        .white_y =  0.3290,
     };
     return p601_625;
 }
@@ -388,10 +400,14 @@ NS_INLINE vImageRGBPrimaries prim601_625(void)
 NS_INLINE vImageRGBPrimaries prim601_525(void)
 {
     const vImageRGBPrimaries p601_525 = {
-        .red_x =    0.630,  .red_y =    0.340,
-        .green_x =  0.310,  .green_y =  0.595,
-        .blue_x =   0.155,  .blue_y =   0.070,
-        .white_x =  0.3127, .white_y =  0.3290,
+        .red_x =    0.630,
+        .green_x =  0.310,
+        .blue_x =   0.155,
+        .white_x =  0.3127,
+        .red_y =    0.340,
+        .green_y =  0.595,
+        .blue_y =   0.070,
+        .white_y =  0.3290,
     };
     return p601_525;
 }
@@ -1502,8 +1518,8 @@ NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
             
             vImage_Buffer sourceBuffer = {
                 .data = ptr,
-                .width = dlWidth,
                 .height = dlHeight,
+                .width = dlWidth,
                 .rowBytes = dlRowBytes
             };
             
@@ -1853,8 +1869,8 @@ NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
             
             vImage_Buffer targetBuffer = {
                 .data = ptr,
-                .width = dlWidth,
                 .height = dlHeight,
+                .width = dlWidth,
                 .rowBytes = dlRowBytes
             };
             
