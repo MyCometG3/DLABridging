@@ -14,6 +14,11 @@
 // MARK: - output (internal)
 /* =================================================================================== */
 
+NS_INLINE BMDAncillaryDataSpace DLABBMDAncillaryDataSpaceFromPublic(DLABAncillaryDataSpace dataSpace)
+{
+    return (BMDAncillaryDataSpace)dataSpace;
+}
+
 @implementation DLABDevice (OutputInternal)
 
 /* =================================================================================== */
@@ -580,7 +585,58 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
                                                   &did, &sdid, &lineNumber, &dataStreamIndex);
                         if (data) {
                             HRESULT ret = packet->Update(did, sdid, lineNumber, dataStreamIndex,
-                                                         data);
+                                                         bmdAncillaryDataSpaceVANC, data);
+                            if (ret == S_OK) {
+                                ret = frameAncillaryPackets->AttachPacket(packet);
+                            }
+                            ready = (ret == S_OK);
+                        }
+                        delete packet;
+                    }
+                    if (!ready) break;
+                }
+            }];
+            
+            frameAncillaryPackets->Release();
+        }
+    }
+}
+
+- (void) callbackOutputAncillaryPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
+                                       atTime:(NSInteger)displayTime
+                                     duration:(NSInteger)frameDuration
+                                  inTimeScale:(NSInteger)timeScale
+{
+    NSParameterAssert(outFrame && frameDuration && timeScale);
+    
+    int64_t frameTime = displayTime;
+    
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
+    OutputAncillaryPacketHandler outHandler = self.outputAncillaryPacketHandler;
+    if (outHandler) {
+        IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
+        outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
+                                 (void**)&frameAncillaryPackets);
+        if (frameAncillaryPackets) {
+            [self delegate_sync:^{
+                while (TRUE) {
+                    BOOL ready = FALSE;
+                    DLABAncillaryPacket* packet = new DLABAncillaryPacket();
+                    if (packet) {
+                        uint8_t did = 0;
+                        uint8_t sdid = 0;
+                        uint32_t lineNumber = 0;
+                        uint8_t dataStreamIndex = 0;
+                        DLABAncillaryDataSpace dataSpace = DLABAncillaryDataSpaceVANC;
+                        NSData* data = outHandler(timingInfo,
+                                                  &did, &sdid, &lineNumber, &dataStreamIndex, &dataSpace);
+                        if (data) {
+                            HRESULT ret = packet->Update(did, sdid, lineNumber, dataStreamIndex,
+                                                         DLABBMDAncillaryDataSpaceFromPublic(dataSpace), data);
                             if (ret == S_OK) {
                                 ret = frameAncillaryPackets->AttachPacket(packet);
                             }
@@ -971,6 +1027,14 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
                                        atTime:displayTime
                                      duration:frameDuration
                                   inTimeScale:timeScale];
+    }
+    
+    // Callback ancillary packet handler block
+    if (self.outputAncillaryPacketHandler) {
+        [self callbackOutputAncillaryPacketHandler:outFrame
+                                            atTime:displayTime
+                                          duration:frameDuration
+                                       inTimeScale:timeScale];
     }
     
     // Callback OutputFrameMetadataHandler block

@@ -470,6 +470,19 @@ NS_ASSUME_NONNULL_BEGIN
                                 duration:(NSInteger)frameDuration
                              inTimeScale:(NSInteger)timeScale;
 
+/**
+ Call ancillary packet handler support for output VideoFrame (SDK 15.3 or later)
+ 
+ @param outFrame IDeckLinkMutableVideoFrame
+ @param displayTime time at which to display the frame in timeScale units
+ @param frameDuration duration for which to display the frame in timeScale units
+ @param timeScale time scale for displayTime and displayDuration
+ */
+- (void) callbackOutputAncillaryPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
+                                       atTime:(NSInteger)displayTime
+                                     duration:(NSInteger)frameDuration
+                                  inTimeScale:(NSInteger)timeScale;
+
 @end
 
 NS_ASSUME_NONNULL_END
@@ -579,6 +592,13 @@ NS_ASSUME_NONNULL_BEGIN
  @param inFrame IDeckLinkVideoInputFrame
  */
 - (void) callbackInputVANCPacketHandler:(IDeckLinkVideoInputFrame*)inFrame;
+
+/**
+ Call ancillary packet handler support for input VideoFrame. (SDK 15.3 or later)
+ 
+ @param inFrame IDeckLinkVideoInputFrame
+ */
+- (void) callbackInputAncillaryPacketHandler:(IDeckLinkVideoInputFrame*)inFrame;
 
 @end
 

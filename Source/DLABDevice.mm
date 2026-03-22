@@ -403,6 +403,8 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize outputVANCHandler = _outputVANCHandler;
 @synthesize inputVANCPacketHandler = _inputVANCPacketHandler;
 @synthesize outputVANCPacketHandler = _outputVANCPacketHandler;
+@synthesize inputAncillaryPacketHandler = _inputAncillaryPacketHandler; // (SDK 15.3 or later)
+@synthesize outputAncillaryPacketHandler = _outputAncillaryPacketHandler; // (SDK 15.3 or later)
 
 @synthesize inputFrameMetadataHandler = _inputFrameMetadataHandler;
 @synthesize outputFrameMetadataHandler = _outputFrameMetadataHandler;

@@ -14,6 +14,13 @@
 // MARK: - input (internal)
 /* =================================================================================== */
 
+NS_INLINE BOOL DLABAncillaryPacketMatchesDataSpace(IDeckLinkAncillaryPacket* packet,
+                                                   BMDAncillaryDataSpace dataSpace)
+{
+    if (!packet) return NO;
+    return (packet->GetDataSpace() == dataSpace);
+}
+
 @implementation DLABDevice (InputInternal)
 
 /* =================================================================================== */
@@ -113,6 +120,11 @@
             // Callback VANCPacketHandler block
             if (self.inputVANCPacketHandler) {
                 [self callbackInputVANCPacketHandler:videoFrame];
+            }
+            
+            // Callback ancillary packet handler block
+            if (self.inputAncillaryPacketHandler) {
+                [self callbackInputAncillaryPacketHandler:videoFrame];
             }
             
             // Callback InputFrameMetadataHandler block
@@ -692,7 +704,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
         
         setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188LTC);
         if (setting) return setting;
-
+        
         setting = createTimecodeSetting(videoFrame, DLABTimecodeFormatRP188VITC2);
         if (setting) return setting;
     }
@@ -813,6 +825,74 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                         IDeckLinkAncillaryPacket* packet = NULL;
                         iterator->Next(&packet);
                         if (packet) {
+                            ready = TRUE;
+                            NSData* data = nil;
+                            BMDAncillaryPacketFormat format = bmdAncillaryPacketFormatUInt8;
+                            const void* ptr = NULL;
+                            uint32_t size = 0;
+                            packet->GetBytes(format, &ptr, &size);
+                            if (ptr && size) {
+                                data = [NSData dataWithBytesNoCopy:(void*)ptr
+                                                            length:(NSUInteger)size
+                                                      freeWhenDone:NO];
+                            }
+                            if (data && DLABAncillaryPacketMatchesDataSpace(packet, bmdAncillaryDataSpaceVANC)) {
+                                uint8_t did = packet->GetDID();
+                                uint8_t sdid = packet->GetSDID();
+                                uint32_t lineNumber = packet->GetLineNumber();
+                                uint8_t dataStreamIndex = packet->GetDataStreamIndex();
+                                ready = inHandler(timingInfo,
+                                                  did, sdid, lineNumber, dataStreamIndex,
+                                                  data);
+                            }
+                            packet->Release();
+                        }
+                        if (!ready) break;
+                    }
+                }];
+                
+                iterator->Release();
+            }
+            
+            frameAncillaryPackets->Release();
+        }
+    }
+}
+
+- (void) callbackInputAncillaryPacketHandler:(IDeckLinkVideoInputFrame*)inFrame
+{
+    NSParameterAssert(inFrame);
+    
+    BMDFrameFlags flags = inFrame->GetFlags();
+    if ((flags & bmdFrameHasNoInputSource) != 0) return;
+    
+    BMDTimeValue frameTime = 0;
+    BMDTimeValue frameDuration = 0;
+    BMDTimeScale timeScale = self.inputVideoSetting.timeScale;
+    HRESULT result = inFrame->GetStreamTime(&frameTime, &frameDuration, timeScale);
+    if (result) return;
+    
+    CMTime duration = CMTimeMake(frameDuration, (int32_t)timeScale);
+    CMTime presentationTimeStamp = CMTimeMake(frameTime, (int32_t)timeScale);
+    CMTime decodeTimeStamp = kCMTimeInvalid;
+    CMSampleTimingInfo timingInfo = {duration, presentationTimeStamp, decodeTimeStamp};
+    
+    InputAncillaryPacketHandler inHandler = self.inputAncillaryPacketHandler;
+    if (inHandler) {
+        IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
+        inFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
+                                (void**)&frameAncillaryPackets);
+        if (frameAncillaryPackets) {
+            IDeckLinkAncillaryPacketIterator* iterator = NULL;
+            frameAncillaryPackets->GetPacketIterator(&iterator);
+            if (iterator) {
+                [self delegate_sync:^{
+                    while (TRUE) {
+                        BOOL ready = FALSE;
+                        IDeckLinkAncillaryPacket* packet = NULL;
+                        iterator->Next(&packet);
+                        if (packet) {
+                            ready = TRUE;
                             NSData* data = nil;
                             BMDAncillaryPacketFormat format = bmdAncillaryPacketFormatUInt8;
                             const void* ptr = NULL;
@@ -828,10 +908,12 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                                 uint8_t sdid = packet->GetSDID();
                                 uint32_t lineNumber = packet->GetLineNumber();
                                 uint8_t dataStreamIndex = packet->GetDataStreamIndex();
+                                DLABAncillaryDataSpace dataSpace = (DLABAncillaryDataSpace)packet->GetDataSpace();
                                 ready = inHandler(timingInfo,
                                                   did, sdid, lineNumber, dataStreamIndex,
-                                                  data);
+                                                  dataSpace, data);
                             }
+                            packet->Release();
                         }
                         if (!ready) break;
                     }
