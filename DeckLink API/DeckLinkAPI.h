@@ -107,9 +107,9 @@ BMD_CONST REFIID IID_IDeckLinkVideoFrame3DExtensions              = /* D4DBE9C6-
 BMD_CONST REFIID IID_IDeckLinkVideoFrameMetadataExtensions        = /* E232A5B7-4DB4-44C9-9152-F47C12E5F051 */ { 0xE2,0x32,0xA5,0xB7,0x4D,0xB4,0x44,0xC9,0x91,0x52,0xF4,0x7C,0x12,0xE5,0xF0,0x51 };
 BMD_CONST REFIID IID_IDeckLinkVideoFrameMutableMetadataExtensions = /* CC198FC6-8298-4419-942D-8357EC355E58 */ { 0xCC,0x19,0x8F,0xC6,0x82,0x98,0x44,0x19,0x94,0x2D,0x83,0x57,0xEC,0x35,0x5E,0x58 };
 BMD_CONST REFIID IID_IDeckLinkVideoInputFrame                     = /* C9ADD3D2-BE52-488D-AB2D-7FDEF7AF0C95 */ { 0xC9,0xAD,0xD3,0xD2,0xBE,0x52,0x48,0x8D,0xAB,0x2D,0x7F,0xDE,0xF7,0xAF,0x0C,0x95 };
-BMD_CONST REFIID IID_IDeckLinkAncillaryPacket                     = /* CC5BBF7E-029C-4D3B-9158-6000EF5E3670 */ { 0xCC,0x5B,0xBF,0x7E,0x02,0x9C,0x4D,0x3B,0x91,0x58,0x60,0x00,0xEF,0x5E,0x36,0x70 };
-BMD_CONST REFIID IID_IDeckLinkAncillaryPacketIterator             = /* 3FC8994B-88FB-4C17-968F-9AAB69D964A7 */ { 0x3F,0xC8,0x99,0x4B,0x88,0xFB,0x4C,0x17,0x96,0x8F,0x9A,0xAB,0x69,0xD9,0x64,0xA7 };
-BMD_CONST REFIID IID_IDeckLinkVideoFrameAncillaryPackets          = /* 6C186C0F-459E-41D8-AEE2-4812D81AEE68 */ { 0x6C,0x18,0x6C,0x0F,0x45,0x9E,0x41,0xD8,0xAE,0xE2,0x48,0x12,0xD8,0x1A,0xEE,0x68 };
+BMD_CONST REFIID IID_IDeckLinkAncillaryPacket                     = /* F5C0D498-5CD3-4C77-9773-8EFA20BB334B */ { 0xF5,0xC0,0xD4,0x98,0x5C,0xD3,0x4C,0x77,0x97,0x73,0x8E,0xFA,0x20,0xBB,0x33,0x4B };
+BMD_CONST REFIID IID_IDeckLinkAncillaryPacketIterator             = /* 10F1AA88-54BE-42F7-B9F8-EC2F5F099551 */ { 0x10,0xF1,0xAA,0x88,0x54,0xBE,0x42,0xF7,0xB9,0xF8,0xEC,0x2F,0x5F,0x09,0x95,0x51 };
+BMD_CONST REFIID IID_IDeckLinkVideoFrameAncillaryPackets          = /* 8A72D630-8070-4D05-8A93-E60C40EE088A */ { 0x8A,0x72,0xD6,0x30,0x80,0x70,0x4D,0x05,0x8A,0x93,0xE6,0x0C,0x40,0xEE,0x08,0x8A };
 BMD_CONST REFIID IID_IDeckLinkVideoFrameAncillary                 = /* 732E723C-D1A4-4E29-9E8E-4A88797A0004 */ { 0x73,0x2E,0x72,0x3C,0xD1,0xA4,0x4E,0x29,0x9E,0x8E,0x4A,0x88,0x79,0x7A,0x00,0x04 };
 BMD_CONST REFIID IID_IDeckLinkEncoderPacket                       = /* B693F36C-316E-4AF1-B6C2-F389A4BCA620 */ { 0xB6,0x93,0xF3,0x6C,0x31,0x6E,0x4A,0xF1,0xB6,0xC2,0xF3,0x89,0xA4,0xBC,0xA6,0x20 };
 BMD_CONST REFIID IID_IDeckLinkEncoderVideoPacket                  = /* 4E7FD944-E8C7-4EAC-B8C0-7B77F80F5AE0 */ { 0x4E,0x7F,0xD9,0x44,0xE8,0xC7,0x4E,0xAC,0xB8,0xC0,0x7B,0x77,0xF8,0x0F,0x5A,0xE0 };
@@ -592,6 +592,9 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkSupportsSynchronizeToPlaybackGroup                = /* 'stpg' */ 0x73747067,
     BMDDeckLinkHasMonitorOut                                     = /* 'fmoo' */ 0x666D6F6F,
     BMDDeckLinkSupportsExtendedDesktop                           = /* 'dtop' */ 0x64746F70,
+    BMDDeckLinkHANCRequiresInputFilterConfiguration              = /* 'hrif' */ 0x68726966,
+    BMDDeckLinkSupportsHANCOutput                                = /* 'dsho' */ 0x6473686F,
+    BMDDeckLinkSupportsHANCInput                                 = /* 'dshi' */ 0x64736869,
 
     /* Integers */
 
@@ -622,6 +625,8 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkMezzanineType                                     = /* 'mezt' */ 0x6D657A74,
     BMDDeckLinkXLRDelayMsMaximum                                 = /* 'xdtx' */ 0x78647478,
     BMDDeckLinkXLRDelayFramesMaximum                             = /* 'xdfx' */ 0x78646678,
+    BMDDeckLinkOutputHANCUserDataWordsLimit                      = /* 'mhow' */ 0x6D686F77,
+    BMDDeckLinkInputHANCUserDataWordsLimit                       = /* 'mhiw' */ 0x6D686977,
 
     /* Floats */
 
@@ -780,6 +785,14 @@ enum _BMD3DPreviewFormat {
     bmd3DPreviewFormatTopBottom                                  = /* 'topb' */ 0x746F7062
 };
 
+/* Enum BMDAncillaryDataSpace - BMDAncillaryDataSpace enumerates the location of an ancillary packet. */
+
+typedef uint32_t BMDAncillaryDataSpace;
+enum _BMDAncillaryDataSpace {
+    bmdAncillaryDataSpaceVANC                                    = 0,
+    bmdAncillaryDataSpaceHANC                                    = 1
+};
+
 /* Enum BMDIPFlowDirection - BMDIPFlowDirection enumerates the direction of the IP flow. */
 
 enum BMDIPFlowDirection {
@@ -787,7 +800,7 @@ enum BMDIPFlowDirection {
     bmdDeckLinkIPFlowDirectionInput                              = 1
 };
 
-/* Enum BMDIPFlowType - BMDIPFlowDirection enumerates the IP flow type. */
+/* Enum BMDIPFlowType - BMDIPFlowType enumerates the IP flow type. */
 
 enum BMDIPFlowType {
     bmdDeckLinkIPFlowTypeVideo                                   = 0,
@@ -1334,6 +1347,7 @@ public:
     virtual uint8_t GetSDID (void) = 0;
     virtual uint32_t GetLineNumber (void) = 0;	// On output, zero is auto
     virtual uint8_t GetDataStreamIndex (void) = 0;	// Usually zero. Can only be 1 if non-SD and the first data stream is completely full
+    virtual BMDAncillaryDataSpace GetDataSpace (void) = 0;
 
 protected:
     virtual ~IDeckLinkAncillaryPacket () {} // call Release method to drop reference count

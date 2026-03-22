@@ -81,7 +81,8 @@ enum _BMDVideoConnection {
     bmdVideoConnectionComposite                                  = 1 << 4,
     bmdVideoConnectionSVideo                                     = 1 << 5,
     bmdVideoConnectionEthernet                                   = 1 << 6,
-    bmdVideoConnectionOpticalEthernet                            = 1 << 7
+    bmdVideoConnectionOpticalEthernet                            = 1 << 7,
+    bmdVideoConnectionInternal                                   = 1 << 8
 };
 
 /* Enum BMDAudioConnection - Audio connection types */

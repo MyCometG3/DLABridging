@@ -139,6 +139,10 @@ enum _BMDDeckLinkConfigurationID {
     bmdDeckLinkConfigVANCSourceLine3Mapping                      = /* 'vsl3' */ 0x76736C33,
     bmdDeckLinkConfigCapturePassThroughMode                      = /* 'cptm' */ 0x6370746D,
     bmdDeckLinkConfigCaptureGroup                                = /* 'cpgr' */ 0x63706772,
+    bmdDeckLinkConfigHANCInputFilter1                            = /* 'hif1' */ 0x68696631,
+    bmdDeckLinkConfigHANCInputFilter2                            = /* 'hif2' */ 0x68696632,
+    bmdDeckLinkConfigHANCInputFilter3                            = /* 'hif3' */ 0x68696633,
+    bmdDeckLinkConfigHANCInputFilter4                            = /* 'hif4' */ 0x68696634,
 
     /* Video Input Floats */
 

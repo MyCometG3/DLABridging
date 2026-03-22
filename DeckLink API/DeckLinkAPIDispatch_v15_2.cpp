@@ -39,7 +39,7 @@
 */
 /* DeckLinkAPIDispatch.cpp */
 
-#include "DeckLinkAPI.h"
+#include "DeckLinkAPI_v15_2.h"
 #include <pthread.h>
 
 #if BLACKMAGIC_DECKLINK_API_MAGIC != 1
@@ -57,7 +57,7 @@ typedef IDeckLinkMetalScreenPreviewHelper* (*CreateMetalScreenPreviewHelperFunc)
 typedef IDeckLinkCocoaScreenPreviewCallback* (*CreateCocoaScreenPreviewFunc)(void*);
 typedef IDeckLinkVideoConversion* (*CreateVideoConversionInstanceFunc)(void);
 typedef IDeckLinkDiscovery* (*CreateDeckLinkDiscoveryInstanceFunc)(void);
-typedef IDeckLinkVideoFrameAncillaryPackets* (*CreateVideoFrameAncillaryPacketsInstanceFunc)(void);
+typedef IDeckLinkVideoFrameAncillaryPackets_v15_2* (*CreateVideoFrameAncillaryPacketsInstanceFunc)(void);
 
 static pthread_once_t						gDeckLinkOnceControl		= PTHREAD_ONCE_INIT;
 static CFBundleRef							gDeckLinkAPIBundleRef		= NULL;
@@ -90,13 +90,13 @@ static void	InitDeckLinkAPI (void)
 			gCreateCocoaPreviewFunc = (CreateCocoaScreenPreviewFunc)CFBundleGetFunctionPointerForName(gDeckLinkAPIBundleRef, CFSTR("CreateCocoaScreenPreview_0002"));
 			gCreateVideoConversionFunc = (CreateVideoConversionInstanceFunc)CFBundleGetFunctionPointerForName(gDeckLinkAPIBundleRef, CFSTR("CreateVideoConversionInstance_0002"));
             gCreateDeckLinkDiscoveryFunc = (CreateDeckLinkDiscoveryInstanceFunc)CFBundleGetFunctionPointerForName(gDeckLinkAPIBundleRef, CFSTR("CreateDeckLinkDiscoveryInstance_0003"));
-            gCreateVideoFrameAncillaryPacketsFunc = (CreateVideoFrameAncillaryPacketsInstanceFunc)CFBundleGetFunctionPointerForName(gDeckLinkAPIBundleRef, CFSTR("CreateVideoFrameAncillaryPacketsInstance_0002"));
+            gCreateVideoFrameAncillaryPacketsFunc = (CreateVideoFrameAncillaryPacketsInstanceFunc)CFBundleGetFunctionPointerForName(gDeckLinkAPIBundleRef, CFSTR("CreateVideoFrameAncillaryPacketsInstance_0001"));
 		}
 		CFRelease(bundleURL);
 	}
 }
 
-bool		IsDeckLinkAPIPresent (void)
+bool		IsDeckLinkAPIPresent_v15_2 (void)
 {
 	// If the DeckLink API bundle was successfully loaded, return this knowledge to the caller
 	if (gDeckLinkAPIBundleRef != NULL)
@@ -185,7 +185,7 @@ IDeckLinkDiscovery* CreateDeckLinkDiscoveryInstance (void)
 	return gCreateDeckLinkDiscoveryFunc();
 }
 
-IDeckLinkVideoFrameAncillaryPackets* CreateVideoFrameAncillaryPacketsInstance (void)
+IDeckLinkVideoFrameAncillaryPackets_v15_2* CreateVideoFrameAncillaryPacketsInstance_v15_2 (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
