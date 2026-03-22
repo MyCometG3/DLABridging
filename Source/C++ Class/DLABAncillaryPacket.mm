@@ -19,23 +19,26 @@ DLABAncillaryPacket::DLABAncillaryPacket(void)
 
 HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, NSData* data)
 {
-    if (data) {
-        char* ptr = (char*) data.bytes;
-        size_t length = (size_t) data.length;
-        vbuf.resize(length);
-        vbuf.shrink_to_fit();
-        if (ptr && length) {
-            memcpy(&vbuf[0], ptr, length);
-        }
-        
-        _did = did;
-        _sdid = sdid;
-        _line = line;
-        _dataStreamIndex = dataStreamIndex;
-        
-        return S_OK;
+    return Update(did, sdid, line, dataStreamIndex, 0, data);
+}
+
+HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, BMDAncillaryDataSpace dataSpace, NSData* data)
+{
+    if (!data) {
+        return E_INVALIDARG;
     }
-    return E_INVALIDARG;
+
+    const uint8_t* ptr = (const uint8_t*)data.bytes;
+    const size_t length = (size_t)data.length;
+    vbuf.assign((const char*)ptr, (const char*)ptr + length);
+
+    _did = did;
+    _sdid = sdid;
+    _line = line;
+    _dataStreamIndex = dataStreamIndex;
+    _dataSpace = dataSpace;
+
+    return S_OK;
 }
 
 // IDeckLinkAncillaryPacket
@@ -45,10 +48,12 @@ HRESULT DLABAncillaryPacket::GetBytes(BMDAncillaryPacketFormat format, const voi
     if (format != bmdAncillaryPacketFormatUInt8) {
         return E_NOTIMPL;
     }
-    if (size)
+    if (size) {
         *size = (uint32_t)vbuf.size();
-    if (data)
-        *data = vbuf.data();
+    }
+    if (data) {
+        *data = vbuf.empty() ? nullptr : vbuf.data();
+    }
     return S_OK;
 }
 
@@ -71,10 +76,18 @@ uint8_t DLABAncillaryPacket::GetDataStreamIndex(void)
     return _dataStreamIndex;
 }
 
+BMDAncillaryDataSpace DLABAncillaryPacket::GetDataSpace (void)
+{
+    return _dataSpace;
+}
+
 // IUnknown
 
 HRESULT DLABAncillaryPacket::QueryInterface(REFIID iid, LPVOID *ppv)
 {
+    if (!ppv) {
+        return E_POINTER;
+    }
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
@@ -83,6 +96,11 @@ HRESULT DLABAncillaryPacket::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkAncillaryPacket, sizeof(REFIID)) == 0) {
+        *ppv = (IDeckLinkAncillaryPacket *)this;
+        AddRef();
+        return S_OK;
+    }
+    if (memcmp(&iid, &IID_IDeckLinkAncillaryPacket_v15_2, sizeof(REFIID)) == 0) {
         *ppv = (IDeckLinkAncillaryPacket *)this;
         AddRef();
         return S_OK;

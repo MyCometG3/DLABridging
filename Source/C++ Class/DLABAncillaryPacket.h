@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
+#import <DeckLinkAPI_v15_2.h>
 #import <atomic>
 #import <vector>
 
@@ -26,6 +27,7 @@ public:
     
     // Utility
     HRESULT Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, NSData* data);
+    HRESULT Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, BMDAncillaryDataSpace dataSpace, NSData* data); // Added in v15_3 or later
     
     // IDeckLinkAncillaryPacket
     HRESULT GetBytes(BMDAncillaryPacketFormat format, const void** data, uint32_t* size);
@@ -33,6 +35,7 @@ public:
     uint8_t GetSDID(void);
     uint32_t GetLineNumber(void);
     uint8_t GetDataStreamIndex(void);
+    BMDAncillaryDataSpace GetDataSpace(void); // Added in v15_3 or later
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
@@ -44,6 +47,7 @@ private:
     uint8_t _sdid;
     uint32_t _line;
     uint8_t _dataStreamIndex;
+    BMDAncillaryDataSpace _dataSpace; // Added in v15_3 or later
     std::vector<char> vbuf;
     std::atomic<ULONG> refCount;
 };
