@@ -60,7 +60,7 @@ HRESULT DLABDeckControlStatusCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkDeckControlStatusCallback, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkInputCallback *)this;
+        *ppv = (IDeckLinkDeckControlStatusCallback *)this;
         AddRef();
         return S_OK;
     }
