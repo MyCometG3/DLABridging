@@ -25,7 +25,7 @@ NOTE: This framework is under development.
     : 2.5.39 IDeckLinkH265NALPacket
     : 2.5.40 IDeckLinkEncoderConfiguration
     : 2.5.43 IDeckLinkVideoConversion
-    : 2.5.49 IDeskLinkMetalScreenPreviewHelper
+    : 2.5.49 IDeckLinkMetalScreenPreviewHelper
     : 2.5.50 IDeckLinkWPFDX9ScreenPreviewHelper
     : 2.5.51 IDeckLinkMacOutput
     : 2.5.52 IDeckLinkMacVideoBuffer
@@ -58,13 +58,11 @@ NOTE: This framework is under development.
     if let device = device {
       try device.setInputScreenPreviewTo(parentView)
 
-      // To capture HDMI
-      var videoConnection :DLABVideoConnection = .HDMI
-      var audioConnection :DLABAudioConnection = .embedded
-
-      // To capture SVideo+RCA
-      var videoConnection :DLABVideoConnection = .sVideo
-      var audioConnection :DLABAudioConnection = .analogRCA
+      // Choose one input connection pair
+      let videoConnection :DLABVideoConnection = .HDMI
+      let audioConnection :DLABAudioConnection = .embedded
+      // let videoConnection :DLABVideoConnection = .sVideo
+      // let audioConnection :DLABAudioConnection = .analogRCA
 
       // To prepare SD Video setting
       var vSetting:DLABVideoSetting? = nil
@@ -72,10 +70,11 @@ NOTE: This framework is under development.
                                                     pixelFormat: .format8BitYUV,
                                                     inputFlag: [])
 
-      // To prepare stereo Audio setting
+      // To prepare Audio setting (use 8ch for HDMI surround)
       var aSetting:DLABAudioSetting? = nil
+      let audioChannelCount: UInt32 = (videoConnection == .HDMI && audioConnection == .embedded) ? 8 : 2
       try aSetting = device.createInputAudioSetting(of: .type16bitInteger,
-                                                    channelCount: 2,
+                                                    channelCount: audioChannelCount,
                                                     sampleRate: .rate48kHz)
 
       // To support NTSC-SD CleanAperture and PixelAspectRatio
@@ -97,7 +96,7 @@ NOTE: This framework is under development.
       var hdmiAudioChannels = 6 // HDMI surround 5.1ch
       var reverseCh3Ch4 = true // For layout of (ch3, ch4) == (LFE, C)
       if let aSetting = aSetting, videoConnection == .HDMI, audioConnection == .embedded,
-        audioChannels == 8, audioChannels >= hdmiAudioChannels, hdmiAudioChannels > 0 {
+        aSetting.channelCount == 8, aSetting.channelCount >= hdmiAudioChannels, hdmiAudioChannels > 0 {
         // rebuild formatDescription to support HDMI Audio Channel order
         try aSetting.buildAudioFormatDescription(forHDMIAudioChannels: hdmiAudioChannels,
                                                  swap3chAnd4ch: reverseCh3Ch4)
