@@ -17,10 +17,10 @@
 /*
  * Internal use only
  * This is C++ subclass from
- * IDeckLinkAncillaryPacket
+ * IDeckLinkAncillaryPacket / IDeckLinkAncillaryPacket_v15_2
  */
 
-class DLABAncillaryPacket : public IDeckLinkAncillaryPacket
+class DLABAncillaryPacket : public IDeckLinkAncillaryPacket, public IDeckLinkAncillaryPacket_v15_2
 {
 public:
     DLABAncillaryPacket(void);
@@ -47,7 +47,7 @@ private:
     uint8_t _sdid;
     uint32_t _line;
     uint8_t _dataStreamIndex;
-    BMDAncillaryDataSpace _dataSpace; // Added in v15_3 or later
+    BMDAncillaryDataSpace _dataSpace = bmdAncillaryDataSpaceVANC; // Added in v15_3 or later
     std::vector<char> vbuf;
     std::atomic<ULONG> refCount;
 };

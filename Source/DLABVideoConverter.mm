@@ -756,7 +756,7 @@ vImage_Error fillCVConversionMatrix(vImageCVImageFormatRef format, vImage_ARGBTo
         case kCVPixelFormatType_422YpCbCr8_yuvs:
         case kCVPixelFormatType_422YpCbCr8FullRange:
         {
-            vImageMatrixType type = NULL;
+            vImageMatrixType type = 0;
             if (!vImageCVImageFormat_GetConversionMatrix(format, &type)) {
                 vImageMatrixType outType = kvImageMatrixType_ARGBToYpCbCrMatrix;
                 err = vImageCVImageFormat_CopyConversionMatrix(format, &matrix, outType);

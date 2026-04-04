@@ -450,7 +450,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param outFrame IDeckLinkMutableVideoFrame
  @param displayTime time at which to display the frame in timeScale units
  @param frameDuration duration for which to display the frame in timeScale units
- @param timeScale time scale for displayTime and displayDuration
+ @param timeScale time scale for displayTime and frameDuration
  */
 - (void) callbackOutputVANCHandler:(IDeckLinkMutableVideoFrame*)outFrame
                             atTime:(NSInteger)displayTime
@@ -463,7 +463,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param outFrame IDeckLinkMutableVideoFrame
  @param displayTime time at which to display the frame in timeScale units
  @param frameDuration duration for which to display the frame in timeScale units
- @param timeScale time scale for displayTime and displayDuration
+ @param timeScale time scale for displayTime and frameDuration
  */
 - (void) callbackOutputVANCPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
                                   atTime:(NSInteger)displayTime
@@ -476,7 +476,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param outFrame IDeckLinkMutableVideoFrame
  @param displayTime time at which to display the frame in timeScale units
  @param frameDuration duration for which to display the frame in timeScale units
- @param timeScale time scale for displayTime and displayDuration
+ @param timeScale time scale for displayTime and frameDuration
  */
 - (void) callbackOutputAncillaryPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
                                        atTime:(NSInteger)displayTime

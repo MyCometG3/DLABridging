@@ -19,7 +19,7 @@ DLABAncillaryPacket::DLABAncillaryPacket(void)
 
 HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, NSData* data)
 {
-    return Update(did, sdid, line, dataStreamIndex, 0, data);
+    return Update(did, sdid, line, dataStreamIndex, bmdAncillaryDataSpaceVANC, data);
 }
 
 HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, BMDAncillaryDataSpace dataSpace, NSData* data)
@@ -30,7 +30,11 @@ HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, ui
 
     const uint8_t* ptr = (const uint8_t*)data.bytes;
     const size_t length = (size_t)data.length;
-    vbuf.assign((const char*)ptr, (const char*)ptr + length);
+    if (length == 0) {
+        vbuf.clear();
+    } else {
+        vbuf.assign((const char*)ptr, (const char*)ptr + length);
+    }
 
     _did = did;
     _sdid = sdid;
@@ -91,17 +95,17 @@ HRESULT DLABAncillaryPacket::QueryInterface(REFIID iid, LPVOID *ppv)
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
-        *ppv = this;
+        *ppv = static_cast<IDeckLinkAncillaryPacket*>(this);
         AddRef();
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkAncillaryPacket, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkAncillaryPacket *)this;
+        *ppv = static_cast<IDeckLinkAncillaryPacket*>(this);
         AddRef();
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkAncillaryPacket_v15_2, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkAncillaryPacket *)this;
+        *ppv = static_cast<IDeckLinkAncillaryPacket_v15_2*>(this);
         AddRef();
         return S_OK;
     }

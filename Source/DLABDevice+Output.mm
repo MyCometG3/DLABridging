@@ -567,8 +567,8 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
     OutputVANCPacketHandler outHandler = self.outputVANCPacketHandler;
     if (outHandler) {
         // Prepare for callback
-        IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
-        outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
+        IDeckLinkVideoFrameAncillaryPackets_v15_2* frameAncillaryPackets = NULL;
+        outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets_v15_2,
                                  (void**)&frameAncillaryPackets);
         if (frameAncillaryPackets) {
             [self delegate_sync:^{
@@ -587,11 +587,17 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
                             HRESULT ret = packet->Update(did, sdid, lineNumber, dataStreamIndex,
                                                          bmdAncillaryDataSpaceVANC, data);
                             if (ret == S_OK) {
-                                ret = frameAncillaryPackets->AttachPacket(packet);
+                                IDeckLinkAncillaryPacket_v15_2* legacyPacket = NULL;
+                                ret = packet->QueryInterface(IID_IDeckLinkAncillaryPacket_v15_2,
+                                                             (void**)&legacyPacket);
+                                if (ret == S_OK && legacyPacket) {
+                                    ret = frameAncillaryPackets->AttachPacket(legacyPacket);
+                                    legacyPacket->Release();
+                                }
                             }
                             ready = (ret == S_OK);
                         }
-                        delete packet;
+                        packet->Release();
                     }
                     if (!ready) break;
                 }
@@ -642,7 +648,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
                             }
                             ready = (ret == S_OK);
                         }
-                        delete packet;
+                        packet->Release();
                     }
                     if (!ready) break;
                 }
