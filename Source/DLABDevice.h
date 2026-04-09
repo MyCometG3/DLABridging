@@ -271,7 +271,7 @@ typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber,
  
  - input : This block is called prior to inputVideoSample  delegate call is performed
  
- @param timingInfo TimingInfo of Output Video Frame
+ @param timingInfo TimingInfo of Video Input Frame
  @param did Data ID (DID) for ancillary packet.
  @param sdid Secondary Data ID (SDID) for ancillary packet.
  @param lineNumber lineNumber of VANC buffer.
@@ -319,7 +319,7 @@ typedef BOOL (^InputAncillaryPacketHandler) (CMSampleTimingInfo timingInfo,
  
  - output : This block is called prior to outputVideoFrame is scheduled
  
- @param timingInfo TimingInfo of Video Input Frame
+ @param timingInfo TimingInfo of Output Video Frame
  @param did Data ID (DID) for ancillary packet.
  @param sdid Secondary Data ID (SDID) for ancillary packet.
  @param lineNumber lineNumber of VANC buffer.
