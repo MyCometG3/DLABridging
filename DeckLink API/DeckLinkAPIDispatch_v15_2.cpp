@@ -105,7 +105,7 @@ bool		IsDeckLinkAPIPresent_v15_2 (void)
 	return false;
 }
 
-IDeckLinkIterator*		CreateDeckLinkIteratorInstance_v15_2 (void)
+IDeckLinkIterator*		CreateDeckLinkIteratorInstance (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -115,7 +115,7 @@ IDeckLinkIterator*		CreateDeckLinkIteratorInstance_v15_2 (void)
 	return gCreateIteratorFunc();
 }
 
-IDeckLinkAPIInformation*	CreateDeckLinkAPIInformationInstance_v15_2 (void)
+IDeckLinkAPIInformation*	CreateDeckLinkAPIInformationInstance (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -125,7 +125,7 @@ IDeckLinkAPIInformation*	CreateDeckLinkAPIInformationInstance_v15_2 (void)
 	return gCreateAPIInformationFunc();
 }
 
-IDeckLinkGLScreenPreviewHelper*		CreateOpenGLScreenPreviewHelper_v15_2 (void)
+IDeckLinkGLScreenPreviewHelper*		CreateOpenGLScreenPreviewHelper (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -135,7 +135,7 @@ IDeckLinkGLScreenPreviewHelper*		CreateOpenGLScreenPreviewHelper_v15_2 (void)
 	return gCreateOpenGLPreviewFunc();
 }
 
-IDeckLinkGLScreenPreviewHelper*		CreateOpenGL3ScreenPreviewHelper_v15_2 (void)
+IDeckLinkGLScreenPreviewHelper*		CreateOpenGL3ScreenPreviewHelper (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 
@@ -145,7 +145,7 @@ IDeckLinkGLScreenPreviewHelper*		CreateOpenGL3ScreenPreviewHelper_v15_2 (void)
 	return gCreateOpenGL3PreviewFunc();
 }
 
-IDeckLinkMetalScreenPreviewHelper*		CreateMetalScreenPreviewHelper_v15_2 (void)
+IDeckLinkMetalScreenPreviewHelper*		CreateMetalScreenPreviewHelper (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -155,7 +155,7 @@ IDeckLinkMetalScreenPreviewHelper*		CreateMetalScreenPreviewHelper_v15_2 (void)
 	return gCreateMetalPreviewFunc();
 }
 
-IDeckLinkCocoaScreenPreviewCallback*	CreateCocoaScreenPreview_v15_2 (void* parentView)
+IDeckLinkCocoaScreenPreviewCallback*	CreateCocoaScreenPreview (void* parentView)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -165,7 +165,7 @@ IDeckLinkCocoaScreenPreviewCallback*	CreateCocoaScreenPreview_v15_2 (void* paren
 	return gCreateCocoaPreviewFunc(parentView);
 }
 
-IDeckLinkVideoConversion* CreateVideoConversionInstance_v15_2 (void)
+IDeckLinkVideoConversion* CreateVideoConversionInstance (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -175,7 +175,7 @@ IDeckLinkVideoConversion* CreateVideoConversionInstance_v15_2 (void)
 	return gCreateVideoConversionFunc();
 }
 
-IDeckLinkDiscovery* CreateDeckLinkDiscoveryInstance_v15_2 (void)
+IDeckLinkDiscovery* CreateDeckLinkDiscoveryInstance (void)
 {
 	pthread_once(&gDeckLinkOnceControl, InitDeckLinkAPI);
 	
@@ -224,7 +224,7 @@ static void InitBMDStreamingAPI(void)
 	}
 }
 
-IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance_v15_2()
+IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance()
 {
 	pthread_once(&gBMDStreamingOnceControl, InitBMDStreamingAPI);
 
@@ -234,7 +234,7 @@ IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance_v15_2()
 	return gCreateDiscoveryFunc();
 }
 
-IBMDStreamingH264NALParser* CreateBMDStreamingH264NALParser_v15_2()
+IBMDStreamingH264NALParser* CreateBMDStreamingH264NALParser()
 {
 	pthread_once(&gBMDStreamingOnceControl, InitBMDStreamingAPI);
 

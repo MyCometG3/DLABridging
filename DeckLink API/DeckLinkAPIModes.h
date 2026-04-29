@@ -1,5 +1,5 @@
 /* -LICENSE-START-
-** Copyright (c) 2025 Blackmagic Design
+** Copyright (c) 2026 Blackmagic Design
 **
 ** Permission is hereby granted, free of charge, to any person or organization
 ** obtaining a copy of the software and accompanying documentation covered by
@@ -197,9 +197,6 @@ enum _BMDDisplayMode {
     bmdMode2560x1440p60                                          = /* 'wqh6' */ 0x77716836,
     bmdMode2560x1600p50                                          = /* 'wqx5' */ 0x77717835,
     bmdMode2560x1600p60                                          = /* 'wqx6' */ 0x77717836,
-
-    /* Special Modes */
-
     bmdModeUnknown                                               = /* 'iunk' */ 0x69756E6B
 };
 
@@ -229,10 +226,10 @@ enum _BMDPixelFormat {
     bmdFormat12BitRGBLE                                          = /* 'R12L' */ 0x5231324C,	// Little-endian RGB 12-bit per component with full range (0-4095). Packed as 12-bit per component
     bmdFormat10BitRGBXLE                                         = /* 'R10l' */ 0x5231306C,	// Little-endian 10-bit RGB with SMPTE video levels (64-940)
     bmdFormat10BitRGBX                                           = /* 'R10b' */ 0x52313062,	// Big-endian 10-bit RGB with SMPTE video levels (64-940)
-    bmdFormatH265                                                = /* 'hev1' */ 0x68657631,	// High Efficiency Video Coding (HEVC/h.265)
 
-    /* AVID DNxHR */
+    /* Formats supported only by devices that can be queried for an IDeckLinkEncoderInput */
 
+    bmdFormatH265                                                = /* 'hev1' */ 0x68657631,
     bmdFormatDNxHR                                               = /* 'AVdh' */ 0x41566468
 };
 

@@ -1,5 +1,5 @@
 /* -LICENSE-START-
- ** Copyright (c) 2025 Blackmagic Design
+ ** Copyright (c) 2026 Blackmagic Design
  **  
  ** Permission is hereby granted, free of charge, to any person or organization 
  ** obtaining a copy of the software and accompanying documentation (the 
@@ -83,8 +83,8 @@
 BMD_CONST REFIID IID_IDeckLinkVideoOutputCallback                 = /* 5BE6DF26-02CE-433E-99D9-9A87C3AC171F */ { 0x5B,0xE6,0xDF,0x26,0x02,0xCE,0x43,0x3E,0x99,0xD9,0x9A,0x87,0xC3,0xAC,0x17,0x1F };
 BMD_CONST REFIID IID_IDeckLinkInputCallback                       = /* 3A94F075-C37D-4BA8-BCC0-1D778C8F881B */ { 0x3A,0x94,0xF0,0x75,0xC3,0x7D,0x4B,0xA8,0xBC,0xC0,0x1D,0x77,0x8C,0x8F,0x88,0x1B };
 BMD_CONST REFIID IID_IDeckLinkEncoderInputCallback                = /* ACF13E61-F4A0-4974-A6A7-59AFF6268B31 */ { 0xAC,0xF1,0x3E,0x61,0xF4,0xA0,0x49,0x74,0xA6,0xA7,0x59,0xAF,0xF6,0x26,0x8B,0x31 };
-BMD_CONST REFIID IID_IDeckLinkVideoBufferAllocator                = /* 3481A4DF-2B11-4E55-AC61-836B87985E9A */ { 0x34,0x81,0xA4,0xDF,0x2B,0x11,0x4E,0x55,0xAC,0x61,0x83,0x6B,0x87,0x98,0x5E,0x9A };
-BMD_CONST REFIID IID_IDeckLinkVideoBufferAllocatorProvider        = /* 08B80403-BFF2-49D0-B448-8C908B9E9FC9 */ { 0x08,0xB8,0x04,0x03,0xBF,0xF2,0x49,0xD0,0xB4,0x48,0x8C,0x90,0x8B,0x9E,0x9F,0xC9 };
+BMD_CONST REFIID IID_IDeckLinkVideoBufferAllocator                = /* F35DFA8D-9078-4622-95BB-56894054EB0F */ { 0xF3,0x5D,0xFA,0x8D,0x90,0x78,0x46,0x22,0x95,0xBB,0x56,0x89,0x40,0x54,0xEB,0x0F };
+BMD_CONST REFIID IID_IDeckLinkVideoBufferAllocatorProvider        = /* 6DF6F20A-D8DF-45D2-8914-383CE7E6243F */ { 0x6D,0xF6,0xF2,0x0A,0xD8,0xDF,0x45,0xD2,0x89,0x14,0x38,0x3C,0xE7,0xE6,0x24,0x3F };
 BMD_CONST REFIID IID_IDeckLinkAudioOutputCallback                 = /* 403C681B-7F46-4A12-B993-2BB127084EE6 */ { 0x40,0x3C,0x68,0x1B,0x7F,0x46,0x4A,0x12,0xB9,0x93,0x2B,0xB1,0x27,0x08,0x4E,0xE6 };
 BMD_CONST REFIID IID_IDeckLinkIterator                            = /* 50FB36CD-3063-4B73-BDBB-958087F2D8BA */ { 0x50,0xFB,0x36,0xCD,0x30,0x63,0x4B,0x73,0xBD,0xBB,0x95,0x80,0x87,0xF2,0xD8,0xBA };
 BMD_CONST REFIID IID_IDeckLinkAPIInformation                      = /* 7BEA3C68-730D-4322-AF34-8A7152B532A4 */ { 0x7B,0xEA,0x3C,0x68,0x73,0x0D,0x43,0x22,0xAF,0x34,0x8A,0x71,0x52,0xB5,0x32,0xA4 };
@@ -93,13 +93,13 @@ BMD_CONST REFIID IID_IDeckLinkIPFlowStatus                        = /* 31C41656-
 BMD_CONST REFIID IID_IDeckLinkIPFlowSetting                       = /* 86DD9174-27D3-4032-B2AD-6067C3BB2424 */ { 0x86,0xDD,0x91,0x74,0x27,0xD3,0x40,0x32,0xB2,0xAD,0x60,0x67,0xC3,0xBB,0x24,0x24 };
 BMD_CONST REFIID IID_IDeckLinkIPFlow                              = /* C5FC83C7-5B8E-42A7-9A40-7C065955D4E1 */ { 0xC5,0xFC,0x83,0xC7,0x5B,0x8E,0x42,0xA7,0x9A,0x40,0x7C,0x06,0x59,0x55,0xD4,0xE1 };
 BMD_CONST REFIID IID_IDeckLinkIPFlowIterator                      = /* BD296AB2-A5C5-4153-888F-AAB1FDBD8A5C */ { 0xBD,0x29,0x6A,0xB2,0xA5,0xC5,0x41,0x53,0x88,0x8F,0xAA,0xB1,0xFD,0xBD,0x8A,0x5C };
-BMD_CONST REFIID IID_IDeckLinkOutput                              = /* 1A8077F1-9FE2-4533-8147-2294305E253F */ { 0x1A,0x80,0x77,0xF1,0x9F,0xE2,0x45,0x33,0x81,0x47,0x22,0x94,0x30,0x5E,0x25,0x3F };
+BMD_CONST REFIID IID_IDeckLinkOutput                              = /* 5F227C95-39D7-46C7-8B7D-9C81795FBBE4 */ { 0x5F,0x22,0x7C,0x95,0x39,0xD7,0x46,0xC7,0x8B,0x7D,0x9C,0x81,0x79,0x5F,0xBB,0xE4 };
 BMD_CONST REFIID IID_IDeckLinkMacOutput                           = /* 22EFC84B-6981-4D35-9F9A-9CEC5790107E */ { 0x22,0xEF,0xC8,0x4B,0x69,0x81,0x4D,0x35,0x9F,0x9A,0x9C,0xEC,0x57,0x90,0x10,0x7E };
-BMD_CONST REFIID IID_IDeckLinkInput                               = /* 4095DB82-E294-4B8C-AAA8-3B9E80C49336 */ { 0x40,0x95,0xDB,0x82,0xE2,0x94,0x4B,0x8C,0xAA,0xA8,0x3B,0x9E,0x80,0xC4,0x93,0x36 };
+BMD_CONST REFIID IID_IDeckLinkInput                               = /* 6A515F8A-FBCE-4853-B0F7-2A09DB1ECA0B */ { 0x6A,0x51,0x5F,0x8A,0xFB,0xCE,0x48,0x53,0xB0,0xF7,0x2A,0x09,0xDB,0x1E,0xCA,0x0B };
 BMD_CONST REFIID IID_IDeckLinkIPExtensions                        = /* 46CF7903-A9FD-4D0B-8FFC-0103722AB442 */ { 0x46,0xCF,0x79,0x03,0xA9,0xFD,0x4D,0x0B,0x8F,0xFC,0x01,0x03,0x72,0x2A,0xB4,0x42 };
 BMD_CONST REFIID IID_IDeckLinkHDMIInputEDID                       = /* ABBBACBC-45BC-4665-9D92-ACE6E5A97902 */ { 0xAB,0xBB,0xAC,0xBC,0x45,0xBC,0x46,0x65,0x9D,0x92,0xAC,0xE6,0xE5,0xA9,0x79,0x02 };
 BMD_CONST REFIID IID_IDeckLinkEncoderInput                        = /* 46C1332E-6FD9-472A-8591-FE59C22192E1 */ { 0x46,0xC1,0x33,0x2E,0x6F,0xD9,0x47,0x2A,0x85,0x91,0xFE,0x59,0xC2,0x21,0x92,0xE1 };
-BMD_CONST REFIID IID_IDeckLinkVideoBuffer                         = /* CCB4B64A-5C86-4E02-B778-885D352709FE */ { 0xCC,0xB4,0xB6,0x4A,0x5C,0x86,0x4E,0x02,0xB7,0x78,0x88,0x5D,0x35,0x27,0x09,0xFE };
+BMD_CONST REFIID IID_IDeckLinkVideoBuffer                         = /* 81F03D70-DE13-4B17-873A-C8AC9689C682 */ { 0x81,0xF0,0x3D,0x70,0xDE,0x13,0x4B,0x17,0x87,0x3A,0xC8,0xAC,0x96,0x89,0xC6,0x82 };
 BMD_CONST REFIID IID_IDeckLinkMacVideoBuffer                      = /* 3FBEDC55-AA43-4EAB-B12F-FA1299C7C324 */ { 0x3F,0xBE,0xDC,0x55,0xAA,0x43,0x4E,0xAB,0xB1,0x2F,0xFA,0x12,0x99,0xC7,0xC3,0x24 };
 BMD_CONST REFIID IID_IDeckLinkVideoFrame                          = /* 6502091C-615F-4F51-BAF6-45C4256DD5B0 */ { 0x65,0x02,0x09,0x1C,0x61,0x5F,0x4F,0x51,0xBA,0xF6,0x45,0xC4,0x25,0x6D,0xD5,0xB0 };
 BMD_CONST REFIID IID_IDeckLinkMutableVideoFrame                   = /* CF9EB134-0374-4C5B-95FA-1EC14819FF62 */ { 0xCF,0x9E,0xB1,0x34,0x03,0x74,0x4C,0x5B,0x95,0xFA,0x1E,0xC1,0x48,0x19,0xFF,0x62 };
@@ -121,15 +121,16 @@ BMD_CONST REFIID IID_IDeckLinkCocoaScreenPreviewCallback          = /* 91945B73-
 BMD_CONST REFIID IID_IDeckLinkGLScreenPreviewHelper               = /* CEB778E2-C202-4EC8-9085-0CD285CC5522 */ { 0xCE,0xB7,0x78,0xE2,0xC2,0x02,0x4E,0xC8,0x90,0x85,0x0C,0xD2,0x85,0xCC,0x55,0x22 };
 BMD_CONST REFIID IID_IDeckLinkMetalScreenPreviewHelper            = /* C15739C7-A5EF-4F0E-A7CB-6806CB87E032 */ { 0xC1,0x57,0x39,0xC7,0xA5,0xEF,0x4F,0x0E,0xA7,0xCB,0x68,0x06,0xCB,0x87,0xE0,0x32 };
 BMD_CONST REFIID IID_IDeckLinkNotificationCallback                = /* B002A1EC-070D-4288-8289-BD5D36E5FF0D */ { 0xB0,0x02,0xA1,0xEC,0x07,0x0D,0x42,0x88,0x82,0x89,0xBD,0x5D,0x36,0xE5,0xFF,0x0D };
-BMD_CONST REFIID IID_IDeckLinkNotification                        = /* B85DF4C8-BDF5-47C1-8064-28162EBDD4EB */ { 0xB8,0x5D,0xF4,0xC8,0xBD,0xF5,0x47,0xC1,0x80,0x64,0x28,0x16,0x2E,0xBD,0xD4,0xEB };
-BMD_CONST REFIID IID_IDeckLinkProfileAttributes                   = /* 17D4BF8E-4911-473A-80A0-731CF6FF345B */ { 0x17,0xD4,0xBF,0x8E,0x49,0x11,0x47,0x3A,0x80,0xA0,0x73,0x1C,0xF6,0xFF,0x34,0x5B };
+BMD_CONST REFIID IID_IDeckLinkNotification                        = /* 1D70FAAC-FD27-4866-9DE6-0939D1E4C7F1 */ { 0x1D,0x70,0xFA,0xAC,0xFD,0x27,0x48,0x66,0x9D,0xE6,0x09,0x39,0xD1,0xE4,0xC7,0xF1 };
+BMD_CONST REFIID IID_IDeckLinkProfileAttributes                   = /* F47551D7-AD22-47AF-BCFD-6BE88AA879D9 */ { 0xF4,0x75,0x51,0xD7,0xAD,0x22,0x47,0xAF,0xBC,0xFD,0x6B,0xE8,0x8A,0xA8,0x79,0xD9 };
 BMD_CONST REFIID IID_IDeckLinkProfileIterator                     = /* 29E5A8C0-8BE4-46EB-93AC-31DAAB5B7BF2 */ { 0x29,0xE5,0xA8,0xC0,0x8B,0xE4,0x46,0xEB,0x93,0xAC,0x31,0xDA,0xAB,0x5B,0x7B,0xF2 };
 BMD_CONST REFIID IID_IDeckLinkProfile                             = /* 16093466-674A-432B-9DA0-1AC2C5A8241C */ { 0x16,0x09,0x34,0x66,0x67,0x4A,0x43,0x2B,0x9D,0xA0,0x1A,0xC2,0xC5,0xA8,0x24,0x1C };
 BMD_CONST REFIID IID_IDeckLinkProfileCallback                     = /* A4F9341E-97AA-4E04-8935-15F809898CEA */ { 0xA4,0xF9,0x34,0x1E,0x97,0xAA,0x4E,0x04,0x89,0x35,0x15,0xF8,0x09,0x89,0x8C,0xEA };
 BMD_CONST REFIID IID_IDeckLinkProfileManager                      = /* 30D41429-3998-4B6D-84F8-78C94A797C6E */ { 0x30,0xD4,0x14,0x29,0x39,0x98,0x4B,0x6D,0x84,0xF8,0x78,0xC9,0x4A,0x79,0x7C,0x6E };
-BMD_CONST REFIID IID_IDeckLinkStatus                              = /* 5F558200-4028-49BC-BEAC-DB3FA4A96E46 */ { 0x5F,0x55,0x82,0x00,0x40,0x28,0x49,0xBC,0xBE,0xAC,0xDB,0x3F,0xA4,0xA9,0x6E,0x46 };
+BMD_CONST REFIID IID_IDeckLinkStatistics                          = /* 21CB2ED1-4429-42BE-AAF3-22A3B1DD3AE0 */ { 0x21,0xCB,0x2E,0xD1,0x44,0x29,0x42,0xBE,0xAA,0xF3,0x22,0xA3,0xB1,0xDD,0x3A,0xE0 };
+BMD_CONST REFIID IID_IDeckLinkStatus                              = /* 2A04A635-ED42-41EF-9342-0E11F8CF6B5E */ { 0x2A,0x04,0xA6,0x35,0xED,0x42,0x41,0xEF,0x93,0x42,0x0E,0x11,0xF8,0xCF,0x6B,0x5E };
 BMD_CONST REFIID IID_IDeckLinkKeyer                               = /* 89AFCAF5-65F8-421E-98F7-96FE5F5BFBA3 */ { 0x89,0xAF,0xCA,0xF5,0x65,0xF8,0x42,0x1E,0x98,0xF7,0x96,0xFE,0x5F,0x5B,0xFB,0xA3 };
-BMD_CONST REFIID IID_IDeckLinkVideoConversion                     = /* A48755D9-8BD5-4727-A1E9-069FDEDBA6E9 */ { 0xA4,0x87,0x55,0xD9,0x8B,0xD5,0x47,0x27,0xA1,0xE9,0x06,0x9F,0xDE,0xDB,0xA6,0xE9 };
+BMD_CONST REFIID IID_IDeckLinkVideoConversion                     = /* 94C536D6-C821-42F5-A600-C66629955101 */ { 0x94,0xC5,0x36,0xD6,0xC8,0x21,0x42,0xF5,0xA6,0x00,0xC6,0x66,0x29,0x95,0x51,0x01 };
 BMD_CONST REFIID IID_IDeckLinkDeviceNotificationCallback          = /* 4997053B-0ADF-4CC8-AC70-7A50C4BE728F */ { 0x49,0x97,0x05,0x3B,0x0A,0xDF,0x4C,0xC8,0xAC,0x70,0x7A,0x50,0xC4,0xBE,0x72,0x8F };
 BMD_CONST REFIID IID_IDeckLinkDiscovery                           = /* CDBF631C-BC76-45FA-B44D-C55059BC6101 */ { 0xCD,0xBF,0x63,0x1C,0xBC,0x76,0x45,0xFA,0xB4,0x4D,0xC5,0x50,0x59,0xBC,0x61,0x01 };
 
@@ -167,7 +168,8 @@ enum _BMDSupportedVideoModeFlags {
     bmdSupportedVideoModeSDIQuadLink                             = 1 << 4,
     bmdSupportedVideoModeInAnyProfile                            = 1 << 5,
     bmdSupportedVideoModePsF                                     = 1 << 6,
-    bmdSupportedVideoModeDolbyVision                             = 1 << 7
+    bmdSupportedVideoModeDolbyVision                             = 1 << 7,
+    bmdSupportedVideoModeEthernetIP10                            = 1 << 8
 };
 
 /* Enum BMDPacketType - Type of packet */
@@ -251,6 +253,15 @@ enum _BMDReferenceStatus {
     bmdReferenceUnlocked                                         = 0,
     bmdReferenceNotSupportedByHardware                           = 1 << 0,
     bmdReferenceLocked                                           = 1 << 1
+};
+
+/* Enum BMDEthernetNMOSRegistryState -  */
+
+typedef uint32_t BMDEthernetNMOSRegistryState;
+enum _BMDEthernetNMOSRegistryState {
+    bmdEthernetNMOSRegistryConnecting                            = /* 'conn' */ 0x636F6E6E,
+    bmdEthernetNMOSRegistryActive                                = /* 'good' */ 0x676F6F64,
+    bmdEthernetNMOSRegistryError                                 = /* 'erro' */ 0x6572726F
 };
 
 /* Enum BMDAudioFormat - Audio Format */
@@ -464,6 +475,7 @@ enum _BMDDeckLinkFrameMetadataID {
 
     bmdDeckLinkFrameMetadataColorspace                           = /* 'cspc' */ 0x63737063,	// Colorspace of video frame (see BMDColorspace)
     bmdDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,	// EOTF in range 0-7 as per CEA 861.3
+    bmdDeckLinkFrameMetadataRTPTimestamp                         = /* 'rtpt' */ 0x72747074,	// RTP timestamp
 
     /* Dolby Vision only - Bytes */
 
@@ -603,6 +615,7 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkMaximumAnalogAudioInputChannels                   = /* 'iach' */ 0x69616368,
     BMDDeckLinkMaximumAnalogAudioOutputChannels                  = /* 'aach' */ 0x61616368,
     BMDDeckLinkNumberOfSubDevices                                = /* 'nsbd' */ 0x6E736264,
+    BMDDeckLinkNumberOfEthernetConnectors                        = /* 'neth' */ 0x6E657468,
     BMDDeckLinkSubDeviceIndex                                    = /* 'subi' */ 0x73756269,
     BMDDeckLinkPersistentID                                      = /* 'peid' */ 0x70656964,
     BMDDeckLinkDeviceGroupID                                     = /* 'dgid' */ 0x64676964,
@@ -644,7 +657,10 @@ enum _BMDDeckLinkAttributeID {
     BMDDeckLinkDisplayName                                       = /* 'dspn' */ 0x6473706E,
     BMDDeckLinkModelName                                         = /* 'mdln' */ 0x6D646C6E,
     BMDDeckLinkDeviceHandle                                      = /* 'devh' */ 0x64657668,
-    BMDDeckLinkEthernetMACAddress                                = /* 'eMAC' */ 0x654D4143
+
+    /* Parameterized Strings */
+
+    BMDDeckLinkParamEthernetMACAddress                           = /* 'pMAC' */ 0x704D4143
 };
 
 /* Enum BMDDeckLinkAPIInformationID - DeckLinkAPI information ID */
@@ -657,26 +673,49 @@ enum _BMDDeckLinkAPIInformationID {
     BMDDeckLinkAPIVersion                                        = /* 'vers' */ 0x76657273
 };
 
+/* Enum BMDDeckLinkStatisticID - DeckLink Statistic ID */
+
+typedef uint32_t BMDDeckLinkStatisticID;
+enum _BMDDeckLinkStatisticID {
+
+    /* Integers */
+
+    bmdDeckLinkStatisticPTPLossOfLock                            = /* 'nlol' */ 0x6E6C6F6C,
+    bmdDeckLinkStatisticPTPDPLLMarginOfError                     = /* 'ptpe' */ 0x70747065,
+    bmdDeckLinkStatisticDeviceTemperature                        = /* 'Stmp' */ 0x53746D70,
+
+    /* Parameterized Integers */
+
+    bmdDeckLinkStatisticParamEthernetRxPackets                   = /* 'ntrx' */ 0x6E747278,
+    bmdDeckLinkStatisticParamEthernetRxDroppedPackets            = /* 'ndrx' */ 0x6E647278,
+
+    /* Parameterized Strings */
+
+    bmdDeckLinkStatisticParamEthernetSFPDynamicInfo              = /* 'sfps' */ 0x73667073
+};
+
 /* Enum BMDDeckLinkStatusID - DeckLink Status ID */
 
 typedef uint32_t BMDDeckLinkStatusID;
 enum _BMDDeckLinkStatusID {
 
-    /* Integers */
+    /* Integers / Interfaces */
 
     bmdDeckLinkStatusDetectedVideoInputMode                      = /* 'dvim' */ 0x6476696D,
+    bmdDeckLinkStatusCurrentVideoInputMode                       = /* 'cvim' */ 0x6376696D,
+    bmdDeckLinkStatusCurrentVideoOutputMode                      = /* 'cvom' */ 0x63766F6D,
+    bmdDeckLinkStatusHDMIOutputActualMode                        = /* 'hiam' */ 0x6869616D,
+
+    /* Integers */
+
     bmdDeckLinkStatusDetectedVideoInputFormatFlags               = /* 'dvff' */ 0x64766666,
     bmdDeckLinkStatusDetectedVideoInputFieldDominance            = /* 'dvfd' */ 0x64766664,
     bmdDeckLinkStatusDetectedVideoInputColorspace                = /* 'dscl' */ 0x6473636C,
     bmdDeckLinkStatusDetectedVideoInputDynamicRange              = /* 'dsdr' */ 0x64736472,
     bmdDeckLinkStatusDetectedSDILinkConfiguration                = /* 'dslc' */ 0x64736C63,
-    bmdDeckLinkStatusCurrentVideoInputMode                       = /* 'cvim' */ 0x6376696D,
     bmdDeckLinkStatusCurrentVideoInputPixelFormat                = /* 'cvip' */ 0x63766970,
     bmdDeckLinkStatusCurrentVideoInputFlags                      = /* 'cvif' */ 0x63766966,
-    bmdDeckLinkStatusCurrentVideoOutputMode                      = /* 'cvom' */ 0x63766F6D,
     bmdDeckLinkStatusCurrentVideoOutputFlags                     = /* 'cvof' */ 0x63766F66,
-    bmdDeckLinkStatusEthernetLink                                = /* 'sels' */ 0x73656C73,
-    bmdDeckLinkStatusEthernetLinkMbps                            = /* 'sesp' */ 0x73657370,
     bmdDeckLinkStatusPCIExpressLinkWidth                         = /* 'pwid' */ 0x70776964,
     bmdDeckLinkStatusPCIExpressLinkSpeed                         = /* 'plnk' */ 0x706C6E6B,
     bmdDeckLinkStatusLastVideoOutputPixelFormat                  = /* 'opix' */ 0x6F706978,
@@ -684,11 +723,10 @@ enum _BMDDeckLinkStatusID {
     bmdDeckLinkStatusReferenceSignalFlags                        = /* 'reff' */ 0x72656666,
     bmdDeckLinkStatusBusy                                        = /* 'busy' */ 0x62757379,
     bmdDeckLinkStatusInterchangeablePanelType                    = /* 'icpt' */ 0x69637074,
-    bmdDeckLinkStatusDeviceTemperature                           = /* 'dtmp' */ 0x64746D70,
-    bmdDeckLinkStatusHDMIOutputActualMode                        = /* 'hiam' */ 0x6869616D,
     bmdDeckLinkStatusHDMIOutputActualFormatFlags                 = /* 'hiaf' */ 0x68696166,
     bmdDeckLinkStatusHDMIOutputFRLRate                           = /* 'hiof' */ 0x68696F66,
     bmdDeckLinkStatusHDMIInputFRLRate                            = /* 'hiif' */ 0x68696966,
+    bmdDeckLinkStatusEthernetManualNMOSRegistry                  = /* 'nmme' */ 0x6E6D6D65,
     bmdDeckLinkStatusHDMIOutputTMDSLineRate                      = /* 'hilr' */ 0x68696C72,
 
     /* Floats */
@@ -698,24 +736,35 @@ enum _BMDDeckLinkStatusID {
     /* Flags */
 
     bmdDeckLinkStatusVideoInputSignalLocked                      = /* 'visl' */ 0x7669736C,
+    bmdDeckLinkStatusAncillaryInputSignalLocked                  = /* 'aisl' */ 0x6169736C,
     bmdDeckLinkStatusReferenceSignalLocked                       = /* 'refl' */ 0x7265666C,
 
     /* Strings */
 
-    bmdDeckLinkStatusEthernetLocalIPAddress                      = /* 'seip' */ 0x73656970,
-    bmdDeckLinkStatusEthernetSubnetMask                          = /* 'sesm' */ 0x7365736D,
-    bmdDeckLinkStatusEthernetGatewayIPAddress                    = /* 'segw' */ 0x73656777,
-    bmdDeckLinkStatusEthernetPrimaryDNS                          = /* 'sepd' */ 0x73657064,
-    bmdDeckLinkStatusEthernetSecondaryDNS                        = /* 'sesd' */ 0x73657364,
     bmdDeckLinkStatusEthernetPTPGrandmasterIdentity              = /* 'spid' */ 0x73706964,
-    bmdDeckLinkStatusEthernetVideoOutputAddress                  = /* 'soav' */ 0x736F6176,
-    bmdDeckLinkStatusEthernetAudioOutputAddress                  = /* 'soaa' */ 0x736F6161,
-    bmdDeckLinkStatusEthernetAncillaryOutputAddress              = /* 'soaA' */ 0x736F6141,
     bmdDeckLinkStatusEthernetAudioInputChannelOrder              = /* 'saco' */ 0x7361636F,
+    bmdDeckLinkStatusEthernetCurrentNMOSRegistry                 = /* 'nmre' */ 0x6E6D7265,
 
     /* Bytes */
 
-    bmdDeckLinkStatusReceivedEDID                                = /* 'edid' */ 0x65646964
+    bmdDeckLinkStatusReceivedEDID                                = /* 'edid' */ 0x65646964,
+
+    /* Parameterized Integers */
+
+    bmdDeckLinkStatusParamEthernetLink                           = /* 'sels' */ 0x73656C73,
+    bmdDeckLinkStatusParamEthernetLinkMbps                       = /* 'sesp' */ 0x73657370,
+
+    /* Parameterized Strings */
+
+    bmdDeckLinkStatusParamEthernetLocalIPAddress                 = /* 'seip' */ 0x73656970,
+    bmdDeckLinkStatusParamEthernetSubnetMask                     = /* 'sesm' */ 0x7365736D,
+    bmdDeckLinkStatusParamEthernetGatewayIPAddress               = /* 'segw' */ 0x73656777,
+    bmdDeckLinkStatusParamEthernetPrimaryDNS                     = /* 'sepd' */ 0x73657064,
+    bmdDeckLinkStatusParamEthernetSecondaryDNS                   = /* 'sesd' */ 0x73657364,
+    bmdDeckLinkStatusParamEthernetSFPStaticInfo                  = /* 'sfpi' */ 0x73667069,
+    bmdDeckLinkStatusParamEthernetVideoOutputAddress             = /* 'soav' */ 0x736F6176,
+    bmdDeckLinkStatusParamEthernetAudioOutputAddress             = /* 'soaa' */ 0x736F6161,
+    bmdDeckLinkStatusParamEthernetAncillaryOutputAddress         = /* 'soaA' */ 0x736F6141
 };
 
 /* Enum BMDDeckLinkVideoStatusFlags -  */
@@ -898,6 +947,7 @@ class IDeckLinkProfileIterator;
 class IDeckLinkProfile;
 class IDeckLinkProfileCallback;
 class IDeckLinkProfileManager;
+class IDeckLinkStatistics;
 class IDeckLinkStatus;
 class IDeckLinkKeyer;
 class IDeckLinkVideoConversion;
@@ -1079,7 +1129,7 @@ public:
     virtual HRESULT CreateVideoFrame (/* in */ int32_t width, /* in */ int32_t height, /* in */ int32_t rowBytes, /* in */ BMDPixelFormat pixelFormat, /* in */ BMDFrameFlags flags, /* out */ IDeckLinkMutableVideoFrame** outFrame) = 0;
     virtual HRESULT CreateVideoFrameWithBuffer (/* in */ int32_t width, /* in */ int32_t height, /* in */ int32_t rowBytes, /* in */ BMDPixelFormat pixelFormat, /* in */ BMDFrameFlags flags, /* in */ IDeckLinkVideoBuffer* buffer, /* out */ IDeckLinkMutableVideoFrame** outFrame) = 0;
     virtual HRESULT RowBytesForPixelFormat (/* in */ BMDPixelFormat pixelFormat, /* in */ int32_t width, /* out */ int32_t* rowBytes) = 0;
-    virtual HRESULT CreateAncillaryData (/* in */ BMDPixelFormat pixelFormat, /* out */ IDeckLinkVideoFrameAncillary** outBuffer) = 0;	// Use of IDeckLinkVideoFrameAncillaryPackets is preferred
+    virtual HRESULT CreateAncillaryData (/* in */ BMDPixelFormat pixelFormat, /* out */ IDeckLinkVideoFrameAncillary** outBuffer) = 0;	// Deprecated. Use of IDeckLinkVideoFrameAncillaryPackets is preferred
     virtual HRESULT DisplayVideoFrameSync (/* in */ IDeckLinkVideoFrame* theFrame) = 0;
     virtual HRESULT ScheduleVideoFrame (/* in */ IDeckLinkVideoFrame* theFrame, /* in */ BMDTimeValue displayTime, /* in */ BMDTimeValue displayDuration, /* in */ BMDTimeScale timeScale) = 0;
     virtual HRESULT SetScheduledFrameCompletionCallback (/* in */ IDeckLinkVideoOutputCallback* theCallback) = 0;
@@ -1232,6 +1282,7 @@ class BMD_PUBLIC IDeckLinkVideoBuffer : public IUnknown
 {
 public:
     virtual HRESULT GetBytes (/* out */ void** buffer) = 0;
+    virtual HRESULT GetSize (/* out */ uint64_t* size) = 0;
     virtual HRESULT StartAccess (/* in */ BMDBufferAccessFlags flags) = 0;
     virtual HRESULT EndAccess (/* in */ BMDBufferAccessFlags flags) = 0;
 
@@ -1261,7 +1312,7 @@ public:
     virtual BMDPixelFormat GetPixelFormat (void) = 0;
     virtual BMDFrameFlags GetFlags (void) = 0;
     virtual HRESULT GetTimecode (/* in */ BMDTimecodeFormat format, /* out */ IDeckLinkTimecode** timecode) = 0;
-    virtual HRESULT GetAncillaryData (/* out */ IDeckLinkVideoFrameAncillary** ancillary) = 0;	// Use of IDeckLinkVideoFrameAncillaryPackets is preferred
+    virtual HRESULT GetAncillaryData (/* out */ IDeckLinkVideoFrameAncillary** ancillary) = 0;	// Deprecated. Use of IDeckLinkVideoFrameAncillaryPackets is preferred
 
 protected:
     virtual ~IDeckLinkVideoFrame () {} // call Release method to drop reference count
@@ -1275,7 +1326,7 @@ public:
     virtual HRESULT SetFlags (/* in */ BMDFrameFlags newFlags) = 0;
     virtual HRESULT SetTimecode (/* in */ BMDTimecodeFormat format, /* in */ IDeckLinkTimecode* timecode) = 0;
     virtual HRESULT SetTimecodeFromComponents (/* in */ BMDTimecodeFormat format, /* in */ uint8_t hours, /* in */ uint8_t minutes, /* in */ uint8_t seconds, /* in */ uint8_t frames, /* in */ BMDTimecodeFlags flags) = 0;
-    virtual HRESULT SetAncillaryData (/* in */ IDeckLinkVideoFrameAncillary* ancillary) = 0;
+    virtual HRESULT SetAncillaryData (/* in */ IDeckLinkVideoFrameAncillary* ancillary) = 0;	// Deprecated. Use of IDeckLinkVideoFrameAncillaryPackets is preferred
     virtual HRESULT SetTimecodeUserBits (/* in */ BMDTimecodeFormat format, /* in */ BMDTimecodeUserBits userBits) = 0;
     virtual HRESULT SetInterfaceProvider (/* in */ REFIID iid, /* in */ IUnknown* iface) = 0;
 
@@ -1537,6 +1588,7 @@ public:
     virtual HRESULT GetInt (/* in */ BMDDeckLinkAttributeID cfgID, /* out */ int64_t* value) = 0;
     virtual HRESULT GetFloat (/* in */ BMDDeckLinkAttributeID cfgID, /* out */ double* value) = 0;
     virtual HRESULT GetString (/* in */ BMDDeckLinkAttributeID cfgID, /* out */ CFStringRef* value) = 0;
+    virtual HRESULT GetStringWithParam (/* in */ BMDDeckLinkAttributeID cfgID, /* in */ uint64_t param, /* out */ CFStringRef* value) = 0;
 
 protected:
     virtual ~IDeckLinkProfileAttributes () {} // call Release method to drop reference count
@@ -1592,6 +1644,19 @@ protected:
     virtual ~IDeckLinkProfileManager () {} // call Release method to drop reference count
 };
 
+/* Interface IDeckLinkStatistics - DeckLink Statistics interface */
+
+class BMD_PUBLIC IDeckLinkStatistics : public IUnknown
+{
+public:
+    virtual HRESULT GetInt (/* in */ BMDDeckLinkStatisticID statID, /* out */ int64_t* value) = 0;
+    virtual HRESULT GetIntWithParam (/* in */ BMDDeckLinkStatisticID statID, /* in */ uint64_t param, /* out */ int64_t* value) = 0;
+    virtual HRESULT GetStringWithParam (/* in */ BMDDeckLinkStatisticID statID, /* in */ uint64_t param, /* out */ CFStringRef* value) = 0;
+
+protected:
+    virtual ~IDeckLinkStatistics () {} // call Release method to drop reference count
+};
+
 /* Interface IDeckLinkStatus - DeckLink Status interface */
 
 class BMD_PUBLIC IDeckLinkStatus : public IUnknown
@@ -1602,6 +1667,12 @@ public:
     virtual HRESULT GetFloat (/* in */ BMDDeckLinkStatusID statusID, /* out */ double* value) = 0;
     virtual HRESULT GetString (/* in */ BMDDeckLinkStatusID statusID, /* out */ CFStringRef* value) = 0;
     virtual HRESULT GetBytes (/* in */ BMDDeckLinkStatusID statusID, /* out */ void* buffer, /* in, out */ uint32_t* bufferSize) = 0;
+    virtual HRESULT GetInterface (/* in */ BMDDeckLinkStatusID statusID, /* out */ void** iface) = 0;
+    virtual HRESULT GetFlagWithParam (/* in */ BMDDeckLinkStatusID statusID, /* in */ uint64_t param, /* out */ bool* value) = 0;
+    virtual HRESULT GetIntWithParam (/* in */ BMDDeckLinkStatusID statusID, /* in */ uint64_t param, /* out */ int64_t* value) = 0;
+    virtual HRESULT GetFloatWithParam (/* in */ BMDDeckLinkStatusID statusID, /* in */ uint64_t param, /* out */ double* value) = 0;
+    virtual HRESULT GetStringWithParam (/* in */ BMDDeckLinkStatusID statusID, /* in */ uint64_t param, /* out */ CFStringRef* value) = 0;
+    virtual HRESULT GetBytesWithParam (/* in */ BMDDeckLinkStatusID statusID, /* in */ uint64_t param, /* out */ void* buffer, /* in, out */ uint32_t* bufferSize) = 0;
 
 protected:
     virtual ~IDeckLinkStatus () {} // call Release method to drop reference count

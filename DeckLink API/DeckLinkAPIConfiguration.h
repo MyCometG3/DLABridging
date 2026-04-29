@@ -1,5 +1,5 @@
 /* -LICENSE-START-
-** Copyright (c) 2025 Blackmagic Design
+** Copyright (c) 2026 Blackmagic Design
 **
 ** Permission is hereby granted, free of charge, to any person or organization
 ** obtaining a copy of the software and accompanying documentation covered by
@@ -50,7 +50,7 @@
 
 // Interface ID Declarations
 
-BMD_CONST REFIID IID_IDeckLinkConfiguration                       = /* 912F634B-2D4E-40A4-8AAB-8D80B73F1289 */ { 0x91,0x2F,0x63,0x4B,0x2D,0x4E,0x40,0xA4,0x8A,0xAB,0x8D,0x80,0xB7,0x3F,0x12,0x89 };
+BMD_CONST REFIID IID_IDeckLinkConfiguration                       = /* 5A68FFD4-1C12-4EDE-A6D2-45451D385FC1 */ { 0x5A,0x68,0xFF,0xD4,0x1C,0x12,0x4E,0xDE,0xA6,0xD2,0x45,0x45,0x1D,0x38,0x5F,0xC1 };
 BMD_CONST REFIID IID_IDeckLinkEncoderConfiguration                = /* 138050E5-C60A-4552-BF3F-0F358049327E */ { 0x13,0x80,0x50,0xE5,0xC6,0x0A,0x45,0x52,0xBF,0x3F,0x0F,0x35,0x80,0x49,0x32,0x7E };
 
 /* Enum BMDDeckLinkConfigurationID - DeckLink Configuration ID */
@@ -91,6 +91,7 @@ enum _BMDDeckLinkConfigurationID {
     bmdDeckLinkConfigOutput1080pAsPsF                            = /* 'pfpr' */ 0x70667072,
     bmdDeckLinkConfigOutputValidateEDIDForDolbyVision            = /* 'pred' */ 0x70726564,
     bmdDeckLinkConfigExtendedDesktop                             = /* 'exdt' */ 0x65786474,
+    bmdDeckLinkConfigEthernetVideoOutputIP10                     = /* 'IP10' */ 0x49503130,
 
     /* Video Output Integers */
 
@@ -192,30 +193,38 @@ enum _BMDDeckLinkConfigurationID {
     bmdDeckLinkConfigHeadphoneVolume                             = /* 'hvol' */ 0x68766F6C,
     bmdDeckLinkConfigSpeakerVolume                               = /* 'svol' */ 0x73766F6C,
 
-    /* Network Flags */
+    /* Ethernet Flags */
 
-    bmdDeckLinkConfigEthernetUseDHCP                             = /* 'DHCP' */ 0x44484350,
     bmdDeckLinkConfigEthernetPTPFollowerOnly                     = /* 'PTPf' */ 0x50545066,
     bmdDeckLinkConfigEthernetPTPUseUDPEncapsulation              = /* 'PTPU' */ 0x50545055,
+    bmdDeckLinkConfigEthernetUseManualNMOSRegistry               = /* 'nmrp' */ 0x6E6D7270,
 
-    /* Network Integers */
+    /* Ethernet Integers */
 
     bmdDeckLinkConfigEthernetPTPPriority1                        = /* 'PTP1' */ 0x50545031,
     bmdDeckLinkConfigEthernetPTPPriority2                        = /* 'PTP2' */ 0x50545032,
     bmdDeckLinkConfigEthernetPTPDomain                           = /* 'PTPD' */ 0x50545044,
     bmdDeckLinkConfigEthernetPTPLogAnnounceInterval              = /* 'PTPA' */ 0x50545041,
 
-    /* Network Strings */
+    /* Ethernet Strings */
 
-    bmdDeckLinkConfigEthernetStaticLocalIPAddress                = /* 'nsip' */ 0x6E736970,
-    bmdDeckLinkConfigEthernetStaticSubnetMask                    = /* 'nssm' */ 0x6E73736D,
-    bmdDeckLinkConfigEthernetStaticGatewayIPAddress              = /* 'nsgw' */ 0x6E736777,
-    bmdDeckLinkConfigEthernetStaticPrimaryDNS                    = /* 'nspd' */ 0x6E737064,
-    bmdDeckLinkConfigEthernetStaticSecondaryDNS                  = /* 'nssd' */ 0x6E737364,
-    bmdDeckLinkConfigEthernetVideoOutputAddress                  = /* 'noav' */ 0x6E6F6176,
-    bmdDeckLinkConfigEthernetAudioOutputAddress                  = /* 'noaa' */ 0x6E6F6161,
-    bmdDeckLinkConfigEthernetAncillaryOutputAddress              = /* 'noaA' */ 0x6E6F6141,
     bmdDeckLinkConfigEthernetAudioOutputChannelOrder             = /* 'caco' */ 0x6361636F,
+    bmdDeckLinkConfigEthernetNMOSRegistryAddress                 = /* 'nmre' */ 0x6E6D7265,
+
+    /* Parameterized Ethernet Flags */
+
+    bmdDeckLinkConfigParamEthernetUseDHCP                        = /* 'DHCP' */ 0x44484350,
+
+    /* Parameterized Ethernet Strings */
+
+    bmdDeckLinkConfigParamEthernetStaticLocalIPAddress           = /* 'nsip' */ 0x6E736970,
+    bmdDeckLinkConfigParamEthernetStaticSubnetMask               = /* 'nssm' */ 0x6E73736D,
+    bmdDeckLinkConfigParamEthernetStaticGatewayIPAddress         = /* 'nsgw' */ 0x6E736777,
+    bmdDeckLinkConfigParamEthernetStaticPrimaryDNS               = /* 'nspd' */ 0x6E737064,
+    bmdDeckLinkConfigParamEthernetStaticSecondaryDNS             = /* 'nssd' */ 0x6E737364,
+    bmdDeckLinkConfigParamEthernetVideoOutputAddress             = /* 'noav' */ 0x6E6F6176,
+    bmdDeckLinkConfigParamEthernetAudioOutputAddress             = /* 'noaa' */ 0x6E6F6161,
+    bmdDeckLinkConfigParamEthernetAncillaryOutputAddress         = /* 'noaA' */ 0x6E6F6141,
 
     /* Device Information Strings */
 
@@ -283,6 +292,14 @@ public:
     virtual HRESULT GetFloat (/* in */ BMDDeckLinkConfigurationID cfgID, /* out */ double* value) = 0;
     virtual HRESULT SetString (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ CFStringRef value) = 0;
     virtual HRESULT GetString (/* in */ BMDDeckLinkConfigurationID cfgID, /* out */ CFStringRef* value) = 0;
+    virtual HRESULT SetFlagWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* in */ bool value) = 0;
+    virtual HRESULT GetFlagWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* out */ bool* value) = 0;
+    virtual HRESULT SetIntWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* in */ int64_t value) = 0;
+    virtual HRESULT GetIntWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* out */ int64_t* value) = 0;
+    virtual HRESULT SetFloatWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* in */ double value) = 0;
+    virtual HRESULT GetFloatWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* out */ double* value) = 0;
+    virtual HRESULT SetStringWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* in */ CFStringRef value) = 0;
+    virtual HRESULT GetStringWithParam (/* in */ BMDDeckLinkConfigurationID cfgID, /* in */ uint64_t param, /* out */ CFStringRef* value) = 0;
     virtual HRESULT WriteConfigurationToPreferences (void) = 0;
 
 protected:
