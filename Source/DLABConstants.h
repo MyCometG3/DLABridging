@@ -13,7 +13,7 @@
 /**
  Swift-safe NS_ENUM/NS_OPTIONS definition
  
- NOTE: These constants are converted from DeckLink API "15.3"
+ NOTE: These constants are converted from DeckLink API "16.0"
  NOTE: Basic renaming rules are:
  1. each enum type name BMDtypename => DLABtypename (DeckLink API bridging)
  1a. remove "s" at end of typename
@@ -27,10 +27,10 @@
 /* =================================================================================== */
 
 /*
- Derived from: Blackmagic_DeckLink_SDK_15.3.zip @ 2025/11/24 UTC
+ Derived from: Blackmagic_DeckLink_SDK_16.0.zip @ 2026/04/02 UTC
  
- #define BLACKMAGIC_DECKLINK_API_VERSION                    0x0f030000
- #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "15.3"
+ #define BLACKMAGIC_DECKLINK_API_VERSION                    0x10000000
+ #define BLACKMAGIC_DECKLINK_API_VERSION_STRING            "16.0"
  */
 
 /* =================================================================================== */
@@ -68,7 +68,8 @@ typedef NS_OPTIONS(uint32_t, DLABSupportedVideoModeFlag)
     DLABSupportedVideoModeFlagSDIQuadLink                             = 1 << 4,
     DLABSupportedVideoModeFlagInAnyProfile                            = 1 << 5,
     DLABSupportedVideoModeFlagPsF                                     = 1 << 6,
-    DLABSupportedVideoModeFlagDolbyVision                             = 1 << 7
+    DLABSupportedVideoModeFlagDolbyVision                             = 1 << 7,
+    DLABSupportedVideoModeEthernetIP10                                = 1 << 8
     ,
     DLABSupportedVideoModePsF   NS_SWIFT_UNAVAILABLE("") __deprecated = 1 << 6,
     DLABSupportedVideoModeFlagFlagKeying                 __deprecated = 1 << 0,
@@ -153,6 +154,15 @@ typedef NS_OPTIONS(uint32_t, DLABReferenceStatus)
     DLABReferenceStatusUnlocked                                         = 0,
     DLABReferenceStatusNotSupportedByHardware                           = 1 << 0,
     DLABReferenceStatusLocked                                           = 1 << 1
+};
+
+/* Enum BMDEthernetNMOSRegistryState -  */
+
+typedef NS_ENUM(uint32_t, DLABEthernetNMOSRegistryState)
+{
+    DLABEthernetNMOSRegistryStateConnecting                            = /* 'conn' */ 0x636F6E6E,
+    DLABEthernetNMOSRegistryStateActive                                = /* 'good' */ 0x676F6F64,
+    DLABEthernetNMOSRegistryStateError                                 = /* 'erro' */ 0x6572726F
 };
 
 /* Enum BMDAudioFormat - Audio Format */
@@ -305,9 +315,9 @@ typedef NS_ENUM(uint32_t, DLABColorspace)
     DLABColorspaceRec601                                          = /* 'r601' */ 0x72363031,
     DLABColorspaceRec709                                          = /* 'r709' */ 0x72373039,
     DLABColorspaceRec2020                                         = /* '2020' */ 0x32303230,
-    DLABColorspaceDolbyVisionNative                               = /* 'DoVi' */ 0x446F5669,	// For bmdDeckLinkConfigVideoOutputConversionColorspaceDestination with 12-bit RGB
-    DLABColorspaceP3D65                                           = /* 'P3D6' */ 0x50334436,	// For bmdDeckLinkConfigVideoOutputConversionColorspaceSource only
-    DLABColorspaceUnknown                                         = /* 'Ncol' */ 0x4E636F6C	// For disabling bmdDeckLinkConfigVideoOutputConversionColorspaceDestination
+    DLABColorspaceDolbyVisionNative                               = /* 'DoVi' */ 0x446F5669,    // For bmdDeckLinkConfigVideoOutputConversionColorspaceDestination with 12-bit RGB
+    DLABColorspaceP3D65                                           = /* 'P3D6' */ 0x50334436,    // For bmdDeckLinkConfigVideoOutputConversionColorspaceSource only
+    DLABColorspaceUnknown                                         = /* 'Ncol' */ 0x4E636F6C    // For disabling bmdDeckLinkConfigVideoOutputConversionColorspaceDestination
 };
 
 /* Enum BMDDynamicRange - SDR or HDR */
@@ -344,11 +354,12 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkFrameMetadata)
     /* Integers */
     
     DLABDeckLinkFrameMetadataColorspace                           = /* 'cspc' */ 0x63737063,    // Colorspace of video frame (see BMDColorspace)
-    DLABDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,	// EOTF in range 0-7 as per CEA 861.3
+    DLABDeckLinkFrameMetadataHDRElectroOpticalTransferFunc        = /* 'eotf' */ 0x656F7466,    // EOTF in range 0-7 as per CEA 861.3
+    DLABDeckLinkFrameMetadataRTPTimestamp                         = /* 'rtpt' */ 0x72747074,    // RTP timestamp
     
     /* Dolby Vision only - Bytes */
     
-    DLABDeckLinkFrameMetadataDolbyVision                          = /* 'dovi' */ 0x646F7669,	// Dolby Vision Metadata
+    DLABDeckLinkFrameMetadataDolbyVision                          = /* 'dovi' */ 0x646F7669,    // Dolby Vision Metadata
     
     /* CEA/SMPTE only - HDR Metadata Floats */
     
@@ -476,6 +487,7 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeMaximumAnalogAudioInputChannels                   = /* 'iach' */ 0x69616368,
     DLABAttributeMaximumAnalogAudioOutputChannels                  = /* 'aach' */ 0x61616368,
     DLABAttributeNumberOfSubDevices                                = /* 'nsbd' */ 0x6E736264,
+    DLABAttributeNumberOfEthernetConnectors                        = /* 'neth' */ 0x6E657468,
     DLABAttributeSubDeviceIndex                                    = /* 'subi' */ 0x73756269,
     DLABAttributePersistentID                                      = /* 'peid' */ 0x70656964,
     DLABAttributeDeviceGroupID                                     = /* 'dgid' */ 0x64676964,
@@ -517,7 +529,12 @@ typedef NS_ENUM(uint32_t, DLABAttribute)
     DLABAttributeDisplayName                                       = /* 'dspn' */ 0x6473706E,
     DLABAttributeModelName                                         = /* 'mdln' */ 0x6D646C6E,
     DLABAttributeDeviceHandle                                      = /* 'devh' */ 0x64657668,
-    DLABAttributeEthernetMACAddress                                = /* 'eMAC' */ 0x654D4143
+    
+    DLABAttributeEthernetMACAddress                   __deprecated = /* 'eMAC' */ 0x654D4143,
+    
+    /* Parameterized Strings */
+    
+    DLABAttributeParamEthernetMACAddress                           = /* 'pMAC' */ 0x704D4143
 };
 
 /* Enum BMDDeckLinkAPIInformationID - DeckLinkAPI information ID */
@@ -529,24 +546,47 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkAPIInformation)
     DLABDeckLinkAPIInformationVersion                                        = /* 'vers' */ 0x76657273
 };
 
+/* Enum BMDDeckLinkStatisticID - DeckLink Statistic ID */
+typedef NS_ENUM(uint32_t, DLABDeckLinkStatistic)
+{
+    
+    /* Integers */
+    
+    DLABDeckLinkStatisticPTPLossOfLock                            = /* 'nlol' */ 0x6E6C6F6C,
+    DLABDeckLinkStatisticPTPDPLLMarginOfError                     = /* 'ptpe' */ 0x70747065,
+    DLABDeckLinkStatisticDeviceTemperature                        = /* 'Stmp' */ 0x53746D70,
+    
+    /* Parameterized Integers */
+    
+    DLABDeckLinkStatisticParamEthernetRxPackets                   = /* 'ntrx' */ 0x6E747278,
+    DLABDeckLinkStatisticParamEthernetRxDroppedPackets            = /* 'ndrx' */ 0x6E647278,
+    
+    /* Parameterized Strings */
+    
+    DLABDeckLinkStatisticParamEthernetSFPDynamicInfo              = /* 'sfps' */ 0x73667073
+};
+
 /* Enum BMDDeckLinkStatusID - DeckLink Status ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
 {
-    /* Integers */
+    
+    /* Integers / Interfaces */
     
     DLABDeckLinkStatusDetectedVideoInputMode                      = /* 'dvim' */ 0x6476696D,
+    DLABDeckLinkStatusCurrentVideoInputMode                       = /* 'cvim' */ 0x6376696D,
+    DLABDeckLinkStatusCurrentVideoOutputMode                      = /* 'cvom' */ 0x63766F6D,
+    DLABDeckLinkStatusHDMIOutputActualMode                        = /* 'hiam' */ 0x6869616D,
+    
+    /* Integers */
+    
     DLABDeckLinkStatusDetectedVideoInputFormatFlags               = /* 'dvff' */ 0x64766666,
     DLABDeckLinkStatusDetectedVideoInputFieldDominance            = /* 'dvfd' */ 0x64766664,
     DLABDeckLinkStatusDetectedVideoInputColorspace                = /* 'dscl' */ 0x6473636C,
     DLABDeckLinkStatusDetectedVideoInputDynamicRange              = /* 'dsdr' */ 0x64736472,
     DLABDeckLinkStatusDetectedSDILinkConfiguration                = /* 'dslc' */ 0x64736C63,
-    DLABDeckLinkStatusCurrentVideoInputMode                       = /* 'cvim' */ 0x6376696D,
     DLABDeckLinkStatusCurrentVideoInputPixelFormat                = /* 'cvip' */ 0x63766970,
     DLABDeckLinkStatusCurrentVideoInputFlags                      = /* 'cvif' */ 0x63766966,
-    DLABDeckLinkStatusCurrentVideoOutputMode                      = /* 'cvom' */ 0x63766F6D,
     DLABDeckLinkStatusCurrentVideoOutputFlags                     = /* 'cvof' */ 0x63766F66,
-    DLABDeckLinkStatusEthernetLink                                = /* 'sels' */ 0x73656C73,
-    DLABDeckLinkStatusEthernetLinkMbps                            = /* 'sesp' */ 0x73657370,
     DLABDeckLinkStatusPCIExpressLinkWidth                         = /* 'pwid' */ 0x70776964,
     DLABDeckLinkStatusPCIExpressLinkSpeed                         = /* 'plnk' */ 0x706C6E6B,
     DLABDeckLinkStatusLastVideoOutputPixelFormat                  = /* 'opix' */ 0x6F706978,
@@ -554,12 +594,15 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     DLABDeckLinkStatusReferenceSignalFlags                        = /* 'reff' */ 0x72656666,
     DLABDeckLinkStatusBusy                                        = /* 'busy' */ 0x62757379,
     DLABDeckLinkStatusInterchangeablePanelType                    = /* 'icpt' */ 0x69637074,
-    DLABDeckLinkStatusDeviceTemperature                           = /* 'dtmp' */ 0x64746D70,
-    DLABDeckLinkStatusHDMIOutputActualMode                        = /* 'hiam' */ 0x6869616D,
     DLABDeckLinkStatusHDMIOutputActualFormatFlags                 = /* 'hiaf' */ 0x68696166,
     DLABDeckLinkStatusHDMIOutputFRLRate                           = /* 'hiof' */ 0x68696F66,
     DLABDeckLinkStatusHDMIInputFRLRate                            = /* 'hiif' */ 0x68696966,
+    DLABDeckLinkStatusEthernetManualNMOSRegistry                  = /* 'nmme' */ 0x6E6D6D65,
     DLABDeckLinkStatusHDMIOutputTMDSLineRate                      = /* 'hilr' */ 0x68696C72,
+    
+    DLABDeckLinkStatusEthernetLink                   __deprecated = /* 'sels' */ 0x73656C73,
+    DLABDeckLinkStatusEthernetLinkMbps               __deprecated = /* 'sesp' */ 0x73657370,
+    DLABDeckLinkStatusDeviceTemperature              __deprecated = /* 'dtmp' */ 0x64746D70,
     
     /* Floats */
     
@@ -568,24 +611,44 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkStatus)
     /* Flags */
     
     DLABDeckLinkStatusVideoInputSignalLocked                      = /* 'visl' */ 0x7669736C,
+    DLABDeckLinkStatusAncillaryInputSignalLocked                  = /* 'aisl' */ 0x6169736C,
     DLABDeckLinkStatusReferenceSignalLocked                       = /* 'refl' */ 0x7265666C,
     
     /* Strings */
-
-    DLABDeckLinkStatusEthernetLocalIPAddress                      = /* 'seip' */ 0x73656970,
-    DLABDeckLinkStatusEthernetSubnetMask                          = /* 'sesm' */ 0x7365736D,
-    DLABDeckLinkStatusEthernetGatewayIPAddress                    = /* 'segw' */ 0x73656777,
-    DLABDeckLinkStatusEthernetPrimaryDNS                          = /* 'sepd' */ 0x73657064,
-    DLABDeckLinkStatusEthernetSecondaryDNS                        = /* 'sesd' */ 0x73657364,
+    
     DLABDeckLinkStatusEthernetPTPGrandmasterIdentity              = /* 'spid' */ 0x73706964,
-    DLABDeckLinkStatusEthernetVideoOutputAddress                  = /* 'soav' */ 0x736F6176,
-    DLABDeckLinkStatusEthernetAudioOutputAddress                  = /* 'soaa' */ 0x736F6161,
-    DLABDeckLinkStatusEthernetAncillaryOutputAddress              = /* 'soaA' */ 0x736F6141,
     DLABDeckLinkStatusEthernetAudioInputChannelOrder              = /* 'saco' */ 0x7361636F,
-
+    DLABDeckLinkStatusEthernetCurrentNMOSRegistry                 = /* 'nmre' */ 0x6E6D7265,
+    
+    DLABDeckLinkStatusEthernetLocalIPAddress         __deprecated = /* 'seip' */ 0x73656970,
+    DLABDeckLinkStatusEthernetSubnetMask             __deprecated = /* 'sesm' */ 0x7365736D,
+    DLABDeckLinkStatusEthernetGatewayIPAddress       __deprecated = /* 'segw' */ 0x73656777,
+    DLABDeckLinkStatusEthernetPrimaryDNS             __deprecated = /* 'sepd' */ 0x73657064,
+    DLABDeckLinkStatusEthernetSecondaryDNS           __deprecated = /* 'sesd' */ 0x73657364,
+    DLABDeckLinkStatusEthernetVideoOutputAddress     __deprecated = /* 'soav' */ 0x736F6176,
+    DLABDeckLinkStatusEthernetAudioOutputAddress     __deprecated = /* 'soaa' */ 0x736F6161,
+    DLABDeckLinkStatusEthernetAncillaryOutputAddress __deprecated = /* 'soaA' */ 0x736F6141,
+    
     /* Bytes */
     
-    DLABDeckLinkStatusReceivedEDID                                = /* 'edid' */ 0x65646964
+    DLABDeckLinkStatusReceivedEDID                                = /* 'edid' */ 0x65646964,
+    
+    /* Parameterized Integers */
+    
+    DLABDeckLinkStatusParamEthernetLink                           = /* 'sels' */ 0x73656C73,
+    DLABDeckLinkStatusParamEthernetLinkMbps                       = /* 'sesp' */ 0x73657370,
+    
+    /* Parameterized Strings */
+    
+    DLABDeckLinkStatusParamEthernetLocalIPAddress                 = /* 'seip' */ 0x73656970,
+    DLABDeckLinkStatusParamEthernetSubnetMask                     = /* 'sesm' */ 0x7365736D,
+    DLABDeckLinkStatusParamEthernetGatewayIPAddress               = /* 'segw' */ 0x73656777,
+    DLABDeckLinkStatusParamEthernetPrimaryDNS                     = /* 'sepd' */ 0x73657064,
+    DLABDeckLinkStatusParamEthernetSecondaryDNS                   = /* 'sesd' */ 0x73657364,
+    DLABDeckLinkStatusParamEthernetSFPStaticInfo                  = /* 'sfpi' */ 0x73667069,
+    DLABDeckLinkStatusParamEthernetVideoOutputAddress             = /* 'soav' */ 0x736F6176,
+    DLABDeckLinkStatusParamEthernetAudioOutputAddress             = /* 'soaa' */ 0x736F6161,
+    DLABDeckLinkStatusParamEthernetAncillaryOutputAddress         = /* 'soaA' */ 0x736F6141,
 };
 
 /* Enum BMDDeckLinkVideoStatusFlags -  */
@@ -678,9 +741,9 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowType)
 /* Enum BMDDeckLinkIPFlowAttributeID - DeckLink IP Flow Attribute ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowAttribute)
 {
-
+    
     /* DeckLink IP Flow Attribute Integers */
-
+    
     DLABDeckLinkIPFlowAttributeID                                          = /* '2fai' */ 0x32666169,
     DLABDeckLinkIPFlowAttributeDirection                                   = /* '2fad' */ 0x32666164,
     DLABDeckLinkIPFlowAttributeType                                        = /* '2fat' */ 0x32666174
@@ -689,18 +752,18 @@ typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowAttribute)
 /* Enum BMDDeckLinkIPFlowStatusID - DeckLink IP Flow Attribute ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowStatus)
 {
-
+    
     /* DeckLink IP Flow Status Strings */
-
+    
     DLABDeckLinkIPFlowStatusSDP                                         = /* '2fas' */ 0x32666173
 };
 
 /* Enum BMDDeckLinkIPFlowSettingID - DeckLink IP Flow Setting ID */
 typedef NS_ENUM(uint32_t, DLABDeckLinkIPFlowSetting)
 {
-
+    
     /* DeckLink IP Flow Setting Strings */
-
+    
     DLABDeckLinkIPFlowSettingPeerSDP                                     = /* '2fps' */ 0x32667073    // The peer's SDP. Must not be over 1000 bytes large.
 };
 
@@ -753,13 +816,14 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationOutput1080pAsPsF                            = /* 'pfpr' */ 0x70667072,
     DLABConfigurationOutputValidateEDIDForDolbyVision            = /* 'pred' */ 0x70726564,
     DLABConfigurationExtendedDesktop                             = /* 'exdt' */ 0x65786474,
+    DLABConfigurationEthernetVideoOutputIP10                     = /* 'IP10' */ 0x49503130,
     
     /* Video Output Integers */
     
     DLABConfigurationVideoOutputConnection                       = /* 'vocn' */ 0x766F636E,
     DLABConfigurationVideoOutputConversionMode                   = /* 'vocm' */ 0x766F636D,
-    DLABConfigurationVideoOutputConversionColorspaceDestination  = /* 'vccd' */ 0x76636364,	// Parameter is of type BMDColorspace
-    DLABConfigurationVideoOutputConversionColorspaceSource       = /* 'vccs' */ 0x76636373,	// Parameter is of type BMDColorspace
+    DLABConfigurationVideoOutputConversionColorspaceDestination  = /* 'vccd' */ 0x76636364,    // Parameter is of type BMDColorspace
+    DLABConfigurationVideoOutputConversionColorspaceSource       = /* 'vccs' */ 0x76636373,    // Parameter is of type BMDColorspace
     DLABConfigurationAnalogVideoOutputFlags                      = /* 'avof' */ 0x61766F66,
     DLABConfigurationReferenceInputTimingOffset                  = /* 'glot' */ 0x676C6F74,
     DLABConfigurationReferenceOutputMode                         = /* 'glOm' */ 0x676C4F6D,
@@ -850,31 +914,50 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     DLABConfigurationHeadphoneVolume                             = /* 'hvol' */ 0x68766F6C,
     DLABConfigurationSpeakerVolume                               = /* 'svol' */ 0x73766F6C,
     
-    /* Network Flags */
-
-    DLABConfigurationEthernetUseDHCP                             = /* 'DHCP' */ 0x44484350,
+    /* Ethernet Flags */
+    
     DLABConfigurationEthernetPTPFollowerOnly                     = /* 'PTPf' */ 0x50545066,
     DLABConfigurationEthernetPTPUseUDPEncapsulation              = /* 'PTPU' */ 0x50545055,
-
-    /* Network Integers */
-
+    DLABConfigurationEthernetUseManualNMOSRegistry               = /* 'nmrp' */ 0x6E6D7270,
+    
+    DLABConfigurationEthernetUseDHCP                __deprecated = /* 'DHCP' */ 0x44484350,
+    
+    /* Ethernet Integers */
+    
     DLABConfigurationEthernetPTPPriority1                        = /* 'PTP1' */ 0x50545031,
     DLABConfigurationEthernetPTPPriority2                        = /* 'PTP2' */ 0x50545032,
     DLABConfigurationEthernetPTPDomain                           = /* 'PTPD' */ 0x50545044,
     DLABConfigurationEthernetPTPLogAnnounceInterval              = /* 'PTPA' */ 0x50545041,
-
-    /* Network Strings */
-
-    DLABConfigurationEthernetStaticLocalIPAddress                = /* 'nsip' */ 0x6E736970,
-    DLABConfigurationEthernetStaticSubnetMask                    = /* 'nssm' */ 0x6E73736D,
-    DLABConfigurationEthernetStaticGatewayIPAddress              = /* 'nsgw' */ 0x6E736777,
-    DLABConfigurationEthernetStaticPrimaryDNS                    = /* 'nspd' */ 0x6E737064,
-    DLABConfigurationEthernetStaticSecondaryDNS                  = /* 'nssd' */ 0x6E737364,
-    DLABConfigurationEthernetVideoOutputAddress                  = /* 'noav' */ 0x6E6F6176,
-    DLABConfigurationEthernetAudioOutputAddress                  = /* 'noaa' */ 0x6E6F6161,
-    DLABConfigurationEthernetAncillaryOutputAddress              = /* 'noaA' */ 0x6E6F6141,
+    
+    /* Ethernet Strings */
+    
     DLABConfigurationEthernetAudioOutputChannelOrder             = /* 'caco' */ 0x6361636F,
-
+    DLABConfigurationEthernetNMOSRegistryAddress                 = /* 'nmre' */ 0x6E6D7265,
+    
+    DLABConfigurationEthernetStaticLocalIPAddress   __deprecated = /* 'nsip' */ 0x6E736970,
+    DLABConfigurationEthernetStaticSubnetMask       __deprecated = /* 'nssm' */ 0x6E73736D,
+    DLABConfigurationEthernetStaticGatewayIPAddress __deprecated = /* 'nsgw' */ 0x6E736777,
+    DLABConfigurationEthernetStaticPrimaryDNS       __deprecated = /* 'nspd' */ 0x6E737064,
+    DLABConfigurationEthernetStaticSecondaryDNS     __deprecated = /* 'nssd' */ 0x6E737364,
+    DLABConfigurationEthernetVideoOutputAddress     __deprecated = /* 'noav' */ 0x6E6F6176,
+    DLABConfigurationEthernetAudioOutputAddress     __deprecated = /* 'noaa' */ 0x6E6F6161,
+    DLABConfigurationEthernetAncillaryOutputAddress __deprecated = /* 'noaA' */ 0x6E6F6141,
+    
+    /* Parameterized Ethernet Flags */
+    
+    DLABConfigurationParamEthernetUseDHCP                        = /* 'DHCP' */ 0x44484350,
+    
+    /* Parameterized Ethernet Strings */
+    
+    DLABConfigurationParamEthernetStaticLocalIPAddress           = /* 'nsip' */ 0x6E736970,
+    DLABConfigurationParamEthernetStaticSubnetMask               = /* 'nssm' */ 0x6E73736D,
+    DLABConfigurationParamEthernetStaticGatewayIPAddress         = /* 'nsgw' */ 0x6E736777,
+    DLABConfigurationParamEthernetStaticPrimaryDNS               = /* 'nspd' */ 0x6E737064,
+    DLABConfigurationParamEthernetStaticSecondaryDNS             = /* 'nssd' */ 0x6E737364,
+    DLABConfigurationParamEthernetVideoOutputAddress             = /* 'noav' */ 0x6E6F6176,
+    DLABConfigurationParamEthernetAudioOutputAddress             = /* 'noaa' */ 0x6E6F6161,
+    DLABConfigurationParamEthernetAncillaryOutputAddress         = /* 'noaA' */ 0x6E6F6141,
+    
     /* Device Information Strings */
     
     DLABConfigurationDeviceInformationLabel                      = /* 'dila' */ 0x64696C61,
@@ -887,9 +970,9 @@ typedef NS_ENUM(uint32_t, DLABConfiguration)
     /* Deck Control Integers */
     
     DLABConfigurationDeckControlConnection                       = /* 'dcco' */ 0x6463636F,
-
+    
     /* UI/UX Integers */
-
+    
     DLABConfigurationDisplayLanguage                             = /* 'lang' */ 0x6C616E67
 };
 
@@ -1160,9 +1243,6 @@ typedef NS_ENUM(uint32_t, DLABDisplayMode)
     DLABDisplayMode2560x1440p60                                          = /* 'wqh6' */ 0x77716836,
     DLABDisplayMode2560x1600p50                                          = /* 'wqx5' */ 0x77717835,
     DLABDisplayMode2560x1600p60                                          = /* 'wqx6' */ 0x77717836,
-    
-    /* Special Modes */
-    
     DLABDisplayModeUnknown                                               = /* 'iunk' */ 0x69756E6B
 };
 
@@ -1190,10 +1270,10 @@ typedef NS_ENUM(uint32_t, DLABPixelFormat)
     DLABPixelFormat12BitRGBLE                                          = /* 'R12L' */ 0x5231324C,    // Little-endian RGB 12-bit per component with full range (0-4095). Packed as 12-bit per component
     DLABPixelFormat10BitRGBXLE                                         = /* 'R10l' */ 0x5231306C,    // Little-endian 10-bit RGB with SMPTE video levels (64-940)
     DLABPixelFormat10BitRGBX                                           = /* 'R10b' */ 0x52313062,    // Big-endian 10-bit RGB with SMPTE video levels (64-940)
-    DLABPixelFormatH265                                                = /* 'hev1' */ 0x68657631,    // High Efficiency Video Coding (HEVC/h.265)
     
-    /* AVID DNxHR */
+    /* Formats supported only by devices that can be queried for an IDeckLinkEncoderInput */
     
+    DLABPixelFormatH265                                                = /* 'hev1' */ 0x68657631,
     DLABPixelFormatDNxHR                                               = /* 'AVdh' */ 0x41566468
 };
 
