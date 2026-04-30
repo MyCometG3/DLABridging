@@ -96,7 +96,7 @@ static void	InitDeckLinkAPI (void)
 	}
 }
 
-bool		IsDeckLinkAPIPresent (void)
+bool		IsDeckLinkAPIPresent_v15_3_1 (void)
 {
 	// If the DeckLink API bundle was successfully loaded, return this knowledge to the caller
 	if (gDeckLinkAPIBundleRef != NULL)
@@ -224,7 +224,7 @@ static void InitBMDStreamingAPI(void)
 	}
 }
 
-IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance()
+IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance_v15_3_1()
 {
 	pthread_once(&gBMDStreamingOnceControl, InitBMDStreamingAPI);
 
@@ -234,7 +234,7 @@ IBMDStreamingDiscovery* CreateBMDStreamingDiscoveryInstance()
 	return gCreateDiscoveryFunc();
 }
 
-IBMDStreamingH264NALParser* CreateBMDStreamingH264NALParser()
+IBMDStreamingH264NALParser* CreateBMDStreamingH264NALParser_v15_3_1()
 {
 	pthread_once(&gBMDStreamingOnceControl, InitBMDStreamingAPI);
 
