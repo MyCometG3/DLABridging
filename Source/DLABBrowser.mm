@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABBrowser+Internal.h>
+#include <DLABQueryInterfaceAny.h>
 
 const char* kBrowserQueue = "DLABDevice.browserQueue";
 
@@ -372,8 +373,9 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
     HRESULT error = E_FAIL;
     
     IDeckLinkProfileAttributes* attr = NULL;
-    error = deckLink->QueryInterface(IID_IDeckLinkProfileAttributes,
-                                     (void **)&attr);
+    error = DLABQueryInterfaceAny(deckLink, &attr,
+                                  IID_IDeckLinkProfileAttributes,
+                                  IID_IDeckLinkProfileAttributes_v15_3_1);
     if (!error && attr) {
         int64_t persistentID = 0;
         HRESULT errPID = attr->GetInt(BMDDeckLinkPersistentID, &persistentID);

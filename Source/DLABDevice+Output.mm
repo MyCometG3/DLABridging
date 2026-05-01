@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDevice+Internal.h>
+#import <DLABQueryInterfaceAny.h>
 
 /* =================================================================================== */
 // MARK: - output (internal)
@@ -218,12 +219,6 @@ NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
     return pixelSize;
 }
 
-NS_INLINE BOOL checkPre1403(DLABDevice *self)
-{
-    BOOL pre1403 = (self.apiVersion < 0x0e030000); // -14.2.1; BLACKMAGIC_DECKLINK_API_VERSION
-    return pre1403;
-}
-
 NS_INLINE BOOL VideoBufferLockBaseAddress(IDeckLinkMutableVideoFrame* videoFrame,
                                           BMDBufferAccessFlags accessFlags,
                                           IDeckLinkVideoBuffer** outVideoBuffer) {
@@ -262,7 +257,7 @@ NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
 NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
     assert(pixelBuffer && videoFrame);
     
-    BOOL pre1403 = checkPre1403(self);
+    BOOL pre1403 = [DLABVersionChecker checkPre1403];
     
     IDeckLinkVideoBuffer* videoBuffer = NULL;
     BMDBufferAccessFlags accessFlags = bmdBufferAccessWrite;
@@ -324,7 +319,7 @@ NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, 
 NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
     assert(pixelBuffer && videoFrame);
     
-    BOOL pre1403 = checkPre1403(self);
+    BOOL pre1403 = [DLABVersionChecker checkPre1403];
     
     IDeckLinkVideoBuffer* videoBuffer = NULL;
     BMDBufferAccessFlags accessFlags = bmdBufferAccessWrite;
@@ -411,7 +406,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
             if (!converter) {
                 converter = [[DLABVideoConverter alloc] initWithCV:pixelBuffer
                                                               toDL:videoFrame];
-                converter.pre1403 = checkPre1403(self);
+                converter.pre1403 = [DLABVersionChecker checkPre1403];
                 self.outputVideoConverter = converter;
             }
             if (converter) {
@@ -464,20 +459,20 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 // MARK: VANC support
 /* =================================================================================== */
 
-// private experimental - VANC Playback support
+// private experimental - VANC Playback support (deprecated)
 
 - (IDeckLinkVideoFrameAncillary*) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame
 {
     NSParameterAssert(outFrame);
     
     IDeckLinkVideoFrameAncillary *ancillaryData = NULL;
-    outFrame->GetAncillaryData(&ancillaryData);
+    outFrame->GetAncillaryData(&ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
     
     if (!ancillaryData) {
         // Create new one and attach to outFrame
         IDeckLinkOutput *output = self.deckLinkOutput;
         if (output) {
-            output->CreateAncillaryData(outFrame->GetPixelFormat(), &ancillaryData);
+            output->CreateAncillaryData(outFrame->GetPixelFormat(), &ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
             if (ancillaryData) {
                 outFrame->SetAncillaryData(ancillaryData);
                 ancillaryData->Release();
@@ -486,7 +481,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
         }
         
         // Issue Another query.
-        outFrame->GetAncillaryData(&ancillaryData);
+        outFrame->GetAncillaryData(&ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
     }
     
     return ancillaryData; // Nullable
@@ -510,7 +505,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 - (void) callbackOutputVANCHandler:(IDeckLinkMutableVideoFrame*)outFrame
                             atTime:(NSInteger)displayTime
                           duration:(NSInteger)frameDuration
-                       inTimeScale:(NSInteger)timeScale
+                       inTimeScale:(NSInteger)timeScale // deprecated
 {
     NSParameterAssert(outFrame && frameDuration && timeScale);
     
@@ -525,7 +520,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
     //
     VANCHandler outHandler = self.outputVANCHandler;
     if (outHandler) {
-        IDeckLinkVideoFrameAncillary* frameAncillary = [self prepareOutputFrameAncillary:outFrame];
+        IDeckLinkVideoFrameAncillary* frameAncillary = [self prepareOutputFrameAncillary:outFrame]; // deprecated
         if (frameAncillary) {
             // Callback in delegate queue
             [self delegate_sync:^{
@@ -625,8 +620,9 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
     OutputAncillaryPacketHandler outHandler = self.outputAncillaryPacketHandler;
     if (outHandler) {
         IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
-        outFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
-                                 (void**)&frameAncillaryPackets);
+        DLABQueryInterfaceAny(outFrame, &frameAncillaryPackets,
+                              IID_IDeckLinkVideoFrameAncillaryPackets,
+                              IID_IDeckLinkVideoFrameAncillaryPackets_v15_2);
         if (frameAncillaryPackets) {
             [self delegate_sync:^{
                 while (TRUE) {
@@ -641,8 +637,20 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
                         NSData* data = outHandler(timingInfo,
                                                   &did, &sdid, &lineNumber, &dataStreamIndex, &dataSpace);
                         if (data) {
+
+                            // For SDK < 15.3, force dataSpace to VANC (only SDK 15.3+ supports dataSpace)
+
+                            DLABAncillaryDataSpace effectiveDataSpace = dataSpace;
+
+                            if ([DLABVersionChecker checkPre1503]) {
+
+                                effectiveDataSpace = DLABAncillaryDataSpaceVANC;
+
+                            }
+
                             HRESULT ret = packet->Update(did, sdid, lineNumber, dataStreamIndex,
-                                                         DLABBMDAncillaryDataSpaceFromPublic(dataSpace), data);
+
+                                                         DLABBMDAncillaryDataSpaceFromPublic(effectiveDataSpace), data);
                             if (ret == S_OK) {
                                 ret = frameAncillaryPackets->AttachPacket(packet);
                             }
@@ -744,8 +752,8 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
         __block HRESULT result = E_FAIL;
         __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
-        __block bool pre1403 = (self.apiVersion < 0x0e030000); // 11.5-14.2; BLACKMAGIC_DECKLINK_API_VERSION
-        __block bool pre1105 = (self.apiVersion < 0x0b050000); // 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
+        __block bool pre1403 = [DLABVersionChecker checkPre1403];
+        __block bool pre1105 = [DLABVersionChecker checkPre1105];
         [self playback_sync:^{
             if (pre1105) {
                 IDeckLinkOutput_v11_4 *output1104 = (IDeckLinkOutput_v11_4*)output;
@@ -891,15 +899,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
     IDeckLinkOutput* output = self.deckLinkOutput;
     if (output) {
         if (parentView) {
-            IDeckLinkScreenPreviewCallback* previewCallback = NULL;
-            
-            BOOL pre1430 = (self.apiVersion < 0x0e030000); // -14.2.1; BLACKMAGIC_DECKLINK_API_VERSION
-            if (!pre1430) {
-                previewCallback = CreateCocoaScreenPreview((__bridge void*)parentView);
-            } else {
-                void* callback = CreateCocoaScreenPreview_v14_2_1((__bridge void*)parentView);
-                previewCallback = (IDeckLinkScreenPreviewCallback*)callback;
-            }
+            IDeckLinkScreenPreviewCallback* previewCallback = DLABCreateScreenPreviewCallback(parentView);
             
             if (previewCallback) {
                 self.outputPreviewCallback = previewCallback;

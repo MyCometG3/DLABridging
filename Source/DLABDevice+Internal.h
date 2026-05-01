@@ -9,7 +9,15 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDevice.h>
+#import <DLABVersionChecker.h>
 #import <DeckLinkAPI.h>
+
+#import <DeckLinkAPI_v15_3_1.h>
+#import <DeckLinkAPIConfiguration_v15_3_1.h>
+#import <DeckLinkAPIVideoInput_v15_3_1.h>
+#import <DeckLinkAPIVideoOutput_v15_3_1.h>
+
+#import <DeckLinkAPI_v15_2.h>
 
 #import <DeckLinkAPI_v14_2_1.h>
 #import <DeckLinkAPIScreenPreviewCallback_v14_2_1.h>
@@ -36,6 +44,15 @@
 #import <DLABDeckControl+Internal.h>
 
 const int maxOutputVideoFrameCount = 8;
+
+NS_INLINE IDeckLinkScreenPreviewCallback * _Nullable DLABCreateScreenPreviewCallback(NSView * _Nonnull parentView)
+{
+    if ([DLABVersionChecker checkPre1403]) {
+        void* callback = CreateCocoaScreenPreview_v14_2_1((__bridge void*)parentView);
+        return (IDeckLinkScreenPreviewCallback*)callback;
+    }
+    return CreateCocoaScreenPreview((__bridge void*)parentView);
+}
 
 /* =================================================================================== */
 
@@ -432,7 +449,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param outFrame IDeckLinkMutableVideoFrame
  @return VideoFrameAncillary for Output Frame.
  */
-- (nullable IDeckLinkVideoFrameAncillary *) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame;
+- (nullable IDeckLinkVideoFrameAncillary *) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
  Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
@@ -455,7 +472,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) callbackOutputVANCHandler:(IDeckLinkMutableVideoFrame*)outFrame
                             atTime:(NSInteger)displayTime
                           duration:(NSInteger)frameDuration
-                       inTimeScale:(NSInteger)timeScale;
+                       inTimeScale:(NSInteger)timeScale DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");;
 
 /**
  Call VANCPacketHandler for output VideoFrame
@@ -567,7 +584,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param inFrame IDeckLinkVideoInputFrame
  @return VideoFrameAncillary for Input Frame.
  */
-- (nullable IDeckLinkVideoFrameAncillary *) prepareInputFrameAncillary:(IDeckLinkVideoInputFrame*)inFrame;
+- (nullable IDeckLinkVideoFrameAncillary *) prepareInputFrameAncillary:(IDeckLinkVideoInputFrame*)inFrame DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
  Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
@@ -584,7 +601,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param inFrame IDeckLinkVideoInputFrame
  */
-- (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame;
+- (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");;
 
 /**
  Call VANCPacketHandler block for input VideoFrame.

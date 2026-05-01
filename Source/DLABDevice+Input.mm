@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDevice+Internal.h>
+#import <DLABQueryInterfaceAny.h>
 
 /* =================================================================================== */
 // MARK: - input (internal)
@@ -226,12 +227,6 @@ NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
     return pixelSize;
 }
 
-NS_INLINE BOOL checkPre1403(DLABDevice *self)
-{
-    BOOL pre1403 = (self.apiVersion < 0x0e030000); // -14.2.1; BLACKMAGIC_DECKLINK_API_VERSION
-    return pre1403;
-}
-
 NS_INLINE BOOL VideoBufferLockBaseAddress(IDeckLinkVideoFrame* videoFrame,
                                           BMDBufferAccessFlags accessFlags,
                                           IDeckLinkVideoBuffer** outVideoBuffer) {
@@ -270,7 +265,7 @@ NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
 NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFrame, CVPixelBufferRef pixelBuffer) {
     assert(videoFrame && pixelBuffer);
     
-    BOOL pre1403 = checkPre1403(self);
+    BOOL pre1403 = [DLABVersionChecker checkPre1403];
     
     IDeckLinkVideoBuffer* videoBuffer = NULL;
     BMDBufferAccessFlags accessFlags = bmdBufferAccessRead;
@@ -332,7 +327,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
 NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* videoFrame, CVPixelBufferRef pixelBuffer) {
     assert(videoFrame && pixelBuffer);
     
-    BOOL pre1403 = checkPre1403(self);
+    BOOL pre1403 = [DLABVersionChecker checkPre1403];
     
     IDeckLinkVideoBuffer* videoBuffer = NULL;
     BMDBufferAccessFlags accessFlags = bmdBufferAccessRead;
@@ -456,7 +451,7 @@ NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* video
                 if (!converter) {
                     converter = [[DLABVideoConverter alloc] initWithDL:videoFrame
                                                                   toCV:pixelBuffer];
-                    converter.pre1403 = checkPre1403(self);
+                    converter.pre1403 = [DLABVersionChecker checkPre1403];
                     self.inputVideoConverter = converter;
                 }
                 if (converter) {
@@ -715,7 +710,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     NSParameterAssert(inFrame);
     
     IDeckLinkVideoFrameAncillary *ancillaryData = NULL;
-    inFrame->GetAncillaryData(&ancillaryData);
+    inFrame->GetAncillaryData(&ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
     
     return ancillaryData; // Nullable
 }
@@ -735,7 +730,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     }
 }
 
-- (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame
+- (void) callbackInputVANCHandler:(IDeckLinkVideoInputFrame*)inFrame // deprecated
 {
     NSParameterAssert(inFrame);
     
@@ -758,7 +753,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     //
     VANCHandler inHandler = self.inputVANCHandler;
     if (inHandler) {
-        IDeckLinkVideoFrameAncillary* frameAncillary = [self prepareInputFrameAncillary:inFrame];
+        IDeckLinkVideoFrameAncillary* frameAncillary = [self prepareInputFrameAncillary:inFrame]; // deprecated
         if (frameAncillary) {
             // Callback in delegate queue
             [self delegate_sync:^{
@@ -872,8 +867,9 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     InputAncillaryPacketHandler inHandler = self.inputAncillaryPacketHandler;
     if (inHandler) {
         IDeckLinkVideoFrameAncillaryPackets* frameAncillaryPackets = NULL;
-        inFrame->QueryInterface(IID_IDeckLinkVideoFrameAncillaryPackets,
-                                (void**)&frameAncillaryPackets);
+        DLABQueryInterfaceAny(inFrame, &frameAncillaryPackets,
+                              IID_IDeckLinkVideoFrameAncillaryPackets,
+                              IID_IDeckLinkVideoFrameAncillaryPackets_v15_2);
         if (frameAncillaryPackets) {
             IDeckLinkAncillaryPacketIterator* iterator = NULL;
             frameAncillaryPackets->GetPacketIterator(&iterator);
@@ -899,7 +895,15 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                                 uint8_t sdid = packet->GetSDID();
                                 uint32_t lineNumber = packet->GetLineNumber();
                                 uint8_t dataStreamIndex = packet->GetDataStreamIndex();
-                                DLABAncillaryDataSpace dataSpace = (DLABAncillaryDataSpace)packet->GetDataSpace();
+                                // Only call GetDataSpace() if SDK 15.3+ is available
+
+                                DLABAncillaryDataSpace dataSpace = DLABAncillaryDataSpaceVANC;
+
+                                if (![DLABVersionChecker checkPre1503]) {
+
+                                    dataSpace = (DLABAncillaryDataSpace)packet->GetDataSpace();
+
+                                }
                                 ready = inHandler(timingInfo,
                                                   did, sdid, lineNumber, dataStreamIndex,
                                                   dataSpace, data);
@@ -1000,8 +1004,8 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
         __block HRESULT result = E_FAIL;
         __block BMDDisplayMode actualMode = 0;
         __block bool supported = false;
-        __block bool pre1403 = (self.apiVersion < 0x0e030000); // 11.5-14.2; BLACKMAGIC_DECKLINK_API_VERSION
-        __block bool pre1105 = (self.apiVersion < 0x0b050000); // 11.0-11.4; BLACKMAGIC_DECKLINK_API_VERSION
+        __block bool pre1403 = [DLABVersionChecker checkPre1403];
+        __block bool pre1105 = [DLABVersionChecker checkPre1105];
         [self capture_sync:^{
             if (pre1105) {
                 IDeckLinkInput_v11_4 *input1104 = (IDeckLinkInput_v11_4*)input;
@@ -1117,15 +1121,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     IDeckLinkInput* input = self.deckLinkInput;
     if (input) {
         if (parentView) {
-            IDeckLinkScreenPreviewCallback* previewCallback = NULL;
-            
-            BOOL pre1430 = (self.apiVersion < 0x0e030000); // -14.2.1; BLACKMAGIC_DECKLINK_API_VERSION
-            if (!pre1430) {
-                previewCallback = CreateCocoaScreenPreview((__bridge void*)parentView);
-            } else {
-                void* callback = CreateCocoaScreenPreview_v14_2_1((__bridge void*)parentView);
-                previewCallback = (IDeckLinkScreenPreviewCallback*)callback;
-            }
+            IDeckLinkScreenPreviewCallback* previewCallback = DLABCreateScreenPreviewCallback(parentView);
             
             if (previewCallback) {
                 self.inputPreviewCallback = previewCallback;

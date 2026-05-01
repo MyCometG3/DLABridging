@@ -601,17 +601,17 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Experimental VANC support: Caller should populate VANC callback block.
  */
-@property (nonatomic, copy, nullable) VANCHandler inputVANCHandler;
+@property (nonatomic, copy, nullable) VANCHandler inputVANCHandler; // deprecated
 
 /**
  Experimental VANC support: Caller should populate interested line numbers of VANC data.
  */
-@property (nonatomic, strong, nullable) NSArray<NSNumber*> *outputVANCLines;
+@property (nonatomic, strong, nullable) NSArray<NSNumber*> *outputVANCLines; // deprecated
 
 /**
  Experimental VANC support: Caller should populate VANC callback block.
  */
-@property (nonatomic, copy, nullable) VANCHandler outputVANCHandler;
+@property (nonatomic, copy, nullable) VANCHandler outputVANCHandler;  // deprecated
 
 /**
  Experimental VANC Packet Capture support: Caller should populate VANC Packet callback block.

@@ -10,6 +10,7 @@
 
 #import <DLABProfileAttributes.h>
 #import <DeckLinkAPI.h>
+#import <DeckLinkAPI_v15_3_1.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

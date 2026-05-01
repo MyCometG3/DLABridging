@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABProfileAttributes+Internal.h>
+#include <DLABQueryInterfaceAny.h>
 
 @implementation DLABProfileAttributes
 
@@ -33,7 +34,9 @@
         // validate property support (attributes)
         HRESULT result = E_FAIL;
         IDeckLinkProfileAttributes *attr = NULL;
-        result = profile->QueryInterface(IID_IDeckLinkProfileAttributes, (void **)&attr);
+        result = DLABQueryInterfaceAny(profile, &attr,
+                                       IID_IDeckLinkProfileAttributes,
+                                       IID_IDeckLinkProfileAttributes_v15_3_1);
         if (result == S_OK && attr) {
             _attributes = attr;
             _profile = profile;

@@ -9,6 +9,8 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDevice+Internal.h>
+#import <DLABQueryInterfaceAny.h>
+#import <DLABVersionChecker.h>
 
 const char* kCaptureQueue = "DLABDevice.captureQueue";
 const char* kPlaybackQueue = "DLABDevice.playbackQueue";
@@ -31,22 +33,36 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     
     if (self = [super init]) {
         // validate property support (attributes/configuration/status/notification)
-        HRESULT err1 = newDeckLink->QueryInterface(IID_IDeckLinkProfileAttributes,
-                                                   (void **)&_deckLinkProfileAttributes);
-        HRESULT err2 = newDeckLink->QueryInterface(IID_IDeckLinkConfiguration,
-                                                   (void **)&_deckLinkConfiguration);
-        HRESULT err3 = newDeckLink->QueryInterface(IID_IDeckLinkStatus,
-                                                   (void**)&_deckLinkStatus);
-        HRESULT err4 = newDeckLink->QueryInterface(IID_IDeckLinkNotification,
-                                                   (void**)&_deckLinkNotification);
-        
-        if (err1 || err2 || err3 || err4) {
-            if (_deckLinkProfileAttributes) _deckLinkProfileAttributes->Release();
-            if (_deckLinkConfiguration) _deckLinkConfiguration->Release();
-            if (_deckLinkStatus) _deckLinkStatus->Release();
-            if (_deckLinkNotification) _deckLinkNotification->Release();
+        IDeckLinkProfileAttributes* profileAttributes = NULL;
+        IDeckLinkConfiguration* configuration = NULL;
+        IDeckLinkStatus* status = NULL;
+        IDeckLinkNotification* notification = NULL;
+
+        HRESULT err1 = DLABQueryInterfaceAny(newDeckLink, &profileAttributes,
+                                             IID_IDeckLinkProfileAttributes,
+                                             IID_IDeckLinkProfileAttributes_v15_3_1);
+        HRESULT err2 = DLABQueryInterfaceAny(newDeckLink, &configuration,
+                                             IID_IDeckLinkConfiguration,
+                                             IID_IDeckLinkConfiguration_v15_3_1);
+        HRESULT err3 = DLABQueryInterfaceAny(newDeckLink, &status,
+                                             IID_IDeckLinkStatus,
+                                             IID_IDeckLinkStatus_v15_3_1);
+        HRESULT err4 = DLABQueryInterfaceAny(newDeckLink, &notification,
+                                             IID_IDeckLinkNotification,
+                                             IID_IDeckLinkNotification_v15_3_1);
+
+        if (FAILED(err1) || FAILED(err2) || FAILED(err3) || FAILED(err4)) {
+            if (profileAttributes) profileAttributes->Release();
+            if (configuration) configuration->Release();
+            if (status) status->Release();
+            if (notification) notification->Release();
             return nil;
         }
+
+        _deckLinkProfileAttributes = profileAttributes;
+        _deckLinkConfiguration = configuration;
+        _deckLinkStatus = status;
+        _deckLinkNotification = notification;
         
         // Retain IDeckLink and each Interfaces
         _deckLink = newDeckLink;
@@ -82,16 +98,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     {
         // Validate support feature (Capture)
         if (!_deckLinkInput && supportsCapture) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkInput, (void **)&_deckLinkInput);
-            if (error) { // 14.2.1
-                error = _deckLink->QueryInterface(IID_IDeckLinkInput_v14_2_1, (void **)&_deckLinkInput);
-            }
-            if (error) { // 11.5.1
-                error = _deckLink->QueryInterface(IID_IDeckLinkInput_v11_5_1, (void **)&_deckLinkInput);
-            }
-            if (error) { // 11.4
-                error = _deckLink->QueryInterface(IID_IDeckLinkInput_v11_4, (void **)&_deckLinkInput);
-            }
+            error = DLABQueryInterfaceAny(_deckLink, &_deckLinkInput,
+                                          IID_IDeckLinkInput,
+                                          IID_IDeckLinkInput_v15_3_1,
+                                          IID_IDeckLinkInput_v14_2_1,
+                                          IID_IDeckLinkInput_v11_5_1,
+                                          IID_IDeckLinkInput_v11_4);
             if (error) {
                 if (_deckLinkInput) _deckLinkInput->Release();
                 _deckLinkInput = NULL;
@@ -101,13 +113,11 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         
         // Validate support feature (Playback)
         if (!_deckLinkOutput && supportsPlayback) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkOutput, (void **)&_deckLinkOutput);
-            if (error) { // 14.2.1
-                error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v14_2_1, (void **)&_deckLinkOutput);
-            }
-            if (error) { // 11.4
-                error = _deckLink->QueryInterface(IID_IDeckLinkOutput_v11_4, (void **)&_deckLinkOutput);
-            }
+            error = DLABQueryInterfaceAny(_deckLink, &_deckLinkOutput,
+                                          IID_IDeckLinkOutput,
+                                          IID_IDeckLinkOutput_v15_3_1,
+                                          IID_IDeckLinkOutput_v14_2_1,
+                                          IID_IDeckLinkOutput_v11_4);
             if (error) {
                 if (_deckLinkOutput) _deckLinkOutput->Release();
                 _deckLinkOutput = NULL;
@@ -578,7 +588,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 /* =================================================================================== */
 
 // private DLABNotificationCallbackDelegate
-- (void) notify:(BMDNotifications)topic param1:(uint64_t)param1 param2:(uint64_t)param2
+- (void) notify:(BMDNotifications)topic param1:(uint64_t)param1 param2:(uint64_t)param2 // TODO: Add param2 handling
 {
     // check topic if it is statusChanged
     if (topic == bmdStatusChanged) {
@@ -959,20 +969,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (int) apiVersion
 {
-    if (_apiVersion == 0) {
-        IDeckLinkAPIInformation* api = CreateDeckLinkAPIInformationInstance();
-        if (api != NULL) {
-            HRESULT result = E_FAIL;
-            BMDDeckLinkAPIInformationID cfgID = DLABDeckLinkAPIInformationVersion;
-            int64_t newIntValue = false;
-            result = api->GetInt(cfgID, &newIntValue);
-            if (!result) {
-                _apiVersion = (int)newIntValue;
-            }
-            api->Release();
-        }
-    }
-    return _apiVersion;
+    return [DLABVersionChecker apiVersion];
 }
 
 /* =================================================================================== */

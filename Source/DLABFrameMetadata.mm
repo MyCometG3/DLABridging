@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABFrameMetadata+Internal.h>
+#import <DLABQueryInterfaceAny.h>
 
 @implementation DLABFrameMetadata
 
@@ -32,7 +33,8 @@
         
         // Get mutable MetadataExtensions of output frame
         IDeckLinkVideoFrameMutableMetadataExtensions* ext = NULL;
-        HRESULT result = frame->QueryInterface(IID_IDeckLinkVideoFrameMutableMetadataExtensions, (void **)&ext);
+        HRESULT result = DLABQueryInterfaceAny(frame, &ext,
+                                               IID_IDeckLinkVideoFrameMutableMetadataExtensions);
         if (result != S_OK || !ext) {
             if (ext) ext->Release();
             return nil;
@@ -64,12 +66,10 @@
         
         // Get MetadataExtensions of input frame
         IDeckLinkVideoFrameMetadataExtensions* ext = NULL;
-        HRESULT result = frame->QueryInterface(IID_IDeckLinkVideoFrameMetadataExtensions, (void **)&ext);
-        // _v11_5.h
-        if (result != S_OK) {
-            result = frame->QueryInterface(IID_IDeckLinkVideoFrameMetadataExtensions_v11_5, (void **)&ext);
-        }
-        if (result != S_OK) {
+        HRESULT result = DLABQueryInterfaceAny(frame, &ext,
+                                               IID_IDeckLinkVideoFrameMetadataExtensions,
+                                               IID_IDeckLinkVideoFrameMetadataExtensions_v11_5);
+        if (result != S_OK || !ext) {
             if (ext) ext->Release();
             return nil;
         }
@@ -222,6 +222,11 @@
 - (BOOL)writeMetadataUsingExtensions:(IDeckLinkVideoFrameMutableMetadataExtensions *)ext {
     NSParameterAssert(ext);
     
+    // Write operations are available in SDK 14.3+
+    if ([DLABVersionChecker checkPre1403]) {
+        return NO;
+    }
+    
     HRESULT result = S_OK;
     
     int64_t int64Value = 0;
@@ -346,15 +351,20 @@
     result = ext->GetInt(bmdDeckLinkFrameMetadataHDRElectroOpticalTransferFunc, pInt64);
     if (result != S_OK) *pInt64 = -1;
     
-    uint32_t bufferSize = 0;
-    result = ext->GetBytes(bmdDeckLinkFrameMetadataDolbyVision, nullptr, &bufferSize);
-    if (SUCCEEDED(result) && bufferSize > 0) {
-        NSMutableData *mutableData = [NSMutableData dataWithLength:bufferSize];
-        if (mutableData) {
-            result = ext->GetBytes(bmdDeckLinkFrameMetadataDolbyVision,
-                                   mutableData.mutableBytes, &bufferSize);
-            if (SUCCEEDED(result)) {
-                _dolbyVision = [NSData dataWithData:mutableData];
+    // GetBytes is available in SDK 11.5.1+
+    if (![DLABVersionChecker checkPre110501]) {
+        uint32_t bufferSize = 0;
+        result = ext->GetBytes(bmdDeckLinkFrameMetadataDolbyVision, nullptr, &bufferSize);
+        if (SUCCEEDED(result) && bufferSize > 0) {
+            NSMutableData *mutableData = [NSMutableData dataWithLength:bufferSize];
+            if (mutableData) {
+                result = ext->GetBytes(bmdDeckLinkFrameMetadataDolbyVision,
+                                       mutableData.mutableBytes, &bufferSize);
+                if (SUCCEEDED(result)) {
+                    _dolbyVision = [NSData dataWithData:mutableData];
+                } else {
+                    _dolbyVision = nil;
+                }
             } else {
                 _dolbyVision = nil;
             }
@@ -427,11 +437,9 @@
         IDeckLinkVideoFrame* targetFrame = self.outputFrame ? self.outputFrame : self.inputFrame;
         if (!targetFrame) return NO;
         
-        HRESULT result = targetFrame->QueryInterface(IID_IDeckLinkVideoFrameMetadataExtensions, (void **)&ext);
-        // _v11_5.h
-        if (result != S_OK) {
-            result = targetFrame->QueryInterface(IID_IDeckLinkVideoFrameMetadataExtensions_v11_5, (void **)&ext);
-        }
+        HRESULT result = DLABQueryInterfaceAny(targetFrame, &ext,
+                                               IID_IDeckLinkVideoFrameMetadataExtensions,
+                                               IID_IDeckLinkVideoFrameMetadataExtensions_v11_5);
         
         if (result != S_OK || !ext) {
             if (ext) ext->Release();

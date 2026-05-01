@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABFrameMetadata.h>
+#import <DLABVersionChecker.h>
 #import <DeckLinkAPI.h>
 
 #import <DeckLinkAPI_v11_5.h>
@@ -42,8 +43,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 // For Input (immutable)
 @property (nonatomic, assign, nullable, readonly) IDeckLinkVideoFrame* inputFrame;
-
-/* =================================================================================== */
 
 /// Check if the input/output frame contains HDR metadata
 - (BOOL)frameContainsHDRMetadataFlag;

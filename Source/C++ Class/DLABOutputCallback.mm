@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABOutputCallback.h>
+#import <DLABQueryInterfaceAny.h>
 
 DLABOutputCallback::DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate)
 : delegate(delegate), refCount(1)
@@ -57,17 +58,14 @@ HRESULT DLABOutputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         AddRef();
         return S_OK;
     }
-    if (memcmp(&iid, &IID_IDeckLinkVideoOutputCallback, sizeof(REFIID)) == 0) {
+    if (DLABIIDMatchesAny(iid,
+                          IID_IDeckLinkVideoOutputCallback,
+                          IID_IDeckLinkVideoOutputCallback_v14_2_1)) {
         *ppv = (IDeckLinkVideoOutputCallback *)this;
         AddRef();
         return S_OK;
     }
-    if (memcmp(&iid, &IID_IDeckLinkVideoOutputCallback_v14_2_1, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkVideoOutputCallback *)this;
-        AddRef();
-        return S_OK;
-    }
-    if (memcmp(&iid, &IID_IDeckLinkAudioOutputCallback, sizeof(REFIID)) == 0) {
+    if (DLABIIDMatchesAny(iid, IID_IDeckLinkAudioOutputCallback)) {
         *ppv = (IDeckLinkAudioOutputCallback *)this;
         AddRef();
         return S_OK;
