@@ -23,7 +23,7 @@
 
 /* =================================================================================== */
 /*
- : Following interfaces are not supported. (Section # are from SDK 15.0 pdf)
+ : Following interfaces are not supported. (Section # are from SDK 16.0 pdf)
  : 2.5.8 IDeckLinkVideoFrame3DExtensions
  : 2.5.25 IDeckLinkGLScreenPreviewHelper
  : 2.5.26 IDeckLinkCocoaScreenPreviewCallback
