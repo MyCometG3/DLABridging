@@ -445,11 +445,11 @@ NS_ASSUME_NONNULL_BEGIN
                    videoSetting:(DLABVideoSetting*)outputVideoSetting;
 
 /* =================================================================================== */
-// MARK: private experimental - VANC support
+// MARK: private - VANC support
 /* =================================================================================== */
 
 /**
- Wrapper of IDeckLinkMutableVideoFrame::GetAncillaryData. Caller must release when finished.
+ Wrapper of IDeckLinkMutableVideoFrame::GetAncillaryData. Caller must release when finished. // deprecated
  
  @param outFrame IDeckLinkMutableVideoFrame
  @return VideoFrameAncillary for Output Frame.
@@ -457,17 +457,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable IDeckLinkVideoFrameAncillary *) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
+ Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine. // deprecated
  
  @param ancillaryData VideoFrameAncillary for Output Frame.
  @param lineNumber VANC line number of interrest.
  @return row buffer pointer, or null if not available.
  */
 - (nullable void*) bufferOfOutputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
-                                           line:(uint32_t)lineNumber;
+                                           line:(uint32_t)lineNumber DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Call VANCHandler for output VideoFrame
+ Call VANCHandler for output VideoFrame // deprecated
  
  @param outFrame IDeckLinkMutableVideoFrame
  @param displayTime time at which to display the frame in timeScale units
@@ -477,7 +477,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) callbackOutputVANCHandler:(IDeckLinkMutableVideoFrame*)outFrame
                             atTime:(NSInteger)displayTime
                           duration:(NSInteger)frameDuration
-                       inTimeScale:(NSInteger)timeScale DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");;
+                       inTimeScale:(NSInteger)timeScale DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
  Call VANCPacketHandler for output VideoFrame
@@ -580,11 +580,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable CMSampleBufferRef) createAudioSampleForAudioPacket:(IDeckLinkAudioInputPacket*)audioPacket;
 
 /* =================================================================================== */
-// MARK: private experimental - VANC support
+// MARK: private - VANC support
 /* =================================================================================== */
 
 /**
- Wrapper of IDeckLinkVideoInputFrame::GetAncillaryData. Caller must release when finished.
+ Wrapper of IDeckLinkVideoInputFrame::GetAncillaryData. Caller must release when finished. // deprecated
  
  @param inFrame IDeckLinkVideoInputFrame
  @return VideoFrameAncillary for Input Frame.
@@ -592,17 +592,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable IDeckLinkVideoFrameAncillary *) prepareInputFrameAncillary:(IDeckLinkVideoInputFrame*)inFrame DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine.
+ Wrapper of IDeckLinkVideoFrameAncillary::GetBufferForVerticalBlankingLine. // deprecated
  
  @param ancillaryData VideoFrameAncillary for Input Frame.
  @param lineNumber VANC line number of interrest.
  @return row buffer pointer, or null if not available.
  */
 - (nullable void*) bufferOfInputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
-                                          line:(uint32_t)lineNumber;
+                                          line:(uint32_t)lineNumber DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Call VANCHandler block for input VideoFrame.
+ Call VANCHandler block for input VideoFrame. // deprecated
  
  @param inFrame IDeckLinkVideoInputFrame
  */

@@ -461,18 +461,18 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 
 // private experimental - VANC Playback support (deprecated)
 
-- (IDeckLinkVideoFrameAncillary*) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame
+- (IDeckLinkVideoFrameAncillary*) prepareOutputFrameAncillary:(IDeckLinkMutableVideoFrame*)outFrame // deprecated
 {
     NSParameterAssert(outFrame);
     
     IDeckLinkVideoFrameAncillary *ancillaryData = NULL;
-    outFrame->GetAncillaryData(&ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
+    outFrame->GetAncillaryData(&ancillaryData); // Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
     
     if (!ancillaryData) {
         // Create new one and attach to outFrame
         IDeckLinkOutput *output = self.deckLinkOutput;
         if (output) {
-            output->CreateAncillaryData(outFrame->GetPixelFormat(), &ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
+            output->CreateAncillaryData(outFrame->GetPixelFormat(), &ancillaryData); // Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
             if (ancillaryData) {
                 outFrame->SetAncillaryData(ancillaryData);
                 ancillaryData->Release();
@@ -481,19 +481,19 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
         }
         
         // Issue Another query.
-        outFrame->GetAncillaryData(&ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
+        outFrame->GetAncillaryData(&ancillaryData); // Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
     }
     
     return ancillaryData; // Nullable
 }
 
 - (void*) bufferOfOutputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
-                                  line:(uint32_t)lineNumber
+                                  line:(uint32_t)lineNumber // deprecated
 {
     NSParameterAssert(ancillaryData);
     
     void* buffer = NULL;
-    ancillaryData->GetBufferForVerticalBlankingLine(lineNumber, &buffer);
+    ancillaryData->GetBufferForVerticalBlankingLine(lineNumber, &buffer); // deprecated
     if (buffer) {
         return buffer;
     } else {
@@ -527,7 +527,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
                 NSArray<NSNumber*>* lines = self.outputVANCLines;
                 for (NSNumber* num in lines) {
                     int32_t lineNumber = num.intValue;
-                    void* buffer = [self bufferOfOutputFrameAncillary:frameAncillary line:lineNumber];
+                    void* buffer = [self bufferOfOutputFrameAncillary:frameAncillary line:lineNumber]; // deprecated
                     if (buffer) {
                         BOOL result = outHandler(timingInfo, lineNumber, buffer);
                         if (!result) break;
@@ -540,7 +540,7 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
     }
 }
 
-// private experimental - VANC Packet Playback support
+// VANC Packet Playback support
 
 - (void) callbackOutputVANCPacketHandler:(IDeckLinkMutableVideoFrame*)outFrame
                                   atTime:(NSInteger)displayTime
@@ -1019,13 +1019,16 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVideoFrame *outFrame, NSInteger displayTime, NSInteger frameDuration, NSInteger timeScale) {
     DLABFrameMetadata* frameMetadata = nil;
     
-    // Callback VANCHandler block
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Callback VANCHandler block // deprecated
     if (self.outputVANCHandler) {
         [self callbackOutputVANCHandler:outFrame
                                  atTime:displayTime
                                duration:frameDuration
                             inTimeScale:timeScale];
     }
+#pragma clang diagnostic pop
     
     // Callback VANCPacketHandler block
     if (self.outputVANCPacketHandler) {

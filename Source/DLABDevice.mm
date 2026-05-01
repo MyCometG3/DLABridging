@@ -616,7 +616,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 /* =================================================================================== */
 
 // private DLABNotificationCallbackDelegate
-- (void) notify:(BMDNotifications)topic param1:(uint64_t)param1 param2:(uint64_t)param2 // TODO: Add param2 handling
+- (void) notify:(BMDNotifications)topic param1:(uint64_t)param1 param2:(uint64_t)param2
 {
     // check topic if it is statusChanged
     if (topic == bmdStatusChanged) {
@@ -639,6 +639,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
             }];
         }
     } else {
+        // TODO: Add param2 handling for DLABNotificationIPFlowStatusChanged/DLABNotificationIPFlowSettingChanged
         NSLog(@"ERROR: Unsupported notification topic is detected.");
     }
 }

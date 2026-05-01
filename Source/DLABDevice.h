@@ -245,7 +245,7 @@ NS_ASSUME_NONNULL_END
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Experimental VANC support: VANC callback block
+ Experimental VANC support: VANC callback block // deprecated
  
  This block is called in sync on delegate queue. You should process immediately.
  
@@ -261,10 +261,10 @@ NS_ASSUME_NONNULL_BEGIN
  @param buffer VANC buffer of specified lineNumber.
  @return Return FALSE if further call is not required.
  */
-typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber, void* buffer);
+typedef BOOL (^VANCHandler) (CMSampleTimingInfo timingInfo, uint32_t lineNumber, void* buffer) DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Experimental VANC Packet support : VANC Capture callback block
+ VANC Packet support : VANC Capture callback block
  
  This block is called in sync on delegate queue. You should process immediately.
  Sequence of callback will be triggered until you returned FALSE (when you finish all of VANC packets).
@@ -287,7 +287,7 @@ typedef BOOL (^InputVANCPacketHandler) (CMSampleTimingInfo timingInfo,
                                         NSData* data);
 
 /**
- Experimental ancillary packet support : capture callback block (SDK 15.3 or later)
+ Ancillary packet support : capture callback block (SDK 15.3 or later)
  
  This block is called in sync on delegate queue. You should process immediately.
  Sequence of callback will be triggered until you returned FALSE (when you finish all ancillary packets).
@@ -312,7 +312,7 @@ typedef BOOL (^InputAncillaryPacketHandler) (CMSampleTimingInfo timingInfo,
                                              NSData* data);
 
 /**
- Experimental VANC Packet support : VANC Playback callback block
+ VANC Packet support : VANC Playback callback block
  
  This block is called in sync on delegate queue. You should process immediately.
  Sequence of callback will be triggered until you returned nil (when you finish all of VANC packets).
@@ -333,7 +333,7 @@ typedef NSData* _Nullable (^OutputVANCPacketHandler) (CMSampleTimingInfo timingI
                                                       uint8_t* dataStreamIndex);
 
 /**
- Experimental ancillary packet support : playback callback block (SDK 15.3 or later)
+ Ancillary packet support : playback callback block (SDK 15.3 or later)
  
  This block is called in sync on delegate queue. You should process immediately.
  Sequence of callback will be triggered until you returned nil (when you finish all ancillary packets).
@@ -590,36 +590,36 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, nullable) id<DLABProfileChangeDelegate> profileDelegate;
 
 /* =================================================================================== */
-// MARK: (Public) - VANC support (experimental)
+// MARK: (Public) - VANC support
 /* =================================================================================== */
 
 /**
- Experimental VANC support: Caller should populate interested line numbers of VANC data.
+ Experimental VANC support: Caller should populate interested line numbers of VANC data. // deprecated
  */
-@property (nonatomic, strong, nullable) NSArray<NSNumber*> *inputVANCLines;
+@property (nonatomic, strong, nullable) NSArray<NSNumber*> *inputVANCLines DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Experimental VANC support: Caller should populate VANC callback block.
+ Experimental VANC support: Caller should populate VANC callback block. // deprecated
  */
-@property (nonatomic, copy, nullable) VANCHandler inputVANCHandler; // deprecated
+@property (nonatomic, copy, nullable) VANCHandler inputVANCHandler DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Experimental VANC support: Caller should populate interested line numbers of VANC data.
+ Experimental VANC support: Caller should populate interested line numbers of VANC data. // deprecated
  */
-@property (nonatomic, strong, nullable) NSArray<NSNumber*> *outputVANCLines; // deprecated
+@property (nonatomic, strong, nullable) NSArray<NSNumber*> *outputVANCLines DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Experimental VANC support: Caller should populate VANC callback block.
+ Experimental VANC support: Caller should populate VANC callback block. // deprecated
  */
-@property (nonatomic, copy, nullable) VANCHandler outputVANCHandler;  // deprecated
+@property (nonatomic, copy, nullable) VANCHandler outputVANCHandler DEPRECATED_MSG_ATTRIBUTE("Deprecated since SDK 16.0.");
 
 /**
- Experimental VANC Packet Capture support: Caller should populate VANC Packet callback block.
+ VANC Packet Capture support: Caller should populate VANC Packet callback block.
  */
 @property (nonatomic, copy, nullable) InputVANCPacketHandler inputVANCPacketHandler;
 
 /**
- Experimental VANC Packet Output support: Caller should populate VANC Packet callback block.
+ VANC Packet Output support: Caller should populate VANC Packet callback block.
  */
 @property (nonatomic, copy, nullable) OutputVANCPacketHandler outputVANCPacketHandler;
 

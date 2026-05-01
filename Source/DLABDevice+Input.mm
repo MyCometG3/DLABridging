@@ -106,10 +106,13 @@
         DLABTimecodeSetting* setting = [self createTimecodeSettingOf:videoFrame];
         
         if (sampleBuffer) {
-            // Callback VANCHandler block
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            // Callback VANCHandler block // deprecated
             if (self.inputVANCHandler) {
                 [self callbackInputVANCHandler:videoFrame];
             }
+#pragma clang diagnostic pop
             
             // Callback VANCPacketHandler block
             if (self.inputVANCPacketHandler) {
@@ -703,25 +706,25 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
 // MARK: VANC support
 /* =================================================================================== */
 
-// private experimental - VANC Capture support
+// private experimental - VANC Capture support (deprecated)
 
-- (IDeckLinkVideoFrameAncillary*) prepareInputFrameAncillary:(IDeckLinkVideoInputFrame*)inFrame
+- (IDeckLinkVideoFrameAncillary*) prepareInputFrameAncillary:(IDeckLinkVideoInputFrame*)inFrame // deprecated
 {
     NSParameterAssert(inFrame);
     
     IDeckLinkVideoFrameAncillary *ancillaryData = NULL;
-    inFrame->GetAncillaryData(&ancillaryData); // TODO: Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
+    inFrame->GetAncillaryData(&ancillaryData); // Deprecated. Use IDeckLinkVideoFrameAncillaryPackets
     
     return ancillaryData; // Nullable
 }
 
 - (void*) bufferOfInputFrameAncillary:(IDeckLinkVideoFrameAncillary*)ancillaryData
-                                 line:(uint32_t)lineNumber
+                                 line:(uint32_t)lineNumber // deprecated
 {
     NSParameterAssert(ancillaryData);
     
     void* buffer = NULL;
-    ancillaryData->GetBufferForVerticalBlankingLine(lineNumber, &buffer);
+    ancillaryData->GetBufferForVerticalBlankingLine(lineNumber, &buffer); // deprecated
     if (buffer) {
         return buffer;
     } else {
@@ -760,7 +763,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
                 NSArray<NSNumber*>* lines = self.inputVANCLines;
                 for (NSNumber* num in lines) {
                     int32_t lineNumber = num.intValue;
-                    void* buffer = [self bufferOfInputFrameAncillary:frameAncillary line:lineNumber];
+                    void* buffer = [self bufferOfInputFrameAncillary:frameAncillary line:lineNumber]; // deprecated
                     if (buffer) {
                         BOOL result = inHandler(timingInfo, lineNumber, buffer);
                         if (!result) break;
@@ -773,7 +776,7 @@ static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* vide
     }
 }
 
-// private experimental - VANC Packet Capture support
+// VANC Packet Capture support
 
 - (void) callbackInputVANCPacketHandler:(IDeckLinkVideoInputFrame*)inFrame
 {
