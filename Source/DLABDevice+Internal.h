@@ -227,6 +227,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly, nullable) IDeckLinkProfileManager *deckLinkProfileManager;
 
+/**
+ IDeckLinkStatistics object.
+ */
+@property (nonatomic, assign, readonly, nullable) IDeckLinkStatistics *deckLinkStatistics;
+
 /* =================================================================================== */
 
 // cpp objects - lazy instantiation

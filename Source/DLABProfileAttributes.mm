@@ -310,4 +310,23 @@
     }
 }
 
+- (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
+                            withParam:(NSUInteger)param
+                                error:(NSError**)error
+{
+    HRESULT result = E_FAIL;
+    BMDDeckLinkAttributeID attr = attributeID;
+    CFStringRef newStringValue = NULL;
+    result = _attributes->GetStringWithParam(attr, (uint64_t)param, &newStringValue);
+    if (!result) {
+        return (NSString*)CFBridgingRelease(newStringValue);
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkAttributes::GetStringWithParam failed."
+              code:result
+                to:error];
+        return nil;
+    }
+}
+
 @end

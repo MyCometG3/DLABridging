@@ -125,6 +125,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSString*) stringValueForAttribute:(DLABAttribute) attributeID
                                          error:(NSError * _Nullable * _Nullable)error;
 
+/**
+ Getter for DLABAttribute (Parameterized query)
+ 
+ @param attributeID DLABAttribute
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSString* form.
+ */
+- (nullable NSString*) stringValueForAttribute:(DLABAttribute) attributeID
+                                     withParam:(NSUInteger)param
+                                         error:(NSError * _Nullable * _Nullable)error;
+
 @end
 
 NS_ASSUME_NONNULL_END

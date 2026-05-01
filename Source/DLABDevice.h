@@ -762,6 +762,54 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSString*) stringValueForConfiguration:(DLABConfiguration)configurationID
                                              error:(NSError * _Nullable * _Nullable)error;
 
+/**
+ Getter for DLABConfiguration (Parameterized query)
+ 
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<BOOL>* form.
+ */
+- (nullable NSNumber*) boolValueForConfiguration:(DLABConfiguration)configurationID
+                                       withParam:(NSUInteger)param
+                                           error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABConfiguration (Parameterized query)
+ 
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<int64_t>* form.
+ */
+- (nullable NSNumber*) intValueForConfiguration:(DLABConfiguration)configurationID
+                                      withParam:(NSUInteger)param
+                                          error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABConfiguration (Parameterized query)
+ 
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<double>* form.
+ */
+- (nullable NSNumber*) doubleValueForConfiguration:(DLABConfiguration)configurationID
+                                         withParam:(NSUInteger)param
+                                             error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABConfiguration (Parameterized query)
+ 
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSString* form.
+ */
+- (nullable NSString*) stringValueForConfiguration:(DLABConfiguration)configurationID
+                                         withParam:(NSUInteger)param
+                                             error:(NSError * _Nullable * _Nullable)error;
+
 // setter configrationID
 
 /**
@@ -810,6 +858,62 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL) setStringValue:(NSString*)value
        forConfiguration:(DLABConfiguration) configurationID
+                  error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Setter for DLABConfiguration (Parameterized update)
+ 
+ @param value BOOL value
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return YES if no error, NO if failed
+ */
+- (BOOL) setBoolValue:(BOOL)value
+     forConfiguration:(DLABConfiguration) configurationID
+            withParam:(NSUInteger)param
+                error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Setter for DLABConfiguration (Parameterized update)
+ 
+ @param value NSInteger value
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return YES if no error, NO if failed
+ */
+- (BOOL) setIntValue:(NSInteger)value
+    forConfiguration:(DLABConfiguration) configurationID
+           withParam:(NSUInteger)param
+               error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Setter for DLABConfiguration (Parameterized update)
+ 
+ @param value double_t value
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return YES if no error, NO if failed
+ */
+- (BOOL) setDoubleValue:(double_t)value
+       forConfiguration:(DLABConfiguration) configurationID
+              withParam:(NSUInteger)param
+                  error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Setter for DLABConfiguration (Parameterized update)
+ 
+ @param value NSString* value
+ @param configurationID DLABConfiguration
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return YES if no error, NO if failed
+ */
+- (BOOL) setStringValue:(NSString*)value
+       forConfiguration:(DLABConfiguration) configurationID
+              withParam:(NSUInteger)param
                   error:(NSError * _Nullable * _Nullable)error;
 
 /**
@@ -872,6 +976,104 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSMutableData*) dataValueForStatus:(DLABDeckLinkStatus)statusID
                                         ofSize:(NSUInteger) requestSize
+                                         error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatus (Parameterized query).
+ 
+ @param statusID DLABDeckLinkStatus.
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<BOOL>* form.
+ */
+- (nullable NSNumber*) boolValueForStatus:(DLABDeckLinkStatus)statusID
+                                withParam:(NSUInteger)param
+                                    error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatus (Parameterized query).
+ 
+ @param statusID DLABDeckLinkStatus.
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<int64_t>* form.
+ */
+- (nullable NSNumber*) intValueForStatus:(DLABDeckLinkStatus)statusID
+                               withParam:(NSUInteger)param
+                                   error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatus (Parameterized query).
+ 
+ @param statusID DLABDeckLinkStatus.
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<double>* form.
+ */
+- (nullable NSNumber*) doubleValueForStatus:(DLABDeckLinkStatus)statusID
+                                  withParam:(NSUInteger)param
+                                      error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatus (Parameterized query).
+ 
+ @param statusID DLABDeckLinkStatus.
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSString* form.
+ */
+- (nullable NSString*) stringValueForStatus:(DLABDeckLinkStatus)statusID
+                                  withParam:(NSUInteger)param
+                                      error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatus (Parameterized query).
+ 
+ @param statusID DLABDeckLinkStatus.
+ @param param Parameter for query.
+ @param requestSize Byte length of result. Specify 0 if unknown.
+ @param error Error description if failed.
+ @return Query result in NSMutableData* form.
+ */
+- (nullable NSMutableData*) dataValueForStatus:(DLABDeckLinkStatus)statusID
+                                     withParam:(NSUInteger)param
+                                        ofSize:(NSUInteger) requestSize
+                                         error:(NSError * _Nullable * _Nullable)error;
+
+// getter statisticsID
+
+/**
+ Getter for DLABDeckLinkStatistics
+ 
+ @param statisticID DLABDeckLinkStatistic.
+ @param error Error description if failed.
+ @return Query result in NSNumber<int64_t>* form.
+ */
+- (nullable NSNumber*) intValueForStatistic:(DLABDeckLinkStatistic)statisticID
+                                      error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatistics (Parameterized query).
+ 
+ @param statisticID DLABDeckLinkStatistic.
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSNumber<int64_t>* form.
+ */
+- (nullable NSNumber*) intValueForStatistic:(DLABDeckLinkStatistic)statisticID
+                                  withParam:(NSUInteger)param
+                                      error:(NSError * _Nullable * _Nullable)error;
+
+/**
+ Getter for DLABDeckLinkStatistics (Parameterized query).
+ 
+ @param statisticID DLABDeckLinkStatistic.
+ @param param Parameter for query.
+ @param error Error description if failed.
+ @return Query result in NSString* form.
+ */
+- (nullable NSString*) stringValueForStatistic:(DLABDeckLinkStatistic)statisticID
+                                     withParam:(NSUInteger)param
                                          error:(NSError * _Nullable * _Nullable)error;
 
 @end
