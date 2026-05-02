@@ -41,7 +41,7 @@ HRESULT DLABProfileCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkProfileCallback, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkProfileCallback *)this;
+        *ppv = static_cast<IDeckLinkProfileCallback *>(this);
         AddRef();
         return S_OK;
     }

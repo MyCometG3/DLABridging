@@ -35,13 +35,13 @@ public:
     DLABDeviceNotificationCallback(id<DLABDeviceNotificationCallbackDelegate> delegate);
     
     // IDeckLinkDeviceNotificationCallback
-    HRESULT DeckLinkDeviceArrived(IDeckLink *deckLink);
-    HRESULT DeckLinkDeviceRemoved(IDeckLink *deckLink);
+    HRESULT DeckLinkDeviceArrived(IDeckLink *deckLink) override;
+    HRESULT DeckLinkDeviceRemoved(IDeckLink *deckLink) override;
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     __weak id<DLABDeviceNotificationCallbackDelegate> delegate;

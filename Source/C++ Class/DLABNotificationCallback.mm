@@ -34,7 +34,7 @@ HRESULT DLABNotificationCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkNotificationCallback, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkNotificationCallback *)this;
+        *ppv = static_cast<IDeckLinkNotificationCallback *>(this);
         AddRef();
         return S_OK;
     }

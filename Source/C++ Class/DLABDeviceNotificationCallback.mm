@@ -41,7 +41,7 @@ HRESULT DLABDeviceNotificationCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     if (memcmp(&iid, &IID_IDeckLinkDeviceNotificationCallback, sizeof(REFIID)) == 0) {
-        *ppv = (IDeckLinkDeviceNotificationCallback *)this;
+        *ppv = static_cast<IDeckLinkDeviceNotificationCallback *>(this);
         AddRef();
         return S_OK;
     }

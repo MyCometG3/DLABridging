@@ -37,15 +37,15 @@ public:
     DLABDeckControlStatusCallback(id<DLABDeckControlStatusCallbackPrivateDelegate> delegate);
     
     // IDeckLinkDeckControlStatusCallback
-    HRESULT TimecodeUpdate(BMDTimecodeBCD currentTimecode);
-    HRESULT VTRControlStateChanged(BMDDeckControlVTRControlState newState, BMDDeckControlError error);
-    HRESULT DeckControlEventReceived(BMDDeckControlEvent event, BMDDeckControlError error);
-    HRESULT DeckControlStatusChanged(BMDDeckControlStatusFlags flags, uint32_t mask);
+    HRESULT TimecodeUpdate(BMDTimecodeBCD currentTimecode) override;
+    HRESULT VTRControlStateChanged(BMDDeckControlVTRControlState newState, BMDDeckControlError error) override;
+    HRESULT DeckControlEventReceived(BMDDeckControlEvent event, BMDDeckControlError error) override;
+    HRESULT DeckControlStatusChanged(BMDDeckControlStatusFlags flags, uint32_t mask) override;
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     __weak id<DLABDeckControlStatusCallbackPrivateDelegate> delegate;

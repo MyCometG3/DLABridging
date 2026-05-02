@@ -35,13 +35,13 @@ public:
     DLABProfileCallback(id<DLABProfileCallbackPrivateDelegate> delegate);
     
     // IDeckLinkProfileCallback
-    HRESULT ProfileChanging(IDeckLinkProfile* profileToBeActivated, bool streamsWillBeForcedToStop);
-    HRESULT ProfileActivated(IDeckLinkProfile* activatedProfile);
+    HRESULT ProfileChanging(IDeckLinkProfile* profileToBeActivated, bool streamsWillBeForcedToStop) override;
+    HRESULT ProfileActivated(IDeckLinkProfile* activatedProfile) override;
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     __weak id<DLABProfileCallbackPrivateDelegate> delegate;

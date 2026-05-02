@@ -37,13 +37,13 @@ public:
     DLABInputCallback(id<DLABInputCallbackDelegate> delegate);
     
     // IDeckLinkInputCallback
-    HRESULT VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags);
-    HRESULT VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket);
+    HRESULT VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override;
+    HRESULT VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override;
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     __weak id<DLABInputCallbackDelegate> delegate;

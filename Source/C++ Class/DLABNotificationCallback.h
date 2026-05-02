@@ -34,12 +34,12 @@ public:
     DLABNotificationCallback(id<DLABNotificationCallbackDelegate> delegate);
     
     // IDeckLinkNotificationCallback
-    HRESULT Notify(BMDNotifications topic, uint64_t param1, uint64_t param2);
+    HRESULT Notify(BMDNotifications topic, uint64_t param1, uint64_t param2) override;
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     __weak id<DLABNotificationCallbackDelegate> delegate;

@@ -30,17 +30,17 @@ public:
     HRESULT Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, BMDAncillaryDataSpace dataSpace, NSData* data); // Added in v15_3 or later
     
     // IDeckLinkAncillaryPacket
-    HRESULT GetBytes(BMDAncillaryPacketFormat format, const void** data, uint32_t* size);
-    uint8_t GetDID (void);
-    uint8_t GetSDID(void);
-    uint32_t GetLineNumber(void);
-    uint8_t GetDataStreamIndex(void);
-    BMDAncillaryDataSpace GetDataSpace(void); // Added in v15_3 or later
+    HRESULT GetBytes(BMDAncillaryPacketFormat format, const void** data, uint32_t* size) override;
+    uint8_t GetDID (void) override;
+    uint8_t GetSDID(void) override;
+    uint32_t GetLineNumber(void) override;
+    uint8_t GetDataStreamIndex(void) override;
+    BMDAncillaryDataSpace GetDataSpace(void) override; // Added in v15_3 or later
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     uint8_t _did;

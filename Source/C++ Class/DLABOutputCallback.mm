@@ -61,12 +61,12 @@ HRESULT DLABOutputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
     if (DLABIIDMatchesAny(iid,
                           IID_IDeckLinkVideoOutputCallback,
                           IID_IDeckLinkVideoOutputCallback_v14_2_1)) {
-        *ppv = (IDeckLinkVideoOutputCallback *)this;
+        *ppv = static_cast<IDeckLinkVideoOutputCallback *>(this);
         AddRef();
         return S_OK;
     }
     if (DLABIIDMatchesAny(iid, IID_IDeckLinkAudioOutputCallback)) {
-        *ppv = (IDeckLinkAudioOutputCallback *)this;
+        *ppv = static_cast<IDeckLinkAudioOutputCallback *>(this);
         AddRef();
         return S_OK;
     }

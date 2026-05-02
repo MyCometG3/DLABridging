@@ -38,16 +38,16 @@ public:
     DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate);
     
     // IDeckLinkVideoOutputCallback
-    HRESULT ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result);
-    HRESULT ScheduledPlaybackHasStopped(void);
+    HRESULT ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result) override;
+    HRESULT ScheduledPlaybackHasStopped(void) override;
     
     // IDeckLinkAudioOutputCallback
-    HRESULT RenderAudioSamples(bool preroll);
+    HRESULT RenderAudioSamples(bool preroll) override;
     
     // IUnknown
-    HRESULT QueryInterface(REFIID iid, LPVOID *ppv);
-    ULONG AddRef();
-    ULONG Release();
+    HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
+    ULONG AddRef() override;
+    ULONG Release() override;
     
 private:
     __weak id<DLABOutputCallbackDelegate> delegate;

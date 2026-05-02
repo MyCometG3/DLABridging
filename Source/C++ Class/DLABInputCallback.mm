@@ -51,7 +51,7 @@ HRESULT DLABInputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
                           IID_IDeckLinkInputCallback,
                           IID_IDeckLinkInputCallback_v14_2_1,
                           IID_IDeckLinkInputCallback_v11_5_1)) {
-        *ppv = (IDeckLinkInputCallback *)this;
+        *ppv = static_cast<IDeckLinkInputCallback *>(this);
         AddRef();
         return S_OK;
     }
