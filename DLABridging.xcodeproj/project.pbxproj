@@ -10,6 +10,8 @@
 		161C9A982FA422F60067C095 /* DLABQueryInterfaceAny.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9A972FA422F60067C095 /* DLABQueryInterfaceAny.h */; };
 		161C9A9B2FA4231C0067C095 /* DLABVersionChecker.mm in Sources */ = {isa = PBXBuildFile; fileRef = 161C9A9A2FA4231C0067C095 /* DLABVersionChecker.mm */; };
 		161C9A9C2FA4231C0067C095 /* DLABVersionChecker.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9A992FA4231C0067C095 /* DLABVersionChecker.h */; };
+		161C9B1F2FA8A5260067C095 /* DLABVideoBufferSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9B1E2FA8A5260067C095 /* DLABVideoBufferSupport.h */; };
+		161C9B202FA8A5260067C095 /* DLABBridgingSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9B1D2FA8A5260067C095 /* DLABBridgingSupport.h */; };
 		164BBCCE24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCCC24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h */; };
 		164BBCCF24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm in Sources */ = {isa = PBXBuildFile; fileRef = 164BBCCD24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm */; };
 		164BBCD224CAB4090076EF54 /* DLABDeckControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCD024CAB4090076EF54 /* DLABDeckControl.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -67,6 +69,8 @@
 		161C9A972FA422F60067C095 /* DLABQueryInterfaceAny.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABQueryInterfaceAny.h; sourceTree = "<group>"; };
 		161C9A992FA4231C0067C095 /* DLABVersionChecker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABVersionChecker.h; sourceTree = "<group>"; };
 		161C9A9A2FA4231C0067C095 /* DLABVersionChecker.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABVersionChecker.mm; sourceTree = "<group>"; };
+		161C9B1D2FA8A5260067C095 /* DLABBridgingSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABBridgingSupport.h; sourceTree = "<group>"; };
+		161C9B1E2FA8A5260067C095 /* DLABVideoBufferSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABVideoBufferSupport.h; sourceTree = "<group>"; };
 		164BBCCC24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLABDeckControlStatusCallback.h; sourceTree = "<group>"; };
 		164BBCCD24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DLABDeckControlStatusCallback.mm; sourceTree = "<group>"; };
 		164BBCD024CAB4090076EF54 /* DLABDeckControl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLABDeckControl.h; sourceTree = "<group>"; };
@@ -180,6 +184,7 @@
 				164C82AF1F514687001208BD /* DLABAudioSetting.h */,
 				164C82AE1F514687001208BD /* DLABAudioSetting+Internal.h */,
 				164C82B01F514687001208BD /* DLABAudioSetting.mm */,
+				161C9B1D2FA8A5260067C095 /* DLABBridgingSupport.h */,
 				164C82B21F514687001208BD /* DLABBrowser.h */,
 				164C82B11F514687001208BD /* DLABBrowser+Internal.h */,
 				164C82B31F514687001208BD /* DLABBrowser.mm */,
@@ -202,6 +207,7 @@
 				164EC8B3241E522F002FBF36 /* DLABFrameMetadata.h */,
 				164EC8B7241E524C002FBF36 /* DLABFrameMetadata+Internal.h */,
 				164EC8B4241E522F002FBF36 /* DLABFrameMetadata.mm */,
+				161C9B1E2FA8A5260067C095 /* DLABVideoBufferSupport.h */,
 				16B0BF17243BEE12004C2BDF /* DLABVideoConverter.h */,
 				16B0BF18243BEE12004C2BDF /* DLABVideoConverter.mm */,
 				164BBCD024CAB4090076EF54 /* DLABDeckControl.h */,
@@ -257,6 +263,8 @@
 				1656BF07241B6B4700E95D3B /* DLABProfileCallback.h in Headers */,
 				164C828A1F514632001208BD /* DLABridging.h in Headers */,
 				164BBCCE24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h in Headers */,
+				161C9B1F2FA8A5260067C095 /* DLABVideoBufferSupport.h in Headers */,
+				161C9B202FA8A5260067C095 /* DLABBridgingSupport.h in Headers */,
 				164BBCD224CAB4090076EF54 /* DLABDeckControl.h in Headers */,
 				164C82D51F514687001208BD /* DLABBrowser.h in Headers */,
 				164C82D71F514687001208BD /* DLABConstants.h in Headers */,

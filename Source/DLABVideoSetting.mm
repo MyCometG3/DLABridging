@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABVideoSetting+Internal.h>
+#import <DLABBridgingSupport.h>
 
 NS_INLINE long rowBytesFor(BMDPixelFormat pixelFormat, long width) {
     long stride = 0;
@@ -235,10 +236,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
 
 - (instancetype) init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithDisplayModeObj:));
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
+    DLABRaiseUnavailableInit(self, @selector(initWithDisplayModeObj:));
     return nil;
 }
 
@@ -434,18 +432,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    if (error) {
-        if (!description) description = @"unknown description";
-        if (!failureReason) failureReason = @"unknown failureReason";
-        
-        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
-        NSInteger code = (NSInteger)result;
-        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
-                                   NSLocalizedFailureReasonErrorKey : failureReason,};
-        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
-        return YES;
-    }
-    return NO;
+    return DLABAssignError(error, description, failureReason, (NSInteger)result);
 }
 
 /* =================================================================================== */

@@ -9,7 +9,107 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDevice+Internal.h>
+#import <DLABBridgingSupport.h>
 #import <DLABQueryInterfaceAny.h>
+#import <DLABVideoBufferSupport.h>
+
+NS_INLINE BOOL DLABPerformOutputCommand(DLABDevice *self,
+                                        NSError **error,
+                                        const char *functionName,
+                                        int lineNumber,
+                                        NSString *failureReason,
+                                        HRESULT (^command)(IDeckLinkOutput *output))
+{
+    __block HRESULT result = E_FAIL;
+    
+    IDeckLinkOutput *output = self.deckLinkOutput;
+    if (!output) {
+        [self post:DLABFunctionLineDescription(functionName, lineNumber)
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
+    }
+    
+    [self playback_sync:^{
+        result = command(output);
+    }];
+    if (result == S_OK) {
+        return YES;
+    }
+    
+    [self post:DLABFunctionLineDescription(functionName, lineNumber)
+        reason:failureReason
+          code:result
+            to:error];
+    return NO;
+}
+
+NS_INLINE NSNumber * DLABOutputUInt32Value(DLABDevice *self,
+                                           NSError **error,
+                                           const char *functionName,
+                                           int lineNumber,
+                                           NSString *failureReason,
+                                           HRESULT (^command)(IDeckLinkOutput *output, uint32_t *value))
+{
+    __block HRESULT result = E_FAIL;
+    __block uint32_t value = 0;
+    
+    IDeckLinkOutput *output = self.deckLinkOutput;
+    if (!output) {
+        [self post:DLABFunctionLineDescription(functionName, lineNumber)
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
+    }
+    
+    [self playback_sync:^{
+        result = command(output, &value);
+    }];
+    if (result == S_OK) {
+        return @(value);
+    }
+    
+    [self post:DLABFunctionLineDescription(functionName, lineNumber)
+        reason:failureReason
+          code:result
+            to:error];
+    return nil;
+}
+
+NS_INLINE NSNumber * DLABOutputBoolValue(DLABDevice *self,
+                                         NSError **error,
+                                         const char *functionName,
+                                         int lineNumber,
+                                         NSString *failureReason,
+                                         HRESULT (^command)(IDeckLinkOutput *output, bool *value))
+{
+    __block HRESULT result = E_FAIL;
+    __block bool value = false;
+    
+    IDeckLinkOutput *output = self.deckLinkOutput;
+    if (!output) {
+        [self post:DLABFunctionLineDescription(functionName, lineNumber)
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return nil;
+    }
+    
+    [self playback_sync:^{
+        result = command(output, &value);
+    }];
+    if (result == S_OK) {
+        return @(value);
+    }
+    
+    [self post:DLABFunctionLineDescription(functionName, lineNumber)
+        reason:failureReason
+          code:result
+            to:error];
+    return nil;
+}
 
 /* =================================================================================== */
 // MARK: - output (internal)
@@ -167,92 +267,6 @@ NS_INLINE BMDAncillaryDataSpace DLABBMDAncillaryDataSpaceFromPublic(DLABAncillar
 /* =================================================================================== */
 // MARK: Process Output videoFrame/timecode
 /* =================================================================================== */
-
-NS_INLINE size_t pixelSizeForDL(IDeckLinkMutableVideoFrame* videoFrame) {
-    size_t pixelSize = 0;   // For vImageCopyBuffer()
-    
-    BMDPixelFormat format = videoFrame->GetPixelFormat();
-    switch (format) {
-        case bmdFormat8BitYUV:
-            pixelSize = ceil( 4.0/2); break; // 4 bytes 2 pixels block
-        case bmdFormat10BitYUV:
-            pixelSize = ceil(16.0/6); break; // 16 bytes 6 pixels block
-        case bmdFormat8BitARGB:
-            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
-        case bmdFormat8BitBGRA:
-            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
-        case bmdFormat10BitRGB:
-            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
-        case bmdFormat12BitRGB:
-            pixelSize = ceil(36.0/8); break; // 36 bytes 8 pixel block
-        case bmdFormat12BitRGBLE:
-            pixelSize = ceil(36.0/8); break; // 36 bytes 8 pixel block
-        case bmdFormat10BitRGBXLE:
-            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
-        case bmdFormat10BitRGBX:
-            pixelSize = ceil( 4.0/1); break; // 4 bytes 1 pixel block
-        default:
-            break;
-    }
-    return pixelSize;
-}
-
-NS_INLINE size_t pixelSizeForCV(CVPixelBufferRef pixelBuffer) {
-    size_t pixelSize = 0;   // For vImageCopyBuffer()
-    {
-        NSString* kBitsPerBlock = (__bridge NSString*)kCVPixelFormatBitsPerBlock;
-        NSString* kBlockWidth = (__bridge NSString*)kCVPixelFormatBlockWidth;
-        NSString* kBlockHeight = (__bridge NSString*)kCVPixelFormatBlockHeight;
-        
-        OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
-        CFDictionaryRef pfDict = CVPixelFormatDescriptionCreateWithPixelFormatType(kCFAllocatorDefault, pixelFormat);
-        NSDictionary* dict = CFBridgingRelease(pfDict);
-        
-        int numBitsPerBlock = ((NSNumber*)dict[kBitsPerBlock]).intValue;
-        int numWidthPerBlock = MAX(1,((NSNumber*)dict[kBlockWidth]).intValue);
-        int numHeightPerBlock = MAX(1,((NSNumber*)dict[kBlockHeight]).intValue);
-        int numPixelPerBlock = numWidthPerBlock * numHeightPerBlock;
-        if (numPixelPerBlock) {
-            pixelSize = ceil(numBitsPerBlock / numPixelPerBlock / 8.0);
-        }
-    }
-    return pixelSize;
-}
-
-NS_INLINE BOOL VideoBufferLockBaseAddress(IDeckLinkMutableVideoFrame* videoFrame,
-                                          BMDBufferAccessFlags accessFlags,
-                                          IDeckLinkVideoBuffer** outVideoBuffer) {
-    if (!videoFrame || !outVideoBuffer) return NO;
-    *outVideoBuffer = NULL;
-    
-    IDeckLinkVideoBuffer* buf = NULL;
-    HRESULT hr = videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, (void**)&buf);
-    if (FAILED(hr)) return NO;
-    
-    hr = buf->StartAccess(accessFlags);
-    if (FAILED(hr)) {
-        buf->Release();
-        return NO;
-    }
-    
-    *outVideoBuffer = buf; // caller owns one ref
-    return YES;
-}
-
-NS_INLINE BOOL VideoBufferGetBaseAddress(IDeckLinkVideoBuffer* videoBuffer, void** pointer) {
-    if (!videoBuffer || !pointer) return NO;
-    *pointer = NULL;
-    
-    HRESULT hr = videoBuffer->GetBytes(pointer);
-    return SUCCEEDED(hr) && (*pointer != NULL);
-}
-
-NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
-                                            BMDBufferAccessFlags accessFlags) {
-    if (!videoBuffer) return;
-    (void)videoBuffer->EndAccess(accessFlags);
-    videoBuffer->Release();
-}
 
 NS_INLINE BOOL copyBufferCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, IDeckLinkMutableVideoFrame* videoFrame) {
     assert(pixelBuffer && videoFrame);
@@ -637,19 +651,19 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
                         NSData* data = outHandler(timingInfo,
                                                   &did, &sdid, &lineNumber, &dataStreamIndex, &dataSpace);
                         if (data) {
-
+                            
                             // For SDK < 15.3, force dataSpace to VANC (only SDK 15.3+ supports dataSpace)
-
+                            
                             DLABAncillaryDataSpace effectiveDataSpace = dataSpace;
-
+                            
                             if ([DLABVersionChecker checkPre1503]) {
-
+                                
                                 effectiveDataSpace = DLABAncillaryDataSpaceVANC;
-
+                                
                             }
-
+                            
                             HRESULT ret = packet->Update(did, sdid, lineNumber, dataStreamIndex,
-
+                                                         
                                                          DLABBMDAncillaryDataSpaceFromPublic(effectiveDataSpace), data);
                             if (ret == S_OK) {
                                 ret = frameAncillaryPackets->AttachPacket(packet);
@@ -864,31 +878,14 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 
 - (NSNumber*) isScheduledPlaybackRunningWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block bool newBoolValue = FALSE;
-    
-    IDeckLinkOutput* output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->IsScheduledPlaybackRunning(&newBoolValue);
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return nil;
-    }
-    
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::IsScheduledPlaybackRunning failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABOutputBoolValue(self,
+                               error,
+                               __PRETTY_FUNCTION__,
+                               __LINE__,
+                               @"IDeckLinkOutput::IsScheduledPlaybackRunning failed.",
+                               ^HRESULT(IDeckLinkOutput *output, bool *value) {
+        return output->IsScheduledPlaybackRunning(value);
+    });
 }
 
 - (BOOL) setOutputScreenPreviewToView:(NSView*)parentView
@@ -942,34 +939,22 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 {
     NSParameterAssert(setting);
     
-    __block HRESULT result = E_FAIL;
     BMDDisplayMode displayMode = setting.displayMode;
     BMDVideoOutputFlags outputFlag = setting.outputFlag;
-    
-    IDeckLinkOutput* output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->EnableVideoOutput(displayMode, outputFlag);
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
+    BOOL succeeded = DLABPerformOutputCommand(self,
+                                              error,
+                                              __PRETTY_FUNCTION__,
+                                              __LINE__,
+                                              @"IDeckLinkOutput::EnableVideoOutput failed.",
+                                              ^HRESULT(IDeckLinkOutput *output) {
+        return output->EnableVideoOutput(displayMode, outputFlag);
+    });
+    if (succeeded) {
         self.outputVideoSettingW = setting;
-        return YES;
     } else {
         self.outputVideoSettingW = nil;
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::EnableVideoOutput failed."
-              code:result
-                to:error];
-        return NO;
     }
+    return succeeded;
 }
 
 - (BOOL) enableVideoOutputWithVideoSetting:(DLABVideoSetting*)setting
@@ -989,31 +974,18 @@ NS_INLINE BOOL copyPlaneCVtoDL(DLABDevice* self, CVPixelBufferRef pixelBuffer, I
 
 - (BOOL) disableVideoOutputWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    
-    IDeckLinkOutput* output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->DisableVideoOutput();
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
+    BOOL succeeded = DLABPerformOutputCommand(self,
+                                              error,
+                                              __PRETTY_FUNCTION__,
+                                              __LINE__,
+                                              @"IDeckLinkOutput::DisableVideoOutput failed.",
+                                              ^HRESULT(IDeckLinkOutput *output) {
+        return output->DisableVideoOutput();
+    });
+    if (succeeded) {
         self.outputVideoSettingW = nil;
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::DisableVideoOutput failed."
-              code:result
-                to:error];
-        return NO;
     }
+    return succeeded;
 }
 
 static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVideoFrame *outFrame, NSInteger displayTime, NSInteger frameDuration, NSInteger timeScale) {
@@ -1055,6 +1027,166 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     }
     
     return frameMetadata;
+}
+
+- (NSNumber*) getBufferedVideoFrameCountWithError:(NSError**)error
+{
+    return DLABOutputUInt32Value(self,
+                                 error,
+                                 __PRETTY_FUNCTION__,
+                                 __LINE__,
+                                 @"IDeckLinkOutput::GetBufferedVideoFrameCount failed.",
+                                 ^HRESULT(IDeckLinkOutput *output, uint32_t *value) {
+        return output->GetBufferedVideoFrameCount(value);
+    });
+}
+
+/* =================================================================================== */
+// MARK: Audio
+/* =================================================================================== */
+
+- (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
+                                     error:(NSError**)error
+{
+    NSParameterAssert(setting);
+    
+    if (self.swapHDMICh3AndCh4OnOutput != nil) {
+        NSError *err = nil;
+        BOOL newValue = self.swapHDMICh3AndCh4OnOutput.boolValue;
+        DLABConfiguration key = DLABConfigurationSwapHDMICh3AndCh4OnOutput;
+        
+        // Verify if SwapHDMICh3AndCh4 flag is available on this device
+        [self boolValueForConfiguration:key error:&err];
+        if (!err) {
+            // Update accordingly
+            [self setBoolValue:newValue forConfiguration:key error:&err];
+        }
+        
+        if (err) {
+            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+                reason:@"bmdDeckLinkConfigSwapHDMICh3AndCh4OnOutput flag is not supported."
+                  code:E_NOTIMPL
+                    to:error];
+            return NO;
+        }
+    }
+    
+    BMDAudioSampleType sampleType = setting.sampleType;
+    uint32_t channelCount = setting.channelCount;
+    BOOL succeeded = DLABPerformOutputCommand(self,
+                                              error,
+                                              __PRETTY_FUNCTION__,
+                                              __LINE__,
+                                              @"IDeckLinkOutput::EnableAudioOutput failed.",
+                                              ^HRESULT(IDeckLinkOutput *output) {
+        return output->EnableAudioOutput(DLABAudioSampleRate48kHz,
+                                         sampleType,
+                                         channelCount,
+                                         DLABAudioOutputStreamTypeContinuous);
+    });
+    if (succeeded) {
+        self.outputAudioSettingW = setting;
+    }
+    return succeeded;
+}
+
+- (BOOL) disableAudioOutputWithError:(NSError**)error
+{
+    BOOL succeeded = DLABPerformOutputCommand(self,
+                                              error,
+                                              __PRETTY_FUNCTION__,
+                                              __LINE__,
+                                              @"IDeckLinkOutput::DisableAudioOutput failed.",
+                                              ^HRESULT(IDeckLinkOutput *output) {
+        return output->DisableAudioOutput();
+    });
+    if (succeeded) {
+        self.outputAudioSettingW = nil;
+    }
+    return succeeded;
+}
+
+- (NSNumber*) getBufferedAudioSampleFrameCountWithError:(NSError**)error;
+{
+    return DLABOutputUInt32Value(self,
+                                 error,
+                                 __PRETTY_FUNCTION__,
+                                 __LINE__,
+                                 @"IDeckLinkOutput::GetBufferedAudioSampleFrameCount failed.",
+                                 ^HRESULT(IDeckLinkOutput *output, uint32_t *value) {
+        return output->GetBufferedAudioSampleFrameCount(value);
+    });
+}
+
+- (BOOL) flushBufferedAudioSamplesWithError:(NSError**)error
+{
+    return DLABPerformOutputCommand(self,
+                                    error,
+                                    __PRETTY_FUNCTION__,
+                                    __LINE__,
+                                    @"IDeckLinkOutput::FlushBufferedAudioSamples failed.",
+                                    ^HRESULT(IDeckLinkOutput *output) {
+        return output->FlushBufferedAudioSamples();
+    });
+}
+
+- (BOOL) beginAudioPrerollWithError:(NSError**)error
+{
+    return DLABPerformOutputCommand(self,
+                                    error,
+                                    __PRETTY_FUNCTION__,
+                                    __LINE__,
+                                    @"IDeckLinkOutput::BeginAudioPreroll failed.",
+                                    ^HRESULT(IDeckLinkOutput *output) {
+        return output->BeginAudioPreroll();
+    });
+}
+
+- (BOOL) endAudioPrerollWithError:(NSError**)error
+{
+    return DLABPerformOutputCommand(self,
+                                    error,
+                                    __PRETTY_FUNCTION__,
+                                    __LINE__,
+                                    @"IDeckLinkOutput::EndAudioPreroll failed.",
+                                    ^HRESULT(IDeckLinkOutput *output) {
+        return output->EndAudioPreroll();
+    });
+}
+
+/* =================================================================================== */
+// MARK: Stream
+/* =================================================================================== */
+
+- (BOOL) startScheduledPlaybackAtTime:(NSUInteger)startTime
+                          inTimeScale:(NSUInteger)timeScale
+                                error:(NSError**)error
+{
+    NSParameterAssert(timeScale);
+    
+    IDeckLinkOutput *output = self.deckLinkOutput;
+    if (!output) {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput is not supported."
+              code:E_NOINTERFACE
+                to:error];
+        return NO;
+    }
+    
+    [self subscribeOutput:YES];
+    __block HRESULT result = E_FAIL;
+    [self playback_sync:^{
+        result = output->StartScheduledPlayback(startTime, timeScale, 1.0);
+    }];
+    if (result == S_OK) {
+        return YES;
+    } else {
+        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
+            reason:@"IDeckLinkOutput::StartScheduledPlayback failed."
+              code:result
+                to:error];
+        return NO;
+    }
 }
 
 - (BOOL) instantPlaybackOfPixelBuffer:(CVPixelBufferRef)pixelBuffer
@@ -1268,96 +1400,6 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     }
 }
 
-- (NSNumber*) getBufferedVideoFrameCountWithError:(NSError**)error
-{
-    __block HRESULT result = E_FAIL;
-    __block uint32_t bufferedFrameCount = 0;
-    
-    IDeckLinkOutput *output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->GetBufferedVideoFrameCount(&bufferedFrameCount);
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return nil;
-    }
-    
-    if (!result) {
-        return @(bufferedFrameCount);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::GetBufferedVideoFrameCount failed."
-              code:result
-                to:error];
-        return nil;
-    }
-}
-
-/* =================================================================================== */
-// MARK: Audio
-/* =================================================================================== */
-
-- (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
-                                     error:(NSError**)error
-{
-    NSParameterAssert(setting);
-    
-    if (self.swapHDMICh3AndCh4OnOutput != nil) {
-        NSError *err = nil;
-        BOOL newValue = self.swapHDMICh3AndCh4OnOutput.boolValue;
-        DLABConfiguration key = DLABConfigurationSwapHDMICh3AndCh4OnOutput;
-        
-        // Verify if SwapHDMICh3AndCh4 flag is available on this device
-        [self boolValueForConfiguration:key error:&err];
-        if (!err) {
-            // Update accordingly
-            [self setBoolValue:newValue forConfiguration:key error:&err];
-        }
-        
-        if (err) {
-            [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-                reason:@"bmdDeckLinkConfigSwapHDMICh3AndCh4OnOutput flag is not supported."
-                  code:E_NOTIMPL
-                    to:error];
-            return NO;
-        }
-    }
-    
-    __block HRESULT result = E_FAIL;
-    BMDAudioSampleType sampleType = setting.sampleType;
-    uint32_t channelCount = setting.channelCount;
-    
-    IDeckLinkOutput* output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->EnableAudioOutput(DLABAudioSampleRate48kHz,
-                                               sampleType,
-                                               channelCount,
-                                               DLABAudioOutputStreamTypeContinuous);
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
-        self.outputAudioSettingW = setting;
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::EnableAudioOutput failed."
-              code:result
-                to:error];
-        return NO;
-    }
-}
 
 - (BOOL) enableAudioOutputWithAudioSetting:(DLABAudioSetting*)setting
                                   onSwitch:(DLABAudioOutputSwitch)audioOutputSwitch
@@ -1375,34 +1417,6 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
 }
 
 
-- (BOOL) disableAudioOutputWithError:(NSError**)error
-{
-    __block HRESULT result = E_FAIL;
-    
-    IDeckLinkOutput* output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->DisableAudioOutput();
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
-        self.outputAudioSettingW = nil;
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::DisableAudioOutput failed."
-              code:result
-                to:error];
-        return NO;
-    }
-}
 
 - (BOOL) instantPlaybackOfAudioBufferList:(AudioBufferList*)audioBufferList
                              writtenCount:(NSUInteger*)sampleFramesWritten
@@ -1550,62 +1564,6 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkOutput::WriteAudioSamplesSync failed."
-              code:result
-                to:error];
-        return NO;
-    }
-}
-
-- (BOOL) beginAudioPrerollWithError:(NSError**)error
-{
-    __block HRESULT result = E_FAIL;
-    
-    IDeckLinkOutput *output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->BeginAudioPreroll();
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::BeginAudioPreroll failed."
-              code:result
-                to:error];
-        return NO;
-    }
-}
-
-- (BOOL) endAudioPrerollWithError:(NSError**)error
-{
-    __block HRESULT result = E_FAIL;
-    
-    IDeckLinkOutput *output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->EndAudioPreroll();
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::EndAudioPreroll failed."
               code:result
                 to:error];
         return NO;
@@ -1772,101 +1730,6 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     } else {
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkOutput::ScheduleAudioSamples failed."
-              code:result
-                to:error];
-        return NO;
-    }
-}
-
-- (NSNumber*) getBufferedAudioSampleFrameCountWithError:(NSError**)error;
-{
-    __block HRESULT result = E_FAIL;
-    __block uint32_t bufferedFrameCount = 0;
-    
-    IDeckLinkOutput *output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->GetBufferedAudioSampleFrameCount(&bufferedFrameCount);
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return nil;
-    }
-    
-    if (!result) {
-        return @(bufferedFrameCount);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::GetBufferedAudioSampleFrameCount failed."
-              code:result
-                to:error];
-        return nil;
-    }
-}
-
-- (BOOL) flushBufferedAudioSamplesWithError:(NSError**)error
-{
-    __block HRESULT result = E_FAIL;
-    
-    IDeckLinkOutput *output = self.deckLinkOutput;
-    if (output) {
-        [self playback_sync:^{
-            result = output->FlushBufferedAudioSamples();
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::FlushBufferedAudioSamples failed."
-              code:result
-                to:error];
-        return NO;
-    }
-}
-
-/* =================================================================================== */
-// MARK: Stream
-/* =================================================================================== */
-
-- (BOOL) startScheduledPlaybackAtTime:(NSUInteger)startTime
-                          inTimeScale:(NSUInteger)timeScale
-                                error:(NSError**)error
-{
-    NSParameterAssert(timeScale);
-    
-    __block HRESULT result = E_FAIL;
-    
-    IDeckLinkOutput* output = self.deckLinkOutput;
-    if (output) {
-        [self subscribeOutput:YES];
-        
-        [self playback_sync:^{
-            result = output->StartScheduledPlayback(startTime, timeScale, 1.0);
-        }];
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput is not supported."
-              code:E_NOINTERFACE
-                to:error];
-        return NO;
-    }
-    
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkOutput::StartScheduledPlayback failed."
               code:result
                 to:error];
         return NO;

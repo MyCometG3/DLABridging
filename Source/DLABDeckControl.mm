@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDeckControl+Internal.h>
+#import <DLABBridgingSupport.h>
 
 const char* kDeckQueue = "DLABDeckControl.deckQueue";
 
@@ -16,14 +17,62 @@ NSString* const kCurrentModeKey = @"currentMode";
 NSString* const kCurrentVTRControlStateKey = @"currentState";
 NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
+NS_INLINE BOOL DLABPerformDeckCommand(DLABDeckControl *self,
+                                      NSError **error,
+                                      const char *functionName,
+                                      int lineNumber,
+                                      NSString *failureReason,
+                                      HRESULT (^command)(IDeckLinkDeckControl *control))
+{
+    __block HRESULT result = E_FAIL;
+    IDeckLinkDeckControl *control = self.deckControl;
+    if (control) {
+        DLABDispatchSyncIfNeeded(self.deckQueue, self.deckQueueKey, ^{
+            result = command(control);
+        });
+    }
+    if (result == S_OK) {
+        return YES;
+    }
+    
+    [self post:DLABFunctionLineDescription(functionName, lineNumber)
+        reason:failureReason
+          code:result
+            to:error];
+    return NO;
+}
+
+NS_INLINE BOOL DLABPerformDeckCommandWithStatusError(DLABDeckControl *self,
+                                                     NSError **error,
+                                                     const char *functionName,
+                                                     int lineNumber,
+                                                     NSString *failureReason,
+                                                     HRESULT (^command)(IDeckLinkDeckControl *control, BMDDeckControlError *deckError))
+{
+    __block HRESULT result = E_FAIL;
+    __block BMDDeckControlError deckError = bmdDeckControlNoError;
+    IDeckLinkDeckControl *control = self.deckControl;
+    if (control) {
+        DLABDispatchSyncIfNeeded(self.deckQueue, self.deckQueueKey, ^{
+            result = command(control, &deckError);
+        });
+    }
+    if (result == S_OK) {
+        return YES;
+    }
+    
+    [self post:DLABFunctionLineDescription(functionName, lineNumber)
+        reason:failureReason
+          code:(NSInteger)deckError
+            to:error];
+    return NO;
+}
+
 @implementation DLABDeckControl
 
 - (instancetype) init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithDeckLink:));
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
+    DLABRaiseUnavailableInit(self, @selector(initWithDeckLink:));
     return nil;
 }
 
@@ -91,29 +140,13 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 - (void) deck_sync:(dispatch_block_t)block
 {
     dispatch_queue_t queue = self.deckQueue;
-    if (queue) {
-        if (deckQueueKey && dispatch_get_specific(deckQueueKey)) {
-            block(); // do sync operation
-        } else {
-            dispatch_sync(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchSyncIfNeeded(queue, deckQueueKey, block);
 }
 
 - (void) deck_async:(dispatch_block_t)block
 {
     dispatch_queue_t queue = self.deckQueue;
-    if (queue) {
-        if (deckQueueKey && dispatch_get_specific(deckQueueKey)) {
-            block(); // do sync operation instead of async
-        } else {
-            dispatch_async(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchAsyncIfNeeded(queue, deckQueueKey, block);
 }
 
 /* =================================================================================== */
@@ -125,18 +158,7 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    if (error) {
-        if (!description) description = @"unknown description";
-        if (!failureReason) failureReason = @"unknown failureReason";
-        
-        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
-        NSInteger code = (NSInteger)result;
-        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
-                                   NSLocalizedFailureReasonErrorKey : failureReason,};
-        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
-        return YES;
-    }
-    return NO;
+    return DLABAssignError(error, description, failureReason, (NSInteger)result);
 }
 
 /* =================================================================================== */
@@ -186,45 +208,29 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
 - (BOOL) openWithTimebase:(CMTime)timebase dropFrame:(BOOL)dropFrame error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
     BMDTimeScale timeScale = (BMDTimeScale)timebase.timescale;
     BMDTimeValue timeValue = (BMDTimeValue)timebase.value;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->Open(timeScale, timeValue, dropFrame, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Open failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Open failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Open(timeScale, timeValue, dropFrame, deckError);
+    });
 }
 
 - (BOOL) closeWithStandby:(BOOL)standby error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->Close(standby);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Close failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommand(self,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkDeckControl::Close failed.",
+                                  ^HRESULT(IDeckLinkDeckControl *control) {
+        return control->Close(standby);
+    });
 }
 
 - (nullable NSNumber*) currentModeWithError:(NSError**)error
@@ -339,22 +345,14 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
 - (BOOL) standby:(BOOL)standbyOn error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->SetStandby(standbyOn);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::SetStandby failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommand(self,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkDeckControl::SetStandby failed.",
+                                  ^HRESULT(IDeckLinkDeckControl *control) {
+        return control->SetStandby(standbyOn);
+    });
 }
 
 - (BOOL) sendCommand:(NSData*)commandBuffer
@@ -368,257 +366,150 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
     uint32_t inBufferSize = (uint32_t)commandBuffer.length;
     uint8_t* outBuffer = (uint8_t*)responseBuffer.bytes;
     uint32_t outBufferSize = (uint32_t)responseBuffer.length;
-    __block HRESULT result = E_FAIL;
     __block uint32_t outDataSize = 0;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->SendCommand(inBuffer, inBufferSize,
-                                                   outBuffer, &outDataSize,
-                                                   outBufferSize, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::SendCommand failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::SendCommand failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->SendCommand(inBuffer, inBufferSize,
+                                    outBuffer, &outDataSize,
+                                    outBufferSize, deckError);
+    });
 }
 
 - (BOOL) playWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->Play(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Play failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Play failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Play(deckError);
+    });
 }
 
 - (BOOL) stopWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->Stop(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Stop failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Stop failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Stop(deckError);
+    });
 }
 
 - (BOOL) togglePlayStopWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->TogglePlayStop(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::TogglePlayStop failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::TogglePlayStop failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->TogglePlayStop(deckError);
+    });
 }
 
 - (BOOL) ejectWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->Eject(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Eject failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Eject failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Eject(deckError);
+    });
 }
 
 - (BOOL) goToTimecode:(DLABTimecodeBCD)timecode error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = self.deckControl->GoToTimecode(timecode, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::GoToTimecode failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::GoToTimecode failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->GoToTimecode(timecode, deckError);
+    });
 }
 
 - (BOOL) fastForwardWithViewTape:(BOOL)viewTape error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->FastForward(viewTape, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::FastForward failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::FastForward failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->FastForward(viewTape, deckError);
+    });
 }
 
 - (BOOL) rewindWithViewTape:(BOOL)viewTape error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->Rewind(viewTape, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Rewind failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Rewind failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Rewind(viewTape, deckError);
+    });
 }
 
 - (BOOL) stepForwardWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->StepForward(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::StepForward failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::StepForward failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->StepForward(deckError);
+    });
 }
 
 - (BOOL) stepBackWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->StepBack(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::StepBack failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::StepBack failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->StepBack(deckError);
+    });
 }
 
 - (BOOL) jogWithRate:(double)rate error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->Jog(rate, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Jog failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Jog failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Jog(rate, deckError);
+    });
 }
 
 - (BOOL) shuttleWithRate:(double)rate error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->Shuttle(rate, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Shuttle failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::Shuttle failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->Shuttle(rate, deckError);
+    });
 }
 
 - (nullable NSString*) timecodeStringWithError:(NSError**)error
@@ -703,22 +594,14 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
 - (BOOL) setPrerollSeconds:(uint32_t)prerollInSec error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->SetPreroll(prerollInSec);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::SetPreroll failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommand(self,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkDeckControl::SetPreroll failed.",
+                                  ^HRESULT(IDeckLinkDeckControl *control) {
+        return control->SetPreroll(prerollInSec);
+    });
 }
 
 - (nullable NSNumber*) prerollSecondsWithError:(NSError**)error
@@ -744,22 +627,14 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
 - (BOOL) setCaptureOffset:(int32_t)offsetFields error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->SetCaptureOffset(offsetFields);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::SetCaptureOffset failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommand(self,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkDeckControl::SetCaptureOffset failed.",
+                                  ^HRESULT(IDeckLinkDeckControl *control) {
+        return control->SetCaptureOffset(offsetFields);
+    });
 }
 
 - (nullable NSNumber*) captureOffsetWithError:(NSError**)error
@@ -785,22 +660,14 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
 - (BOOL) setExportOffset:(int32_t)offsetFields error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->SetExportOffset(offsetFields);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::SetExportOffset failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommand(self,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkDeckControl::SetExportOffset failed.",
+                                  ^HRESULT(IDeckLinkDeckControl *control) {
+        return control->SetExportOffset(offsetFields);
+    });
 }
 
 - (nullable NSNumber*) exportOffsetWithError:(NSError**)error
@@ -850,23 +717,14 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
             modeOpsFlags:(DLABDeckControlExportModeOps)flags
                    error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->StartExport(inTimecode, outTimecode, flags, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::StartExport failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::StartExport failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->StartExport(inTimecode, outTimecode, flags, deckError);
+    });
 }
 
 - (BOOL) startCaptureFrom:(DLABTimecodeBCD)inTimecode
@@ -874,23 +732,14 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
                   useVITC:(BOOL)useVITC
                     error:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->StartCapture(useVITC, inTimecode, outTimecode, &err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::StartCapture failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::StartCapture failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->StartCapture(useVITC, inTimecode, outTimecode, deckError);
+    });
 }
 
 - (nullable NSNumber*) deviceIDWithError:(NSError**)error
@@ -917,64 +766,38 @@ NSString* const kCurrentStatusFlagsKey = @"currentFlags";
 
 - (BOOL) abortWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->Abort();
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::Abort failed."
-              code:(NSInteger)result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommand(self,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkDeckControl::Abort failed.",
+                                  ^HRESULT(IDeckLinkDeckControl *control) {
+        return control->Abort();
+    });
 }
 
 - (BOOL) crashRecordStartWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->CrashRecordStart(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::CrashRecordStart failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::CrashRecordStart failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->CrashRecordStart(deckError);
+    });
 }
 
 - (BOOL) crashRecordStopWithError:(NSError**)error
 {
-    __block HRESULT result = E_FAIL;
-    __block BMDDeckControlError err = bmdDeckControlNoError;
-    IDeckLinkDeckControl* control = self.deckControl;
-    if (control) {
-        [self deck_sync:^{
-            result = control->CrashRecordStop(&err);
-        }];
-    }
-    if (result == S_OK) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkDeckControl::CrashRecordStop failed."
-              code:(NSInteger)err // result
-                to:error];
-        return NO;
-    }
+    return DLABPerformDeckCommandWithStatusError(self,
+                                                 error,
+                                                 __PRETTY_FUNCTION__,
+                                                 __LINE__,
+                                                 @"IDeckLinkDeckControl::CrashRecordStop failed.",
+                                                 ^HRESULT(IDeckLinkDeckControl *control, BMDDeckControlError *deckError) {
+        return control->CrashRecordStop(deckError);
+    });
 }
 
 @end

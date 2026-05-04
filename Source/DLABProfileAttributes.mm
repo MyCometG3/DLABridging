@@ -9,16 +9,14 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABProfileAttributes+Internal.h>
+#import <DLABBridgingSupport.h>
 #include <DLABQueryInterfaceAny.h>
 
 @implementation DLABProfileAttributes
 
 - (instancetype) init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithProfile:));
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
+    DLABRaiseUnavailableInit(self, @selector(initWithProfile:));
     return nil;
 }
 
@@ -220,18 +218,7 @@
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    if (error) {
-        if (!description) description = @"unknown description";
-        if (!failureReason) failureReason = @"unknown failureReason";
-        
-        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
-        NSInteger code = (NSInteger)result;
-        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
-                                   NSLocalizedFailureReasonErrorKey : failureReason,};
-        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
-        return YES;
-    }
-    return NO;
+    return DLABAssignError(error, description, failureReason, (NSInteger)result);
 }
 
 /* =================================================================================== */
@@ -241,92 +228,58 @@
 - (NSNumber*) boolValueForAttribute:(DLABAttribute) attributeID
                               error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    bool newBoolValue = false;
-    result = _attributes->GetFlag(attr, &newBoolValue);
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetFlag failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFlagValue(_attributes,
+                            (BMDDeckLinkAttributeID)attributeID,
+                            error,
+                            __PRETTY_FUNCTION__,
+                            __LINE__,
+                            @"IDeckLinkAttributes::GetFlag failed.");
 }
 
 - (NSNumber*) intValueForAttribute:(DLABAttribute) attributeID
                              error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    int64_t newIntValue = 0;
-    result = _attributes->GetInt(attr, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetInt failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntValue(_attributes,
+                           (BMDDeckLinkAttributeID)attributeID,
+                           error,
+                           __PRETTY_FUNCTION__,
+                           __LINE__,
+                           @"IDeckLinkAttributes::GetInt failed.");
 }
 
 - (NSNumber*) doubleValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    double newDoubleValue = 0;
-    result = _attributes->GetFloat(attr, &newDoubleValue);
-    if (!result) {
-        return @(newDoubleValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetFloat failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFloatValue(_attributes,
+                             (BMDDeckLinkAttributeID)attributeID,
+                             error,
+                             __PRETTY_FUNCTION__,
+                             __LINE__,
+                             @"IDeckLinkAttributes::GetFloat failed.");
 }
 
 - (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
                                 error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    CFStringRef newStringValue = NULL;
-    result = _attributes->GetString(attr, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetString failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringValue(_attributes,
+                              (BMDDeckLinkAttributeID)attributeID,
+                              error,
+                              __PRETTY_FUNCTION__,
+                              __LINE__,
+                              @"IDeckLinkAttributes::GetString failed.");
 }
 
 - (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
                             withParam:(NSUInteger)param
                                 error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    CFStringRef newStringValue = NULL;
-    result = _attributes->GetStringWithParam(attr, (uint64_t)param, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetStringWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringWithParam(_attributes,
+                                  (BMDDeckLinkAttributeID)attributeID,
+                                  (uint64_t)param,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkAttributes::GetStringWithParam failed.");
 }
 
 @end

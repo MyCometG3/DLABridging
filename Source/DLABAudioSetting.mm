@@ -9,16 +9,14 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABAudioSetting+Internal.h>
+#import <DLABBridgingSupport.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 @implementation DLABAudioSetting
 
 - (instancetype) init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithSampleType:channelCount:sampleRate:));
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
+    DLABRaiseUnavailableInit(self, @selector(initWithSampleType:channelCount:sampleRate:));
     return nil;
 }
 
@@ -98,18 +96,7 @@
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    if (error) {
-        if (!description) description = @"unknown description";
-        if (!failureReason) failureReason = @"unknown failureReason";
-        
-        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
-        NSInteger code = (NSInteger)result;
-        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
-                                   NSLocalizedFailureReasonErrorKey : failureReason,};
-        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
-        return YES;
-    }
-    return NO;
+    return DLABAssignError(error, description, failureReason, (NSInteger)result);
 }
 
 /* =================================================================================== */
@@ -223,7 +210,7 @@
             // Configure AudioChannelLayout
             AudioChannelLayout* aclPtr = (AudioChannelLayout*)(aclData.mutableBytes);
             aclPtr->mChannelLayoutTag = tag;
-
+            
             // NOTE: validChannelCount <= channelCount, validSampleSize <= sampleSize
             result = [self fillAudioFormatDescriptionAndAsbdData:asbdData
                                                usingChannelCount:validChannelCount

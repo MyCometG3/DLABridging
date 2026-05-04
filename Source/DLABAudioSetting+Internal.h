@@ -60,7 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Utility to fill AudioStreamBasicDescription and CMAudioFormatDescription.
-
+ 
  @param aclData NSData* of AudioChannelLayout
  @param asbdData NSMutableData* of AudioStreamBasicDescription to fill
  @param channelCount mChannelsPerFrame for AudioStreamBasicDescription
