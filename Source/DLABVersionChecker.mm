@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABVersionChecker.h>
+#import <DLABBridgingSupport.h>
 #import <DLABConstants.h>
 #import <DeckLinkAPI.h>
 
@@ -86,9 +87,7 @@
 
 - (instancetype)init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[%@ sharedChecker] instead", classString];
+    DLABRaiseUnavailableSingletonInit(self, @"sharedChecker");
     return nil;
 }
 

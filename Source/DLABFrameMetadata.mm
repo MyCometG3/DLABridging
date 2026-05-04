@@ -9,16 +9,14 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABFrameMetadata+Internal.h>
+#import <DLABBridgingSupport.h>
 #import <DLABQueryInterfaceAny.h>
 
 @implementation DLABFrameMetadata
 
 - (instancetype) init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithOutputFrame:));
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
+    DLABRaiseUnavailableInit(self, @selector(initWithOutputFrame:));
     return nil;
 }
 

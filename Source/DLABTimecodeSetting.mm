@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABTimecodeSetting+Internal.h>
+#import <DLABBridgingSupport.h>
 
 @implementation DLABTimecodeSetting
 
@@ -171,18 +172,7 @@
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    if (error) {
-        if (!description) description = @"unknown description";
-        if (!failureReason) failureReason = @"unknown failureReason";
-        
-        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
-        NSInteger code = (NSInteger)result;
-        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
-                                   NSLocalizedFailureReasonErrorKey : failureReason,};
-        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
-        return YES;
-    }
-    return NO;
+    return DLABAssignError(error, description, failureReason, (NSInteger)result);
 }
 
 /* =================================================================================== */

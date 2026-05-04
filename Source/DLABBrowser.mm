@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABBrowser+Internal.h>
+#import <DLABBridgingSupport.h>
 #include <DLABQueryInterfaceAny.h>
 
 const char* kBrowserQueue = "DLABDevice.browserQueue";
@@ -184,13 +185,12 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     IDeckLinkAPIInformation* api = self.apiInformation;
     if (api) {
-        HRESULT result = E_FAIL;
-        BMDDeckLinkAPIInformationID cfgID = informationID;
-        bool newBoolValue = false;
-        result = api->GetFlag(cfgID, &newBoolValue);
-        if (!result) {
-            return @(newBoolValue);
-        }
+        return DLABGetFlagValue(api,
+                                (BMDDeckLinkAPIInformationID)informationID,
+                                nil,
+                                __PRETTY_FUNCTION__,
+                                __LINE__,
+                                nil);
     }
     return nil;
 }
@@ -199,13 +199,12 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     IDeckLinkAPIInformation* api = self.apiInformation;
     if (api) {
-        HRESULT result = E_FAIL;
-        BMDDeckLinkAPIInformationID cfgID = informationID;
-        int64_t newIntValue = false;
-        result = api->GetInt(cfgID, &newIntValue);
-        if (!result) {
-            return @(newIntValue);
-        }
+        return DLABGetIntValue(api,
+                               (BMDDeckLinkAPIInformationID)informationID,
+                               nil,
+                               __PRETTY_FUNCTION__,
+                               __LINE__,
+                               nil);
     }
     return nil;
 }
@@ -214,13 +213,12 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     IDeckLinkAPIInformation* api = self.apiInformation;
     if (api) {
-        HRESULT result = E_FAIL;
-        BMDDeckLinkAPIInformationID cfgID = informationID;
-        double newDoubleValue = false;
-        result = api->GetFloat(cfgID, &newDoubleValue);
-        if (!result) {
-            return @(newDoubleValue);
-        }
+        return DLABGetFloatValue(api,
+                                 (BMDDeckLinkAPIInformationID)informationID,
+                                 nil,
+                                 __PRETTY_FUNCTION__,
+                                 __LINE__,
+                                 nil);
     }
     return nil;
 }
@@ -229,13 +227,12 @@ const char* kBrowserQueue = "DLABDevice.browserQueue";
 {
     IDeckLinkAPIInformation* api = self.apiInformation;
     if (api) {
-        HRESULT result = E_FAIL;
-        BMDDeckLinkAPIInformationID cfgID = informationID;
-        CFStringRef newStringValue = NULL;
-        result = api->GetString(cfgID, &newStringValue);
-        if (!result) {
-            return (NSString*)CFBridgingRelease(newStringValue);
-        }
+        return DLABGetStringValue(api,
+                                  (BMDDeckLinkAPIInformationID)informationID,
+                                  nil,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  nil);
     }
     return nil;
 }
@@ -515,15 +512,7 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
     NSParameterAssert(block);
     
     dispatch_queue_t queue = self.browserQueue; // Allow lazy instantiation
-    if (queue) {
-        if (browserQueueKey && dispatch_get_specific(browserQueueKey)) {
-            block();
-        } else {
-            dispatch_sync(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchSyncIfNeeded(queue, browserQueueKey, block);
 }
 
 @end

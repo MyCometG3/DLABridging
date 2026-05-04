@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABDevice+Internal.h>
+#import <DLABBridgingSupport.h>
 #import <DLABQueryInterfaceAny.h>
 #import <DLABVersionChecker.h>
 
@@ -20,10 +21,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (instancetype) init
 {
-    NSString *classString = NSStringFromClass([self class]);
-    NSString *selectorString = NSStringFromSelector(@selector(initWithDeckLink:));
-    [NSException raise:NSGenericException
-                format:@"Disabled. Use +[[%@ alloc] %@] instead", classString, selectorString];
+    DLABRaiseUnavailableInit(self, @selector(initWithDeckLink:));
     return nil;
 }
 
@@ -37,7 +35,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         IDeckLinkConfiguration* configuration = NULL;
         IDeckLinkStatus* status = NULL;
         IDeckLinkNotification* notification = NULL;
-
+        
         HRESULT err1 = DLABQueryInterfaceAny(newDeckLink, &profileAttributes,
                                              IID_IDeckLinkProfileAttributes,
                                              IID_IDeckLinkProfileAttributes_v15_3_1);
@@ -50,7 +48,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         HRESULT err4 = DLABQueryInterfaceAny(newDeckLink, &notification,
                                              IID_IDeckLinkNotification,
                                              IID_IDeckLinkNotification_v15_3_1);
-
+        
         if (FAILED(err1) || FAILED(err2) || FAILED(err3) || FAILED(err4)) {
             if (profileAttributes) profileAttributes->Release();
             if (configuration) configuration->Release();
@@ -58,7 +56,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
             if (notification) notification->Release();
             return nil;
         }
-
+        
         _deckLinkProfileAttributes = profileAttributes;
         _deckLinkConfiguration = configuration;
         _deckLinkStatus = status;
@@ -489,57 +487,25 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (void) delegate_sync:(dispatch_block_t) block
 {
     dispatch_queue_t queue = self.delegateQueue;
-    if (queue) {
-        if (delegateQueueKey && dispatch_get_specific(delegateQueueKey)) {
-            block(); // do sync operation
-        } else {
-            dispatch_sync(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchSyncIfNeeded(queue, delegateQueueKey, block);
 }
 
 - (void) delegate_async:(dispatch_block_t) block
 {
     dispatch_queue_t queue = self.delegateQueue;
-    if (queue) {
-        if (delegateQueueKey && dispatch_get_specific(delegateQueueKey)) {
-            block(); // do sync operation instead of async
-        } else {
-            dispatch_async(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchAsyncIfNeeded(queue, delegateQueueKey, block);
 }
 
 - (void) playback_sync:(dispatch_block_t) block
 {
     dispatch_queue_t queue = self.playbackQueue;
-    if (queue) {
-        if (playbackQueueKey && dispatch_get_specific(playbackQueueKey)) {
-            block();
-        } else {
-            dispatch_sync(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchSyncIfNeeded(queue, playbackQueueKey, block);
 }
 
 - (void) capture_sync:(dispatch_block_t) block
 {
     dispatch_queue_t queue = self.captureQueue;
-    if (queue) {
-        if (captureQueueKey && dispatch_get_specific(captureQueueKey)) {
-            block();
-        } else {
-            dispatch_sync(queue, block);
-        }
-    } else {
-        NSLog(@"ERROR: The queue is not available.");
-    }
+    DLABDispatchSyncIfNeeded(queue, captureQueueKey, block);
 }
 
 /* =================================================================================== */
@@ -551,18 +517,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    if (error) {
-        if (!description) description = @"unknown description";
-        if (!failureReason) failureReason = @"unknown failureReason";
-        
-        NSString *domain = @"com.MyCometG3.DLABridging.ErrorDomain";
-        NSInteger code = (NSInteger)result;
-        NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description,
-                                   NSLocalizedFailureReasonErrorKey : failureReason,};
-        *error = [NSError errorWithDomain:domain code:code userInfo:userInfo];
-        return YES;
-    }
-    return NO;
+    return DLABAssignError(error, description, failureReason, (NSInteger)result);
 }
 
 /* =================================================================================== */
@@ -1057,19 +1012,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         return nil;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    bool newBoolValue = false;
-    result = _deckLinkProfileAttributes->GetFlag(attr, &newBoolValue);
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetFlag failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFlagValue(_deckLinkProfileAttributes,
+                            (BMDDeckLinkAttributeID)attributeID,
+                            error,
+                            __PRETTY_FUNCTION__,
+                            __LINE__,
+                            @"IDeckLinkAttributes::GetFlag failed.");
 }
 
 - (NSNumber*) intValueForAttribute:(DLABAttribute) attributeID
@@ -1081,19 +1029,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         return nil;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    int64_t newIntValue = 0;
-    result = _deckLinkProfileAttributes->GetInt(attr, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetInt failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntValue(_deckLinkProfileAttributes,
+                           (BMDDeckLinkAttributeID)attributeID,
+                           error,
+                           __PRETTY_FUNCTION__,
+                           __LINE__,
+                           @"IDeckLinkAttributes::GetInt failed.");
 }
 
 - (NSNumber*) doubleValueForAttribute:(DLABAttribute) attributeID
@@ -1105,19 +1046,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         return nil;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    double newDoubleValue = 0;
-    result = _deckLinkProfileAttributes->GetFloat(attr, &newDoubleValue);
-    if (!result) {
-        return @(newDoubleValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetFloat failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFloatValue(_deckLinkProfileAttributes,
+                             (BMDDeckLinkAttributeID)attributeID,
+                             error,
+                             __PRETTY_FUNCTION__,
+                             __LINE__,
+                             @"IDeckLinkAttributes::GetFloat failed.");
 }
 
 - (NSString*) stringValueForAttribute:(DLABAttribute) attributeID
@@ -1129,19 +1063,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         return nil;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkAttributeID attr = attributeID;
-    CFStringRef newStringValue = NULL;
-    result = _deckLinkProfileAttributes->GetString(attr, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkAttributes::GetString failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringValue(_deckLinkProfileAttributes,
+                              (BMDDeckLinkAttributeID)attributeID,
+                              error,
+                              __PRETTY_FUNCTION__,
+                              __LINE__,
+                              @"IDeckLinkAttributes::GetString failed.");
 }
 
 /* =================================================================================== */
@@ -1151,149 +1078,97 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 - (NSNumber*) boolValueForConfiguration:(DLABConfiguration)configurationID
                                   error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    bool newBoolValue = false;
-    result = _deckLinkConfiguration->GetFlag(conf, &newBoolValue);
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetFlag failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFlagValue(_deckLinkConfiguration,
+                            (BMDDeckLinkConfigurationID)configurationID,
+                            error,
+                            __PRETTY_FUNCTION__,
+                            __LINE__,
+                            @"IDeckLinkConfiguration::GetFlag failed.");
 }
 
 - (NSNumber*) intValueForConfiguration:(DLABConfiguration)configurationID
                                  error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    int64_t newIntValue = 0;
-    result = _deckLinkConfiguration->GetInt(conf, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetInt failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntValue(_deckLinkConfiguration,
+                           (BMDDeckLinkConfigurationID)configurationID,
+                           error,
+                           __PRETTY_FUNCTION__,
+                           __LINE__,
+                           @"IDeckLinkConfiguration::GetInt failed.");
 }
 
 - (NSNumber*) doubleValueForConfiguration:(DLABConfiguration)configurationID
                                     error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    double newDoubleValue = 0;
-    result = _deckLinkConfiguration->GetFloat(conf, &newDoubleValue);
-    if (!result) {
-        return @(newDoubleValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetFloat failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFloatValue(_deckLinkConfiguration,
+                             (BMDDeckLinkConfigurationID)configurationID,
+                             error,
+                             __PRETTY_FUNCTION__,
+                             __LINE__,
+                             @"IDeckLinkConfiguration::GetFloat failed.");
 }
 
 - (NSString*) stringValueForConfiguration:(DLABConfiguration)configurationID
                                     error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    CFStringRef newStringValue = NULL;
-    result = _deckLinkConfiguration->GetString(conf, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetString failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringValue(_deckLinkConfiguration,
+                              (BMDDeckLinkConfigurationID)configurationID,
+                              error,
+                              __PRETTY_FUNCTION__,
+                              __LINE__,
+                              @"IDeckLinkConfiguration::GetString failed.");
 }
 
 - (NSNumber*) boolValueForConfiguration:(DLABConfiguration)configurationID
                               withParam:(NSUInteger)param
                                   error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    bool newBoolValue = false;
-    result = _deckLinkConfiguration->GetFlagWithParam(conf, (uint64_t)param, &newBoolValue);
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetFlagWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFlagWithParam(_deckLinkConfiguration,
+                                (BMDDeckLinkConfigurationID)configurationID,
+                                (uint64_t)param,
+                                error,
+                                __PRETTY_FUNCTION__,
+                                __LINE__,
+                                @"IDeckLinkConfiguration::GetFlagWithParam failed.");
 }
 
 - (NSNumber*) intValueForConfiguration:(DLABConfiguration)configurationID
                              withParam:(NSUInteger)param
                                  error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    int64_t newIntValue = 0;
-    result = _deckLinkConfiguration->GetIntWithParam(conf, (uint64_t)param, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetIntWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntWithParam(_deckLinkConfiguration,
+                               (BMDDeckLinkConfigurationID)configurationID,
+                               (uint64_t)param,
+                               error,
+                               __PRETTY_FUNCTION__,
+                               __LINE__,
+                               @"IDeckLinkConfiguration::GetIntWithParam failed.");
 }
 
 - (NSNumber*) doubleValueForConfiguration:(DLABConfiguration)configurationID
                                 withParam:(NSUInteger)param
                                     error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    double newDoubleValue = 0;
-    result = _deckLinkConfiguration->GetFloatWithParam(conf, (uint64_t)param, &newDoubleValue);
-    if (!result) {
-        return @(newDoubleValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetFloatWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFloatWithParam(_deckLinkConfiguration,
+                                 (BMDDeckLinkConfigurationID)configurationID,
+                                 (uint64_t)param,
+                                 error,
+                                 __PRETTY_FUNCTION__,
+                                 __LINE__,
+                                 @"IDeckLinkConfiguration::GetFloatWithParam failed.");
 }
 
 - (NSString*) stringValueForConfiguration:(DLABConfiguration)configurationID
                                 withParam:(NSUInteger)param
                                     error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    CFStringRef newStringValue = NULL;
-    result = _deckLinkConfiguration->GetStringWithParam(conf, (uint64_t)param, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::GetStringWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringWithParam(_deckLinkConfiguration,
+                                  (BMDDeckLinkConfigurationID)configurationID,
+                                  (uint64_t)param,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkConfiguration::GetStringWithParam failed.");
 }
 
 /* =================================================================================== */
@@ -1309,19 +1184,13 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    bool newBoolValue = (bool)value;
-    result = _deckLinkConfiguration->SetFlag(conf, newBoolValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetFlag failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetFlagValue(_deckLinkConfiguration,
+                            (BMDDeckLinkConfigurationID)configurationID,
+                            (bool)value,
+                            error,
+                            __PRETTY_FUNCTION__,
+                            __LINE__,
+                            @"IDeckLinkConfiguration::SetFlag failed.");
 }
 
 - (BOOL) setIntValue:(NSInteger)value forConfiguration:(DLABConfiguration)
@@ -1333,19 +1202,13 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    int64_t newIntValue = (int64_t)value;
-    result = _deckLinkConfiguration->SetInt(conf, newIntValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetInt failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetIntValue(_deckLinkConfiguration,
+                           (BMDDeckLinkConfigurationID)configurationID,
+                           (int64_t)value,
+                           error,
+                           __PRETTY_FUNCTION__,
+                           __LINE__,
+                           @"IDeckLinkConfiguration::SetInt failed.");
 }
 
 - (BOOL) setDoubleValue:(double_t)value forConfiguration:(DLABConfiguration)
@@ -1357,19 +1220,13 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    double newDoubleValue = (double)value;
-    result = _deckLinkConfiguration->SetFloat(conf, newDoubleValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetFloat failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetFloatValue(_deckLinkConfiguration,
+                             (BMDDeckLinkConfigurationID)configurationID,
+                             (double)value,
+                             error,
+                             __PRETTY_FUNCTION__,
+                             __LINE__,
+                             @"IDeckLinkConfiguration::SetFloat failed.");
 }
 
 - (BOOL) setStringValue:(NSString*)value forConfiguration:(DLABConfiguration)
@@ -1383,20 +1240,13 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    CFStringRef newStringValue = (CFStringRef)CFBridgingRetain(value);
-    result = _deckLinkConfiguration->SetString(conf, newStringValue);
-    CFRelease(newStringValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetString failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetStringValue(_deckLinkConfiguration,
+                              (BMDDeckLinkConfigurationID)configurationID,
+                              value,
+                              error,
+                              __PRETTY_FUNCTION__,
+                              __LINE__,
+                              @"IDeckLinkConfiguration::SetString failed.");
 }
 
 - (BOOL) setBoolValue:(BOOL)value
@@ -1410,19 +1260,14 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    bool newBoolValue = (bool)value;
-    result = _deckLinkConfiguration->SetFlagWithParam(conf, (uint64_t)param, newBoolValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetFlagWithParam failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetFlagWithParam(_deckLinkConfiguration,
+                                (BMDDeckLinkConfigurationID)configurationID,
+                                (uint64_t)param,
+                                (bool)value,
+                                error,
+                                __PRETTY_FUNCTION__,
+                                __LINE__,
+                                @"IDeckLinkConfiguration::SetFlagWithParam failed.");
 }
 
 - (BOOL) setIntValue:(NSInteger)value
@@ -1436,19 +1281,14 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    int64_t newIntValue = (int64_t)value;
-    result = _deckLinkConfiguration->SetIntWithParam(conf, (uint64_t)param, newIntValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetIntWithParam failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetIntWithParam(_deckLinkConfiguration,
+                               (BMDDeckLinkConfigurationID)configurationID,
+                               (uint64_t)param,
+                               (int64_t)value,
+                               error,
+                               __PRETTY_FUNCTION__,
+                               __LINE__,
+                               @"IDeckLinkConfiguration::SetIntWithParam failed.");
 }
 
 - (BOOL) setDoubleValue:(double_t)value
@@ -1462,19 +1302,14 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    double newDoubleValue = (double)value;
-    result = _deckLinkConfiguration->SetFloatWithParam(conf, (uint64_t)param, newDoubleValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetFloatWithParam failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetFloatWithParam(_deckLinkConfiguration,
+                                 (BMDDeckLinkConfigurationID)configurationID,
+                                 (uint64_t)param,
+                                 (double)value,
+                                 error,
+                                 __PRETTY_FUNCTION__,
+                                 __LINE__,
+                                 @"IDeckLinkConfiguration::SetFloatWithParam failed.");
 }
 
 - (BOOL) setStringValue:(NSString*)value
@@ -1490,20 +1325,14 @@ configurationID error:(NSError**)error
         return NO;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkConfigurationID conf = configurationID;
-    CFStringRef newStringValue = (CFStringRef)CFBridgingRetain(value);
-    result = _deckLinkConfiguration->SetStringWithParam(conf, (uint64_t)param, newStringValue);
-    CFRelease(newStringValue);
-    if (!result) {
-        return YES;
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkConfiguration::SetStringWithParam failed."
-              code:result
-                to:error];
-        return NO;
-    }
+    return DLABSetStringWithParam(_deckLinkConfiguration,
+                                  (BMDDeckLinkConfigurationID)configurationID,
+                                  (uint64_t)param,
+                                  value,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkConfiguration::SetStringWithParam failed.");
 }
 
 - (BOOL) writeConfigurationToPreferencesWithError:(NSError**)error
@@ -1534,73 +1363,45 @@ configurationID error:(NSError**)error
 - (NSNumber*) boolValueForStatus:(DLABDeckLinkStatus)statusID
                            error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    bool newBoolValue = false;
-    result = _deckLinkStatus->GetFlag(stat, &newBoolValue);
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetFlag failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFlagValue(_deckLinkStatus,
+                            (BMDDeckLinkStatusID)statusID,
+                            error,
+                            __PRETTY_FUNCTION__,
+                            __LINE__,
+                            @"IDeckLinkStatus::GetFlag failed.");
 }
 
 - (NSNumber*) intValueForStatus:(DLABDeckLinkStatus)statusID
                           error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    int64_t newIntValue = 0;
-    result = _deckLinkStatus->GetInt(stat, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetInt failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntValue(_deckLinkStatus,
+                           (BMDDeckLinkStatusID)statusID,
+                           error,
+                           __PRETTY_FUNCTION__,
+                           __LINE__,
+                           @"IDeckLinkStatus::GetInt failed.");
 }
 
 - (NSNumber*) doubleValueForStatus:(DLABDeckLinkStatus)statusID
                              error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    double newDoubleValue = 0;
-    result = _deckLinkStatus->GetFloat(stat, &newDoubleValue);
-    if (!result) {
-        return @(newDoubleValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetFloat failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFloatValue(_deckLinkStatus,
+                             (BMDDeckLinkStatusID)statusID,
+                             error,
+                             __PRETTY_FUNCTION__,
+                             __LINE__,
+                             @"IDeckLinkStatus::GetFloat failed.");
 }
 
 - (NSString*) stringValueForStatus:(DLABDeckLinkStatus)statusID
                              error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    CFStringRef newStringValue = NULL;
-    result = _deckLinkStatus->GetString(stat, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetString failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringValue(_deckLinkStatus,
+                              (BMDDeckLinkStatusID)statusID,
+                              error,
+                              __PRETTY_FUNCTION__,
+                              __LINE__,
+                              @"IDeckLinkStatus::GetString failed.");
 }
 
 - (NSMutableData*) dataValueForStatus:(DLABDeckLinkStatus)statusID
@@ -1650,76 +1451,52 @@ configurationID error:(NSError**)error
                        withParam:(NSUInteger)param
                            error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    bool newBoolValue = false;
-    result = _deckLinkStatus->GetFlagWithParam(stat, (uint64_t)param, &newBoolValue);
-    if (!result) {
-        return @(newBoolValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetFlagWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFlagWithParam(_deckLinkStatus,
+                                (BMDDeckLinkStatusID)statusID,
+                                (uint64_t)param,
+                                error,
+                                __PRETTY_FUNCTION__,
+                                __LINE__,
+                                @"IDeckLinkStatus::GetFlagWithParam failed.");
 }
 
 - (NSNumber*) intValueForStatus:(DLABDeckLinkStatus)statusID
                       withParam:(NSUInteger)param
                           error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    int64_t newIntValue = 0;
-    result = _deckLinkStatus->GetIntWithParam(stat, (uint64_t)param, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetIntWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntWithParam(_deckLinkStatus,
+                               (BMDDeckLinkStatusID)statusID,
+                               (uint64_t)param,
+                               error,
+                               __PRETTY_FUNCTION__,
+                               __LINE__,
+                               @"IDeckLinkStatus::GetIntWithParam failed.");
 }
 
 - (NSNumber*) doubleValueForStatus:(DLABDeckLinkStatus)statusID
                          withParam:(NSUInteger)param
                              error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    double newDoubleValue = 0;
-    result = _deckLinkStatus->GetFloatWithParam(stat, (uint64_t)param, &newDoubleValue);
-    if (!result) {
-        return @(newDoubleValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetFloatWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetFloatWithParam(_deckLinkStatus,
+                                 (BMDDeckLinkStatusID)statusID,
+                                 (uint64_t)param,
+                                 error,
+                                 __PRETTY_FUNCTION__,
+                                 __LINE__,
+                                 @"IDeckLinkStatus::GetFloatWithParam failed.");
 }
 
 - (NSString*) stringValueForStatus:(DLABDeckLinkStatus)statusID
                          withParam:(NSUInteger)param
                              error:(NSError**)error
 {
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatusID stat = statusID;
-    CFStringRef newStringValue = NULL;
-    result = _deckLinkStatus->GetStringWithParam(stat, (uint64_t)param, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatus::GetStringWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetStringWithParam(_deckLinkStatus,
+                                  (BMDDeckLinkStatusID)statusID,
+                                  (uint64_t)param,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkStatus::GetStringWithParam failed.");
 }
 
 - (NSMutableData*) dataValueForStatus:(DLABDeckLinkStatus)statusID
@@ -1779,19 +1556,12 @@ configurationID error:(NSError**)error
         return nil;
     }
     
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatisticID stat = statisticID;
-    int64_t newIntValue = 0;
-    result = _deckLinkStatistics->GetInt(stat, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatistics::GetInt failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    return DLABGetIntValue(_deckLinkStatistics,
+                           (BMDDeckLinkStatisticID)statisticID,
+                           error,
+                           __PRETTY_FUNCTION__,
+                           __LINE__,
+                           @"IDeckLinkStatistics::GetInt failed.");
 }
 
 - (NSNumber*) intValueForStatistic:(DLABDeckLinkStatistic)statisticID
@@ -1803,20 +1573,14 @@ configurationID error:(NSError**)error
                                          lineNumber:__LINE__]) {
         return nil;
     }
-
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatisticID stat = statisticID;
-    int64_t newIntValue = 0;
-    result = _deckLinkStatistics->GetIntWithParam(stat, (uint64_t)param, &newIntValue);
-    if (!result) {
-        return @(newIntValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatistics::GetIntWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    
+    return DLABGetIntWithParam(_deckLinkStatistics,
+                               (BMDDeckLinkStatisticID)statisticID,
+                               (uint64_t)param,
+                               error,
+                               __PRETTY_FUNCTION__,
+                               __LINE__,
+                               @"IDeckLinkStatistics::GetIntWithParam failed.");
 }
 
 - (NSString*) stringValueForStatistic:(DLABDeckLinkStatistic)statisticID
@@ -1828,20 +1592,14 @@ configurationID error:(NSError**)error
                                          lineNumber:__LINE__]) {
         return nil;
     }
-
-    HRESULT result = E_FAIL;
-    BMDDeckLinkStatisticID stat = statisticID;
-    CFStringRef newStringValue = NULL;
-    result = _deckLinkStatistics->GetStringWithParam(stat, (uint64_t)param, &newStringValue);
-    if (!result) {
-        return (NSString*)CFBridgingRelease(newStringValue);
-    } else {
-        [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
-            reason:@"IDeckLinkStatistics::GetStringWithParam failed."
-              code:result
-                to:error];
-        return nil;
-    }
+    
+    return DLABGetStringWithParam(_deckLinkStatistics,
+                                  (BMDDeckLinkStatisticID)statisticID,
+                                  (uint64_t)param,
+                                  error,
+                                  __PRETTY_FUNCTION__,
+                                  __LINE__,
+                                  @"IDeckLinkStatistics::GetStringWithParam failed.");
 }
 
 @end

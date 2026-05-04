@@ -9,6 +9,7 @@
 /* This software is released under the MIT License, see LICENSE.txt. */
 
 #import <DLABVideoConverter.h>
+#import <DLABVideoBufferSupport.h>
 
 /* =================================================================================== */
 // MARK: -
@@ -1219,45 +1220,6 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         }
     }
     return convErr;
-}
-
-/* =================================================================================== */
-// MARK: DL VideoBuffer Lock/Unlock Base Address (SDK 14.3 or later)
-/* =================================================================================== */
-
-NS_INLINE BOOL VideoBufferLockBaseAddress(IDeckLinkVideoFrame* videoFrame,
-                                          BMDBufferAccessFlags accessFlags,
-                                          IDeckLinkVideoBuffer** outVideoBuffer) {
-    if (!videoFrame || !outVideoBuffer) return NO;
-    *outVideoBuffer = NULL;
-    
-    IDeckLinkVideoBuffer* buf = NULL;
-    HRESULT hr = videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, (void**)&buf);
-    if (FAILED(hr)) return NO;
-    
-    hr = buf->StartAccess(accessFlags);
-    if (FAILED(hr)) {
-        buf->Release();
-        return NO;
-    }
-    
-    *outVideoBuffer = buf; // caller owns one ref
-    return YES;
-}
-
-NS_INLINE BOOL VideoBufferGetBaseAddress(IDeckLinkVideoBuffer* videoBuffer, void** pointer) {
-    if (!videoBuffer || !pointer) return NO;
-    *pointer = NULL;
-    
-    HRESULT hr = videoBuffer->GetBytes(pointer);
-    return SUCCEEDED(hr) && (*pointer != NULL);
-}
-
-NS_INLINE void VideoBufferUnlockBaseAddress(IDeckLinkVideoBuffer* videoBuffer,
-                                            BMDBufferAccessFlags accessFlags) {
-    if (!videoBuffer) return;
-    (void)videoBuffer->EndAccess(accessFlags);
-    videoBuffer->Release();
 }
 
 /* =================================================================================== */
