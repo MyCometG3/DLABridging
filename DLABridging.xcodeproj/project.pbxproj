@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		161C9A982FA422F60067C095 /* DLABQueryInterfaceAny.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9A972FA422F60067C095 /* DLABQueryInterfaceAny.h */; };
 		161C9A9B2FA4231C0067C095 /* DLABVersionChecker.mm in Sources */ = {isa = PBXBuildFile; fileRef = 161C9A9A2FA4231C0067C095 /* DLABVersionChecker.mm */; };
-		161C9A9C2FA4231C0067C095 /* DLABVersionChecker.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9A992FA4231C0067C095 /* DLABVersionChecker.h */; };
+		161C9A9C2FA4231C0067C095 /* DLABVersionChecker.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9A992FA4231C0067C095 /* DLABVersionChecker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		161C9B1F2FA8A5260067C095 /* DLABVideoBufferSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9B1E2FA8A5260067C095 /* DLABVideoBufferSupport.h */; };
 		161C9B202FA8A5260067C095 /* DLABBridgingSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 161C9B1D2FA8A5260067C095 /* DLABBridgingSupport.h */; };
 		164BBCCE24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 164BBCCC24CAA0AE0076EF54 /* DLABDeckControlStatusCallback.h */; };

@@ -30,3 +30,4 @@ FOUNDATION_EXPORT const unsigned char DLABridgingVersionString[];
 #import <DLABridging/DLABProfileAttributes.h>
 #import <DLABridging/DLABFrameMetadata.h>
 #import <DLABridging/DLABDeckControl.h>
+#import <DLABridging/DLABVersionChecker.h>
