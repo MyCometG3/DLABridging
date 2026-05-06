@@ -435,7 +435,6 @@ NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* video
                 if (!converter) {
                     converter = [[DLABVideoConverter alloc] initWithDL:videoFrame
                                                                   toCV:pixelBuffer];
-                    converter.pre1403 = [DLABVersionChecker checkPre1403];
                     self.inputVideoConverter = converter;
                 }
                 if (converter) {

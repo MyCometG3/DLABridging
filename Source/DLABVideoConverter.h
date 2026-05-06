@@ -63,9 +63,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// For Debugging purpose only; Use XRGB16U interimBuffer.
 @property (nonatomic, assign) BOOL useXRGB16U;
 
-/// SDK 14.3 or later dropped IDeckLinkVideoFrame::GetBytes() method.
-@property (nonatomic, assign) BOOL pre1403; // for DeckLink 1403 or earlier
-
 /* ================================================================ */
 // MARK: - Validate VideoFrame and CVPixelBuffer (optional)
 /* ================================================================ */

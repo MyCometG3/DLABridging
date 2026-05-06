@@ -10,6 +10,7 @@
 
 #import <DLABVideoConverter.h>
 #import <DLABVideoBufferSupport.h>
+#import <DLABVersionChecker.h>
 
 /* =================================================================================== */
 // MARK: -
@@ -48,6 +49,9 @@
 @property (nonatomic, assign) void* temp1216Buffer;
 @property (nonatomic, assign) BOOL queryTemp1216Buffer;
 
+/// SDK 14.3 or later dropped IDeckLinkVideoFrame::GetBytes() method.
+@property (nonatomic, readonly) BOOL pre1403;
+
 @end
 
 /* =================================================================================== */
@@ -56,9 +60,19 @@
 
 @implementation DLABVideoConverter
 
-- (instancetype) initWithDL:(IDeckLinkVideoFrame*)videoFrame toCV:(CVPixelBufferRef)pixelBuffer
+- (instancetype) init
 {
     self = [super init];
+    if (self) {
+        self->pre1403 = [DLABVersionChecker checkPre1403];
+        return self;
+    }
+    return nil;
+}
+
+- (instancetype) initWithDL:(IDeckLinkVideoFrame*)videoFrame toCV:(CVPixelBufferRef)pixelBuffer
+{
+    self = [self init];
     if (self) {
         BOOL ready = [self prepareDL:videoFrame toCV:pixelBuffer];
         if (ready) return self;
@@ -68,7 +82,7 @@
 
 - (instancetype) initWithCV:(CVPixelBufferRef)pixelBuffer toDL:(IDeckLinkMutableVideoFrame*)videoFrame
 {
-    self = [super init];
+    self = [self init];
     if (self) {
         BOOL ready = [self prepareCV:pixelBuffer toDL:videoFrame];
         if (ready) return self;
