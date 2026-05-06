@@ -20,15 +20,18 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)sharedChecker;
 
 + (int)apiVersion;
-+ (BOOL)isBeforeVersion:(int)version;
++ (BOOL)isLessThanVersion:(int)version;
++ (BOOL)isAtMostVersion:(int)version;
 + (BOOL)isAtLeastVersion:(int)version;
++ (BOOL)isGreaterThanVersion:(int)version;
 
-+ (BOOL)checkPre1105;
-+ (BOOL)checkPre110501;
-+ (BOOL)checkPre1400;
-+ (BOOL)checkPre1403;
-+ (BOOL)checkPre1503;
-+ (BOOL)checkPre1600;
++ (BOOL)checkPre1105;   // <= 11.4
++ (BOOL)checkPre110501; // <= 11.5
++ (BOOL)checkPre1106;   // <= 11.5.1
++ (BOOL)checkPre1401;   // <= 14.0
++ (BOOL)checkPre1403;   // <= 14.2.1
++ (BOOL)checkPre1503;   // <= 15.2
++ (BOOL)checkPre1600;   // <= 15.3.1
 
 @end
 

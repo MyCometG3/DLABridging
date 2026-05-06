@@ -23,8 +23,10 @@
 - (instancetype)initPrivate;
 - (int)fetchAPIVersion;
 - (int)apiVersion;
-- (BOOL)isBeforeVersion:(int)version;
+- (BOOL)isLessThanVersion:(int)version;
+- (BOOL)isAtMostVersion:(int)version;
 - (BOOL)isAtLeastVersion:(int)version;
+- (BOOL)isGreaterThanVersion:(int)version;
 
 @end
 
@@ -45,9 +47,14 @@
     return [[self sharedChecker] apiVersion];
 }
 
-+ (BOOL)isBeforeVersion:(int)version
++ (BOOL)isLessThanVersion:(int)version
 {
-    return [[self sharedChecker] isBeforeVersion:version];
+    return [[self sharedChecker] isLessThanVersion:version];
+}
+
++ (BOOL)isAtMostVersion:(int)version
+{
+    return [[self sharedChecker] isAtMostVersion:version];
 }
 
 + (BOOL)isAtLeastVersion:(int)version
@@ -55,35 +62,51 @@
     return [[self sharedChecker] isAtLeastVersion:version];
 }
 
++ (BOOL)isGreaterThanVersion:(int)version
+{
+    return [[self sharedChecker] isGreaterThanVersion:version];
+}
+
+// Convenience methods for specific versions
+
 + (BOOL)checkPre1105
 {
-    return [self isBeforeVersion:0x0b050000];
+    return [self isLessThanVersion:0x0b050000];
 }
 
 + (BOOL)checkPre110501
 {
-    return [self isBeforeVersion:0x0b050100];
+    return [self isLessThanVersion:0x0b050100];
 }
 
-+ (BOOL)checkPre1400
++ (BOOL)checkPre1106
 {
-    return [self isBeforeVersion:0x0e000000];
+    return [self isLessThanVersion:0x0b060000];
+}
+
++ (BOOL)checkPre1401
+{
+    return [self isLessThanVersion:0x0e010000];
 }
 
 + (BOOL)checkPre1403
 {
-    return [self isBeforeVersion:0x0e030000];
+    return [self isLessThanVersion:0x0e030000];
 }
 
 + (BOOL)checkPre1503
 {
-    return [self isBeforeVersion:0x0f030000];
+    return [self isLessThanVersion:0x0f030000];
 }
 
 + (BOOL)checkPre1600
 {
-    return [self isBeforeVersion:0x10000000];
+    return [self isLessThanVersion:0x10000000];
 }
+
+/* =================================================================================== */
+// MARK: Instance methods
+/* =================================================================================== */
 
 - (instancetype)init
 {
@@ -119,14 +142,24 @@
     return _apiVersion;
 }
 
-- (BOOL)isBeforeVersion:(int)version
+- (BOOL)isLessThanVersion:(int)version
 {
     return self.apiVersion < version;
+}
+
+- (BOOL)isAtMostVersion:(int)version
+{
+    return self.apiVersion <= version;
 }
 
 - (BOOL)isAtLeastVersion:(int)version
 {
     return self.apiVersion >= version;
+}
+
+- (BOOL)isGreaterThanVersion:(int)version
+{
+    return self.apiVersion > version;
 }
 
 @end
