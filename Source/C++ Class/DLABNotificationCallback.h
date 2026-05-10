@@ -10,7 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
-#import <atomic>
+#import <DLABCallbackBase.h>
 
 /*
  * Internal use only
@@ -28,20 +28,18 @@
 
 /* =================================================================================== */
 
-class DLABNotificationCallback : public IDeckLinkNotificationCallback
+class DLABNotificationCallback : public IDeckLinkNotificationCallback,
+                                   public DLABCallbackBase<DLABNotificationCallback, id<DLABNotificationCallbackDelegate>>
 {
+    using Base = DLABCallbackBase<DLABNotificationCallback, id<DLABNotificationCallbackDelegate>>;
 public:
-    DLABNotificationCallback(id<DLABNotificationCallbackDelegate> delegate);
+    using Base::Base;
     
     // IDeckLinkNotificationCallback
     HRESULT Notify(BMDNotifications topic, uint64_t param1, uint64_t param2) override;
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
-    ULONG AddRef() override;
-    ULONG Release() override;
-    
-private:
-    __weak id<DLABNotificationCallbackDelegate> delegate;
-    std::atomic<ULONG> refCount;
+    ULONG AddRef() override { return Base::AddRef(); }
+    ULONG Release() override { return Base::Release(); }
 };

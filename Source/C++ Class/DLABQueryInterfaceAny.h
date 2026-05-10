@@ -37,11 +37,11 @@ static inline HRESULT DLABQueryInterfaceAny(SourceT* source,
         return E_POINTER;
     }
     *out = nullptr;
-
+    
     if (!source) {
         return E_NOINTERFACE;
     }
-
+    
     for (REFIID iid : iids) {
         OutputT* candidate = nullptr;
         HRESULT hr = source->QueryInterface(iid, reinterpret_cast<void**>(&candidate));
@@ -49,12 +49,12 @@ static inline HRESULT DLABQueryInterfaceAny(SourceT* source,
             *out = candidate;
             return S_OK;
         }
-
+        
         if (candidate) {
             candidate->Release();
         }
     }
-
+    
     return E_NOINTERFACE;
 }
 

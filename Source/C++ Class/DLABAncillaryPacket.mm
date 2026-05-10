@@ -27,7 +27,7 @@ HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, ui
     if (!data) {
         return E_INVALIDARG;
     }
-
+    
     const uint8_t* ptr = (const uint8_t*)data.bytes;
     const size_t length = (size_t)data.length;
     if (length == 0) {
@@ -35,13 +35,13 @@ HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, ui
     } else {
         vbuf.assign((const char*)ptr, (const char*)ptr + length);
     }
-
+    
     _did = did;
     _sdid = sdid;
     _line = line;
     _dataStreamIndex = dataStreamIndex;
     _dataSpace = dataSpace;
-
+    
     return S_OK;
 }
 

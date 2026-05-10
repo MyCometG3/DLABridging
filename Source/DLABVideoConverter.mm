@@ -792,7 +792,7 @@ void endianRGB12U_B2L(vImage_Buffer *buffer) {
     size_t rowBytes = buffer->rowBytes;
     size_t bufSize = rowBytes * height;
     uint8_t* ptr = (uint8_t*)buffer->data;
-    assert(ptr && bufSize);
+    if (!ptr || !bufSize) return;
     if (rowBytes % 3 == 0) {
         for (size_t offset = 0; offset < bufSize; offset += 3) {
             size_t offset0 = (offset + 0), offset1 = (offset + 1), offset2 = (offset + 2);
@@ -825,7 +825,7 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
     size_t rowBytes = buffer->rowBytes;
     size_t bufSize = rowBytes * height;
     uint8_t* ptr = (uint8_t*)buffer->data;
-    assert(ptr && bufSize);
+    if (!ptr || !bufSize) return;
     if (rowBytes % 3 == 0) {
         for (size_t offset = 0; offset < bufSize; offset += 3) {
             size_t offset0 = (offset + 0), offset1 = (offset + 1), offset2 = (offset + 2);
@@ -1403,18 +1403,21 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         if (interimErr == kvImageNoError) {
             vImageCVImageFormatRef outFormat = vImageCVImageFormat_CreateWithCVPixelBuffer(pixelBuffer);
             if (outFormat) {
-                assert(kvImageNoError == fillCVColorSpace(outFormat, cvColorSpace));
-                assert(kvImageNoError == fillCVChromaSiting(outFormat, kCVImageBufferChromaLocation_Center));
-                assert(kvImageNoError == fillCVConversionMatrix(outFormat, matrixToYpCbCrFor(dlWidth, dlHeight)));
-                vImage_Flags flags = kvImageNoFlags; // kvImagePrintDiagnosticsToConsole
-                CGFloat bgColor[3] = {0,0,0};
-                convCGtoCV = vImageConverter_CreateForCGToCVImageFormat(&interimFormat,
-                                                                        outFormat,
-                                                                        bgColor,
-                                                                        flags,
-                                                                        &errCGtoCV);
-                if (errCGtoCV || !convCGtoCV) {
-                    NSLog(@"ERROR: vImageConverter_CreateForCGToCVImageFormat() failed.(%ld)", errCGtoCV);
+                vImage_Error fillErr = fillCVColorSpace(outFormat, cvColorSpace);
+                if (fillErr == kvImageNoError) fillErr = fillCVChromaSiting(outFormat, kCVImageBufferChromaLocation_Center);
+                if (fillErr == kvImageNoError) fillErr = fillCVConversionMatrix(outFormat, matrixToYpCbCrFor(dlWidth, dlHeight));
+                if (fillErr != kvImageNoError) errCGtoCV = fillErr;
+                else {
+                    vImage_Flags flags = kvImageNoFlags; // kvImagePrintDiagnosticsToConsole
+                    CGFloat bgColor[3] = {0,0,0};
+                    convCGtoCV = vImageConverter_CreateForCGToCVImageFormat(&interimFormat,
+                                                                            outFormat,
+                                                                            bgColor,
+                                                                            flags,
+                                                                            &errCGtoCV);
+                    if (errCGtoCV || !convCGtoCV) {
+                        NSLog(@"ERROR: vImageConverter_CreateForCGToCVImageFormat() failed.(%ld)", errCGtoCV);
+                    }
                 }
                 vImageCVImageFormat_Release(outFormat);
                 
@@ -1490,7 +1493,10 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                 IDeckLinkVideoFrame_v14_2_1* videoFrame_v14_2_1 = (IDeckLinkVideoFrame_v14_2_1*)videoFrame;
                 videoFrame_v14_2_1->GetBytes(&ptr);
             }
-            assert (ptr != NULL);
+            if (!ptr) {
+                if (!pre1403) VideoBufferUnlockBaseAddress(videoBuffer, accessFlags);
+                return FALSE;
+            }
             
             vImage_Buffer sourceBuffer = {
                 .data = ptr,
@@ -1722,18 +1728,21 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
         if (interimErr == kvImageNoError) {
             vImageCVImageFormatRef inFormat = vImageCVImageFormat_CreateWithCVPixelBuffer(pixelBuffer);
             if (inFormat) {
-                assert(kvImageNoError == fillCVColorSpace(inFormat, cvColorSpace));
-                assert(kvImageNoError == fillCVChromaSiting(inFormat, kCVImageBufferChromaLocation_Center));
-                assert(kvImageNoError == fillCVConversionMatrix(inFormat, matrixToYpCbCrFor(dlWidth, dlHeight)));
-                vImage_Flags flags = kvImageNoFlags; // kvImagePrintDiagnosticsToConsole
-                CGFloat bgColor[3] = {0,0,0};
-                convCVtoCG = vImageConverter_CreateForCVToCGImageFormat(inFormat,
-                                                                        &interimFormat,
-                                                                        bgColor,
-                                                                        flags,
-                                                                        &errCVtoCG);
-                if (errCVtoCG || !convCVtoCG) {
-                    NSLog(@"ERROR: vImageConverter_CreateForCVToCGImageFormat() failed.(%ld)", errCVtoCG);
+                vImage_Error fillErr = fillCVColorSpace(inFormat, cvColorSpace);
+                if (fillErr == kvImageNoError) fillErr = fillCVChromaSiting(inFormat, kCVImageBufferChromaLocation_Center);
+                if (fillErr == kvImageNoError) fillErr = fillCVConversionMatrix(inFormat, matrixToYpCbCrFor(dlWidth, dlHeight));
+                if (fillErr != kvImageNoError) errCVtoCG = fillErr;
+                else {
+                    vImage_Flags flags = kvImageNoFlags; // kvImagePrintDiagnosticsToConsole
+                    CGFloat bgColor[3] = {0,0,0};
+                    convCVtoCG = vImageConverter_CreateForCVToCGImageFormat(inFormat,
+                                                                            &interimFormat,
+                                                                            bgColor,
+                                                                            flags,
+                                                                            &errCVtoCG);
+                    if (errCVtoCG || !convCVtoCG) {
+                        NSLog(@"ERROR: vImageConverter_CreateForCVToCGImageFormat() failed.(%ld)", errCVtoCG);
+                    }
                 }
                 vImageCVImageFormat_Release(inFormat);
                 
@@ -1841,7 +1850,10 @@ void endianRGB12U_L2B(vImage_Buffer *buffer) {
                 IDeckLinkMutableVideoFrame_v14_2_1* videoFrame_v14_2_1 = (IDeckLinkMutableVideoFrame_v14_2_1*)videoFrame;
                 videoFrame_v14_2_1->GetBytes(&ptr);
             }
-            assert (ptr != NULL);
+            if (!ptr) {
+                if (!pre1403) VideoBufferUnlockBaseAddress(videoBuffer, accessFlags);
+                return FALSE;
+            }
             
             vImage_Buffer targetBuffer = {
                 .data = ptr,

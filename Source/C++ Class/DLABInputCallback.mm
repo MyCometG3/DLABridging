@@ -11,11 +11,6 @@
 #import <DLABInputCallback.h>
 #import <DLABQueryInterfaceAny.h>
 
-DLABInputCallback::DLABInputCallback(id<DLABInputCallbackDelegate> delegate)
-: delegate(delegate), refCount(1)
-{
-}
-
 // DLABInputCallbackDelegate
 
 HRESULT DLABInputCallback::VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags)
@@ -56,20 +51,4 @@ HRESULT DLABInputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     return E_NOINTERFACE;
-}
-
-ULONG DLABInputCallback::AddRef()
-{
-    ULONG newRefValue = ++refCount;
-    return newRefValue;
-}
-
-ULONG DLABInputCallback::Release()
-{
-    ULONG newRefValue = --refCount;
-    if (newRefValue == 0) {
-        delete this;
-        return 0;
-    }
-    return newRefValue;
 }

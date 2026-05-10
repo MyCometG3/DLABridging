@@ -432,7 +432,7 @@ NS_INLINE BOOL checkPixelFormat(BMDPixelFormat dlPixelFormat, OSType cvPixelForm
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    return DLABAssignError(error, description, failureReason, (NSInteger)result);
+    return DLABPostError(error, description, failureReason, result);
 }
 
 /* =================================================================================== */

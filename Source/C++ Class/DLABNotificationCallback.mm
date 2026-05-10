@@ -10,11 +10,6 @@
 
 #import <DLABNotificationCallback.h>
 
-DLABNotificationCallback::DLABNotificationCallback(id<DLABNotificationCallbackDelegate> delegate)
-: delegate(delegate), refCount(1)
-{
-}
-
 HRESULT DLABNotificationCallback::Notify(BMDNotifications topic, uint64_t param1, uint64_t param2)
 {
     if (delegate && [delegate respondsToSelector:@selector(notify:param1:param2:)]) {
@@ -39,20 +34,4 @@ HRESULT DLABNotificationCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     return E_NOINTERFACE;
-}
-
-ULONG DLABNotificationCallback::AddRef()
-{
-    ULONG newRefValue = ++refCount;
-    return newRefValue;
-}
-
-ULONG DLABNotificationCallback::Release()
-{
-    ULONG newRefValue = --refCount;
-    if (newRefValue == 0) {
-        delete this;
-        return 0;
-    }
-    return newRefValue;
 }

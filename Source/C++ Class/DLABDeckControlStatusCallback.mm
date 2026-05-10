@@ -10,11 +10,6 @@
 
 #import <DLABDeckControlStatusCallback.h>
 
-DLABDeckControlStatusCallback::DLABDeckControlStatusCallback(id<DLABDeckControlStatusCallbackPrivateDelegate> delegate)
-: delegate(delegate), refCount(1)
-{
-}
-
 // IDeckLinkDeckControlStatusCallback
 
 HRESULT DLABDeckControlStatusCallback::TimecodeUpdate(BMDTimecodeBCD currentTimecode)
@@ -66,20 +61,4 @@ HRESULT DLABDeckControlStatusCallback::QueryInterface(REFIID iid, LPVOID *ppv)
     }
     
     return E_NOINTERFACE;
-}
-
-ULONG DLABDeckControlStatusCallback::AddRef()
-{
-    ULONG newRefValue = ++refCount;
-    return newRefValue;
-}
-
-ULONG DLABDeckControlStatusCallback::Release()
-{
-    ULONG newRefValue = --refCount;
-    if (newRefValue == 0) {
-        delete this;
-        return 0;
-    }
-    return newRefValue;
 }

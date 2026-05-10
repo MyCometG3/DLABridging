@@ -10,7 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
-#import <atomic>
+#import <DLABCallbackBase.h>
 
 /*
  * Internal use only
@@ -31,10 +31,12 @@
 
 /* =================================================================================== */
 
-class DLABDeckControlStatusCallback : public IDeckLinkDeckControlStatusCallback
+class DLABDeckControlStatusCallback : public IDeckLinkDeckControlStatusCallback,
+                                       public DLABCallbackBase<DLABDeckControlStatusCallback, id<DLABDeckControlStatusCallbackPrivateDelegate>>
 {
+    using Base = DLABCallbackBase<DLABDeckControlStatusCallback, id<DLABDeckControlStatusCallbackPrivateDelegate>>;
 public:
-    DLABDeckControlStatusCallback(id<DLABDeckControlStatusCallbackPrivateDelegate> delegate);
+    using Base::Base;
     
     // IDeckLinkDeckControlStatusCallback
     HRESULT TimecodeUpdate(BMDTimecodeBCD currentTimecode) override;
@@ -44,10 +46,6 @@ public:
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
-    ULONG AddRef() override;
-    ULONG Release() override;
-    
-private:
-    __weak id<DLABDeckControlStatusCallbackPrivateDelegate> delegate;
-    std::atomic<ULONG> refCount;
+    ULONG AddRef() override { return Base::AddRef(); }
+    ULONG Release() override { return Base::Release(); }
 };

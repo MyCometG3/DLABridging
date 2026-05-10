@@ -247,7 +247,7 @@ NS_INLINE NSNumber * DLABInputUInt32Value(DLABDevice *self,
 /* =================================================================================== */
 
 NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFrame, CVPixelBufferRef pixelBuffer) {
-    assert(videoFrame && pixelBuffer);
+    if (!videoFrame || !pixelBuffer) return FALSE;
     
     BOOL pre1403 = [DLABVersionChecker checkPre1403];
     
@@ -291,12 +291,14 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
             } else {
                 pixelSize = pixelSizeForCV(pixelBuffer);
             }
-            assert(pixelSize > 0);
-            
-            vImage_Error convErr = kvImageNoError;
-            convErr = vImageCopyBuffer(&sourceBuffer, &targetBuffer,
-                                       pixelSize, kvImageNoFlags);
-            result = (convErr == kvImageNoError);
+            if (pixelSize == 0) {
+                result = false;
+            } else {
+                vImage_Error convErr = kvImageNoError;
+                convErr = vImageCopyBuffer(&sourceBuffer, &targetBuffer,
+                                           pixelSize, kvImageNoFlags);
+                result = (convErr == kvImageNoError);
+            }
         }
         CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
     }
@@ -309,7 +311,7 @@ NS_INLINE BOOL copyBufferDLtoCV(DLABDevice* self, IDeckLinkVideoFrame* videoFram
 }
 
 NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* videoFrame, CVPixelBufferRef pixelBuffer) {
-    assert(videoFrame && pixelBuffer);
+    if (!videoFrame || !pixelBuffer) return FALSE;
     
     BOOL pre1403 = [DLABVersionChecker checkPre1403];
     
@@ -372,7 +374,7 @@ NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* video
     
     BOOL ready = false;
     OSType cvPixelFormat = self.inputVideoSetting.cvPixelFormatType;
-    assert(cvPixelFormat);
+    if (!cvPixelFormat) return NULL;
     
     // Check pool, and create if required
     CVPixelBufferPoolRef pool = self.inputPixelBufferPool;
@@ -629,7 +631,7 @@ NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* video
 }
 
 static DLABTimecodeSetting* createTimecodeSetting(IDeckLinkVideoInputFrame* videoFrame, BMDTimecodeFormat format) {
-    assert(videoFrame && format);
+    if (!videoFrame || !format) return nil;
     
     HRESULT result = E_FAIL;
     

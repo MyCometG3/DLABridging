@@ -12,7 +12,7 @@
 #import <DeckLinkAPI.h>
 #import <DeckLinkAPIVideoInput_v14_2_1.h>
 #import <DeckLinkAPIVideoInput_v11_5_1.h>
-#import <atomic>
+#import <DLABCallbackBase.h>
 
 /*
  * Internal use only
@@ -31,10 +31,12 @@
 
 /* =================================================================================== */
 
-class DLABInputCallback : public IDeckLinkInputCallback
+class DLABInputCallback : public IDeckLinkInputCallback,
+                           public DLABCallbackBase<DLABInputCallback, id<DLABInputCallbackDelegate>>
 {
+    using Base = DLABCallbackBase<DLABInputCallback, id<DLABInputCallbackDelegate>>;
 public:
-    DLABInputCallback(id<DLABInputCallbackDelegate> delegate);
+    using Base::Base;
     
     // IDeckLinkInputCallback
     HRESULT VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override;
@@ -42,10 +44,6 @@ public:
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
-    ULONG AddRef() override;
-    ULONG Release() override;
-    
-private:
-    __weak id<DLABInputCallbackDelegate> delegate;
-    std::atomic<ULONG> refCount;
+    ULONG AddRef() override { return Base::AddRef(); }
+    ULONG Release() override { return Base::Release(); }
 };

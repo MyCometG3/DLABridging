@@ -10,7 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
-#import <atomic>
+#import <DLABCallbackBase.h>
 
 /*
  * Internal use only
@@ -29,10 +29,12 @@
 
 /* =================================================================================== */
 
-class DLABProfileCallback : public IDeckLinkProfileCallback
+class DLABProfileCallback : public IDeckLinkProfileCallback,
+                              public DLABCallbackBase<DLABProfileCallback, id<DLABProfileCallbackPrivateDelegate>>
 {
+    using Base = DLABCallbackBase<DLABProfileCallback, id<DLABProfileCallbackPrivateDelegate>>;
 public:
-    DLABProfileCallback(id<DLABProfileCallbackPrivateDelegate> delegate);
+    using Base::Base;
     
     // IDeckLinkProfileCallback
     HRESULT ProfileChanging(IDeckLinkProfile* profileToBeActivated, bool streamsWillBeForcedToStop) override;
@@ -40,10 +42,6 @@ public:
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
-    ULONG AddRef() override;
-    ULONG Release() override;
-    
-private:
-    __weak id<DLABProfileCallbackPrivateDelegate> delegate;
-    std::atomic<ULONG> refCount;
+    ULONG AddRef() override { return Base::AddRef(); }
+    ULONG Release() override { return Base::Release(); }
 };

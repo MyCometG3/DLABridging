@@ -11,11 +11,6 @@
 #import <DLABOutputCallback.h>
 #import <DLABQueryInterfaceAny.h>
 
-DLABOutputCallback::DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate)
-: delegate(delegate), refCount(1)
-{
-}
-
 // IDeckLinkVideoOutputCallback
 
 HRESULT DLABOutputCallback::ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result)
@@ -71,20 +66,4 @@ HRESULT DLABOutputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     return E_NOINTERFACE;
-}
-
-ULONG DLABOutputCallback::AddRef()
-{
-    ULONG newRefValue = ++refCount;
-    return newRefValue;
-}
-
-ULONG DLABOutputCallback::Release()
-{
-    ULONG newRefValue = --refCount;
-    if (newRefValue == 0) {
-        delete this;
-        return 0;
-    }
-    return newRefValue;
 }

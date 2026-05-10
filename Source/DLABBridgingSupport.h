@@ -34,6 +34,14 @@ NS_INLINE BOOL DLABAssignError(NSError * _Nullable * _Nullable error,
     return NO;
 }
 
+NS_INLINE BOOL DLABPostError(NSError * _Nullable * _Nullable error,
+                             NSString * _Nullable description,
+                             NSString * _Nullable failureReason,
+                             NSInteger code)
+{
+    return DLABAssignError(error, description, failureReason, code);
+}
+
 NS_INLINE void DLABRaiseUnavailableInit(id _Nonnull selfObject, SEL _Nonnull requiredSelector)
 {
     NSString *classString = NSStringFromClass([selfObject class]);

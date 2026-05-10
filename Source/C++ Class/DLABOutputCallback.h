@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <DeckLinkAPI.h>
 #import <DeckLinkAPI_v14_2_1.h>
-#import <atomic>
+#import <DLABCallbackBase.h>
 
 /*
  * Internal use only
@@ -32,10 +32,13 @@
 
 /* =================================================================================== */
 
-class DLABOutputCallback : public IDeckLinkVideoOutputCallback, public IDeckLinkAudioOutputCallback
+class DLABOutputCallback : public IDeckLinkVideoOutputCallback,
+                            public IDeckLinkAudioOutputCallback,
+                            public DLABCallbackBase<DLABOutputCallback, id<DLABOutputCallbackDelegate>>
 {
+    using Base = DLABCallbackBase<DLABOutputCallback, id<DLABOutputCallbackDelegate>>;
 public:
-    DLABOutputCallback(id<DLABOutputCallbackDelegate> delegate);
+    using Base::Base;
     
     // IDeckLinkVideoOutputCallback
     HRESULT ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result) override;
@@ -46,10 +49,6 @@ public:
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
-    ULONG AddRef() override;
-    ULONG Release() override;
-    
-private:
-    __weak id<DLABOutputCallbackDelegate> delegate;
-    std::atomic<ULONG> refCount;
+    ULONG AddRef() override { return Base::AddRef(); }
+    ULONG Release() override { return Base::Release(); }
 };

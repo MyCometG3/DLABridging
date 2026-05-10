@@ -10,11 +10,6 @@
 
 #import <DLABProfileCallback.h>
 
-DLABProfileCallback::DLABProfileCallback(id<DLABProfileCallbackPrivateDelegate> delegate)
-: delegate(delegate), refCount(1)
-{
-}
-
 HRESULT DLABProfileCallback::ProfileChanging(IDeckLinkProfile* profileToBeActivated, bool streamsWillBeForcedToStop)
 {
     if ([delegate respondsToSelector:@selector(willApplyProfile:stopping:)]) {
@@ -46,20 +41,4 @@ HRESULT DLABProfileCallback::QueryInterface(REFIID iid, LPVOID *ppv)
         return S_OK;
     }
     return E_NOINTERFACE;
-}
-
-ULONG DLABProfileCallback::AddRef()
-{
-    ULONG newRefValue = ++refCount;
-    return newRefValue;
-}
-
-ULONG DLABProfileCallback::Release()
-{
-    ULONG newRefValue = --refCount;
-    if (newRefValue == 0) {
-        delete this;
-        return 0;
-    }
-    return newRefValue;
 }

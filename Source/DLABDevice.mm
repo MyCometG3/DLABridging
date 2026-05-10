@@ -13,6 +13,22 @@
 #import <DLABQueryInterfaceAny.h>
 #import <DLABVersionChecker.h>
 
+#if DEBUG
+#define DLABShutdownCallbackAssert(condition, message) NSCAssert((condition), (message))
+#else
+#define DLABShutdownCallbackAssert(condition, message) do { (void)(condition); } while (0)
+#endif
+
+NS_INLINE void DLABAssertOrphanedCallback(BOOL released,
+                                          NSString * _Nonnull callbackName,
+                                          NSString * _Nonnull operationName)
+{
+    DLABShutdownCallbackAssert(released,
+                               ([NSString stringWithFormat:@"%@ failed during shutdown; retaining %@ to avoid releasing a callback still owned by DeckLink.",
+                                 operationName,
+                                 callbackName]));
+}
+
 const char* kCaptureQueue = "DLABDevice.captureQueue";
 const char* kPlaybackQueue = "DLABDevice.playbackQueue";
 const char* kDelegateQueue = "DLABDevice.delegateQueue";
@@ -67,8 +83,27 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _deckLink->AddRef();
         
         //
-        outputVideoFrameSet = [NSMutableSet set];
-        outputVideoFrameIdleSet = [NSMutableSet set];
+        _outputVideoFramePool = [[DLABVideoFramePool alloc] init];
+        
+        // Eagerly initialize dispatch queues and callback objects to avoid
+        // lazy-initialization races on concurrent first access.
+        _captureQueue = dispatch_queue_create(kCaptureQueue, DISPATCH_QUEUE_SERIAL);
+        captureQueueKey = &captureQueueKey;
+        dispatch_queue_set_specific(_captureQueue, captureQueueKey, (__bridge void*)self, NULL);
+        
+        _playbackQueue = dispatch_queue_create(kPlaybackQueue, DISPATCH_QUEUE_SERIAL);
+        playbackQueueKey = &playbackQueueKey;
+        dispatch_queue_set_specific(_playbackQueue, playbackQueueKey, (__bridge void*)self, NULL);
+        
+        _delegateQueue = dispatch_queue_create(kDelegateQueue, DISPATCH_QUEUE_SERIAL);
+        delegateQueueKey = &delegateQueueKey;
+        dispatch_queue_set_specific(_delegateQueue, delegateQueueKey, (__bridge void*)self, NULL);
+        
+        _inputCallback = new DLABInputCallback((id)self);
+        _outputCallback = new DLABOutputCallback((id)self);
+        _statusChangeCallback = new DLABNotificationCallback((id)self);
+        _prefsChangeCallback = new DLABNotificationCallback((id)self);
+        _profileCallback = new DLABProfileCallback((id)self);
         
         //
         [self validate];
@@ -78,89 +113,96 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (void) validate
 {
-    HRESULT error = E_FAIL;
-    
-    // Validate support feature (capture/playback)
     BOOL supportsCapture = FALSE;
     BOOL supportsPlayback = FALSE;
-    {
-        int64_t support = 0;
-        error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkVideoIOSupport, &support);
-        if (!error) {
-            supportsCapture = (support & bmdDeviceSupportsCapture);
-            supportsPlayback = (support & bmdDeviceSupportsPlayback);
+    
+    [self validateVideoIOSupport:&supportsCapture playback:&supportsPlayback];
+    [self validateOptionalInterfacesForCaptureSupport:&supportsCapture playbackSupport:&supportsPlayback];
+    [self updateSupportFlagsFromCaptureSupport:supportsCapture playbackSupport:supportsPlayback];
+    [self loadStaticDeviceAttributes];
+}
+
+- (void) validateVideoIOSupport:(BOOL *)supportsCapture
+                       playback:(BOOL *)supportsPlayback
+{
+    int64_t support = 0;
+    HRESULT error = _deckLinkProfileAttributes->GetInt(BMDDeckLinkVideoIOSupport, &support);
+    *supportsCapture = FALSE;
+    *supportsPlayback = FALSE;
+    if (!error) {
+        *supportsCapture = (support & bmdDeviceSupportsCapture);
+        *supportsPlayback = (support & bmdDeviceSupportsPlayback);
+    }
+}
+
+- (void) validateOptionalInterfacesForCaptureSupport:(BOOL *)supportsCapture
+                                     playbackSupport:(BOOL *)supportsPlayback
+{
+    HRESULT error = E_FAIL;
+    
+    if (!_deckLinkInput && *supportsCapture) {
+        error = DLABQueryInterfaceAny(_deckLink, &_deckLinkInput,
+                                      IID_IDeckLinkInput,
+                                      IID_IDeckLinkInput_v15_3_1,
+                                      IID_IDeckLinkInput_v14_2_1,
+                                      IID_IDeckLinkInput_v11_5_1,
+                                      IID_IDeckLinkInput_v11_4);
+        if (error) {
+            if (_deckLinkInput) _deckLinkInput->Release();
+            _deckLinkInput = NULL;
+            *supportsCapture = FALSE;
         }
     }
     
-    // Optional c++ objects
-    {
-        // Validate support feature (Capture)
-        if (!_deckLinkInput && supportsCapture) {
-            error = DLABQueryInterfaceAny(_deckLink, &_deckLinkInput,
-                                          IID_IDeckLinkInput,
-                                          IID_IDeckLinkInput_v15_3_1,
-                                          IID_IDeckLinkInput_v14_2_1,
-                                          IID_IDeckLinkInput_v11_5_1,
-                                          IID_IDeckLinkInput_v11_4);
-            if (error) {
-                if (_deckLinkInput) _deckLinkInput->Release();
-                _deckLinkInput = NULL;
-                supportsCapture = FALSE;
-            }
-        }
-        
-        // Validate support feature (Playback)
-        if (!_deckLinkOutput && supportsPlayback) {
-            error = DLABQueryInterfaceAny(_deckLink, &_deckLinkOutput,
-                                          IID_IDeckLinkOutput,
-                                          IID_IDeckLinkOutput_v15_3_1,
-                                          IID_IDeckLinkOutput_v14_2_1,
-                                          IID_IDeckLinkOutput_v11_4);
-            if (error) {
-                if (_deckLinkOutput) _deckLinkOutput->Release();
-                _deckLinkOutput = NULL;
-                supportsPlayback = FALSE;
-            }
-        }
-        
-        // Validate HDMIInputEDID support (optional)
-        if (!_deckLinkHDMIInputEDID && supportsCapture) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkHDMIInputEDID, (void **)&_deckLinkHDMIInputEDID);
-            if (error) {
-                if (_deckLinkHDMIInputEDID) _deckLinkHDMIInputEDID->Release();
-                _deckLinkHDMIInputEDID = NULL;
-            }
-        }
-        
-        // Validate Keyer support (optional)
-        if (!_deckLinkKeyer && supportsPlayback) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkKeyer, (void **)&_deckLinkKeyer);
-            if (error) {
-                if (_deckLinkKeyer) _deckLinkKeyer->Release();
-                _deckLinkKeyer = NULL;
-            }
-        }
-        
-        // Validate Profile support (optional)
-        if (!_deckLinkProfileManager) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkProfileManager, (void **)&_deckLinkProfileManager);
-            if (error) {
-                if (_deckLinkProfileManager) _deckLinkProfileManager->Release();
-                _deckLinkProfileManager = NULL;
-            }
-        }
-        
-        // Validate Statistics support (optional)
-        if (!_deckLinkStatistics) {
-            error = _deckLink->QueryInterface(IID_IDeckLinkStatistics, (void **)&_deckLinkStatistics);
-            if (error) {
-                if (_deckLinkStatistics) _deckLinkStatistics->Release();
-                _deckLinkStatistics = NULL;
-            }
+    if (!_deckLinkOutput && *supportsPlayback) {
+        error = DLABQueryInterfaceAny(_deckLink, &_deckLinkOutput,
+                                      IID_IDeckLinkOutput,
+                                      IID_IDeckLinkOutput_v15_3_1,
+                                      IID_IDeckLinkOutput_v14_2_1,
+                                      IID_IDeckLinkOutput_v11_4);
+        if (error) {
+            if (_deckLinkOutput) _deckLinkOutput->Release();
+            _deckLinkOutput = NULL;
+            *supportsPlayback = FALSE;
         }
     }
     
-    // Validate support feature
+    if (!_deckLinkHDMIInputEDID && *supportsCapture) {
+        error = _deckLink->QueryInterface(IID_IDeckLinkHDMIInputEDID, (void **)&_deckLinkHDMIInputEDID);
+        if (error) {
+            if (_deckLinkHDMIInputEDID) _deckLinkHDMIInputEDID->Release();
+            _deckLinkHDMIInputEDID = NULL;
+        }
+    }
+    
+    if (!_deckLinkKeyer && *supportsPlayback) {
+        error = _deckLink->QueryInterface(IID_IDeckLinkKeyer, (void **)&_deckLinkKeyer);
+        if (error) {
+            if (_deckLinkKeyer) _deckLinkKeyer->Release();
+            _deckLinkKeyer = NULL;
+        }
+    }
+    
+    if (!_deckLinkProfileManager) {
+        error = _deckLink->QueryInterface(IID_IDeckLinkProfileManager, (void **)&_deckLinkProfileManager);
+        if (error) {
+            if (_deckLinkProfileManager) _deckLinkProfileManager->Release();
+            _deckLinkProfileManager = NULL;
+        }
+    }
+    
+    if (!_deckLinkStatistics) {
+        error = _deckLink->QueryInterface(IID_IDeckLinkStatistics, (void **)&_deckLinkStatistics);
+        if (error) {
+            if (_deckLinkStatistics) _deckLinkStatistics->Release();
+            _deckLinkStatistics = NULL;
+        }
+    }
+}
+
+- (void) updateSupportFlagsFromCaptureSupport:(BOOL)supportsCapture
+                              playbackSupport:(BOOL)supportsPlayback
+{
     _supportFlag = DLABVideoIOSupportNone;
     _supportCapture = FALSE;
     _supportPlayback = FALSE;
@@ -175,6 +217,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _supportPlayback = TRUE;
     }
     if (_deckLinkKeyer) {
+        HRESULT error = E_FAIL;
         bool keyingInternal = false;
         error = _deckLinkProfileAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &keyingInternal);
         if (!error && keyingInternal)
@@ -187,8 +230,12 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         
         _supportKeying = (keyingInternal || keyingExternal);
     }
+}
+
+- (void) loadStaticDeviceAttributes
+{
+    HRESULT error = E_FAIL;
     
-    // Validate attributes
     _modelName = @"Unknown modelName";
     CFStringRef newModelName = nil;
     error = _deckLink->GetModelName(&newModelName);
@@ -265,7 +312,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     }
     
     // Release OutputVideoFramePool
-    [self freeOutputVideoFramePool];
+    [_outputVideoFramePool freeFrames];
     
     // Release CFObjects
     if (_inputPixelBufferPool) {
@@ -285,29 +332,69 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         _inputPreviewCallback = NULL;
     }
     if (_profileCallback) {
-        [self subscribeProfileChange:NO];
-        _profileCallback->Release();
-        _profileCallback = NULL;
+        BOOL canReleaseProfileCallback = YES;
+        if (_profileCallbackRegistered) {
+            canReleaseProfileCallback = [self subscribeProfileChange:NO];
+        }
+        DLABAssertOrphanedCallback(canReleaseProfileCallback,
+                                   @"_profileCallback",
+                                   @"IDeckLinkProfileManager::SetCallback(NULL)");
+        if (canReleaseProfileCallback) {
+            _profileCallback->Release();
+            _profileCallback = NULL;
+        }
     }
     if (_prefsChangeCallback) {
-        [self subscribePrefsChangeNotification:NO];
-        _prefsChangeCallback->Release();
-        _prefsChangeCallback = NULL;
+        BOOL canReleasePrefsCallback = YES;
+        if (_prefsChangeNotificationSubscribed) {
+            canReleasePrefsCallback = [self subscribePrefsChangeNotification:NO];
+        }
+        DLABAssertOrphanedCallback(canReleasePrefsCallback,
+                                   @"_prefsChangeCallback",
+                                   @"IDeckLinkNotification::Unsubscribe(bmdPreferencesChanged)");
+        if (canReleasePrefsCallback) {
+            _prefsChangeCallback->Release();
+            _prefsChangeCallback = NULL;
+        }
     }
     if (_statusChangeCallback) {
-        [self subscribeStatusChangeNotification:NO];
-        _statusChangeCallback->Release();
-        _statusChangeCallback = NULL;
+        BOOL canReleaseStatusCallback = YES;
+        if (_statusChangeNotificationSubscribed) {
+            canReleaseStatusCallback = [self subscribeStatusChangeNotification:NO];
+        }
+        DLABAssertOrphanedCallback(canReleaseStatusCallback,
+                                   @"_statusChangeCallback",
+                                   @"IDeckLinkNotification::Unsubscribe(bmdStatusChanged)");
+        if (canReleaseStatusCallback) {
+            _statusChangeCallback->Release();
+            _statusChangeCallback = NULL;
+        }
     }
     if (_outputCallback) {
-        [self subscribeOutput:NO];
-        _outputCallback->Release();
-        _outputCallback = NULL;
+        BOOL canReleaseOutputCallback = YES;
+        if (_outputCallbackRegistered) {
+            canReleaseOutputCallback = [self subscribeOutput:NO];
+        }
+        DLABAssertOrphanedCallback(canReleaseOutputCallback,
+                                   @"_outputCallback",
+                                   @"IDeckLinkOutput::SetScheduledFrameCompletionCallback(NULL)");
+        if (canReleaseOutputCallback) {
+            _outputCallback->Release();
+            _outputCallback = NULL;
+        }
     }
     if (_inputCallback) {
-        [self subscribeInput:NO];
-        _inputCallback->Release();
-        _inputCallback = NULL;
+        BOOL canReleaseInputCallback = YES;
+        if (_inputCallbackRegistered) {
+            canReleaseInputCallback = [self subscribeInput:NO];
+        }
+        DLABAssertOrphanedCallback(canReleaseInputCallback,
+                                   @"_inputCallback",
+                                   @"IDeckLinkInput::SetCallback(NULL)");
+        if (canReleaseInputCallback) {
+            _inputCallback->Release();
+            _inputCallback = NULL;
+        }
     }
     
     if (_deckLinkOutput) {
@@ -469,14 +556,18 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 @synthesize captureQueueKey = captureQueueKey;
 @synthesize playbackQueueKey = playbackQueueKey;
 @synthesize delegateQueueKey = delegateQueueKey;
-@synthesize outputVideoFrameSet = outputVideoFrameSet;
-@synthesize outputVideoFrameIdleSet = outputVideoFrameIdleSet;
+@synthesize outputVideoFramePool = _outputVideoFramePool;
 
 @synthesize inputPixelBufferPool = _inputPixelBufferPool;
 @synthesize outputPreviewCallback = _outputPreviewCallback;
 @synthesize inputPreviewCallback = _inputPreviewCallback;
 
 @synthesize needsInputVideoConfigurationRefresh = _needsInputVideoConfigurationRefresh;
+@synthesize statusChangeNotificationSubscribed = _statusChangeNotificationSubscribed;
+@synthesize prefsChangeNotificationSubscribed = _prefsChangeNotificationSubscribed;
+@synthesize inputCallbackRegistered = _inputCallbackRegistered;
+@synthesize outputCallbackRegistered = _outputCallbackRegistered;
+@synthesize profileCallbackRegistered = _profileCallbackRegistered;
 @synthesize inputVideoConverter = _inputVideoConverter;
 @synthesize outputVideoConverter = _outputVideoConverter;
 
@@ -517,7 +608,7 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
          code:(NSInteger)result
            to:(NSError**)error;
 {
-    return DLABAssignError(error, description, failureReason, (NSInteger)result);
+    return DLABPostError(error, description, failureReason, result);
 }
 
 /* =================================================================================== */
@@ -612,11 +703,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         result = input->SetCallback(callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkInput::SetCallback failed.");
+        } else {
+            self.inputCallbackRegistered = YES;
         }
     } else {
         result = input->SetCallback(NULL);
         if (result) {
             NSLog(@"ERROR: IDeckLinkInput::SetCallback failed.");
+        } else {
+            self.inputCallbackRegistered = NO;
         }
     }
     return (result == S_OK);
@@ -633,11 +728,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         result = output->SetScheduledFrameCompletionCallback(callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkOutput::SetScheduledFrameCompletionCallback failed.");
+        } else {
+            self.outputCallbackRegistered = YES;
         }
     } else {
         result = output->SetScheduledFrameCompletionCallback(NULL);
         if (result) {
             NSLog(@"ERROR: IDeckLinkOutput::SetScheduledFrameCompletionCallback failed.");
+        } else {
+            self.outputCallbackRegistered = NO;
         }
     }
     return (result == S_OK);
@@ -654,11 +753,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         result = notification->Subscribe(bmdStatusChanged, callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Subscribe failed.");
+        } else {
+            self.statusChangeNotificationSubscribed = YES;
         }
     } else {
         result = notification->Unsubscribe(bmdStatusChanged, callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Unsubscribe failed.");
+        } else {
+            self.statusChangeNotificationSubscribed = NO;
         }
     }
     return (result == S_OK);
@@ -675,11 +778,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         result = notification->Subscribe(bmdPreferencesChanged, callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Subscribe failed.");
+        } else {
+            self.prefsChangeNotificationSubscribed = YES;
         }
     } else {
         result = notification->Unsubscribe(bmdPreferencesChanged, callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkNotification::Unsubscribe failed.");
+        } else {
+            self.prefsChangeNotificationSubscribed = NO;
         }
     }
     return (result == S_OK);
@@ -696,11 +803,15 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
         result = manager->SetCallback(callback);
         if (result) {
             NSLog(@"ERROR: IDeckLinkProfileManager::SetCallback failed.");
+        } else {
+            self.profileCallbackRegistered = YES;
         }
     } else {
         result = manager->SetCallback(NULL);
         if (result) {
             NSLog(@"ERROR: IDeckLinkProfileManager::SetCallback failed.");
+        } else {
+            self.profileCallbackRegistered = NO;
         }
     }
     return (result == S_OK);
@@ -786,92 +897,84 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 // MARK: - (Public) - property setter
 /* =================================================================================== */
 
+- (void) updateSubscriptionFrom:(id)oldValue
+                             to:(id)newValue
+                          block:(BOOL(^)(BOOL))subscribeBlock
+{
+    if (oldValue) {
+        subscribeBlock(NO);
+    }
+    if (newValue) {
+        subscribeBlock(YES);
+    }
+}
+
 - (void) setOutputDelegate:(id<DLABOutputPlaybackDelegate>)newDelegate
 {
     if (_outputDelegate == newDelegate) return;
-    if (_outputDelegate) {
-        // Unsubscribe request from current delegate
-        _outputDelegate = nil;
-        
-        [self subscribeOutput:NO];
-    }
+    id old = _outputDelegate;
+    _outputDelegate = nil;
     if (newDelegate) {
-        // Subscribe request from new delegate
         _outputDelegate = newDelegate;
-        
-        [self subscribeOutput:YES];
     }
+    [self updateSubscriptionFrom:old
+                              to:newDelegate
+                           block:^BOOL(BOOL flag) { return [self subscribeOutput:flag]; }];
 }
 
 - (void) setInputDelegate:(id<DLABInputCaptureDelegate>)newDelegate
 {
     if (_inputDelegate == newDelegate) return;
-    if (_inputDelegate) {
-        // Unsubscribe request from current delegate
-        _inputDelegate = nil;
-        
-        [self subscribeInput:NO];
-    }
+    id old = _inputDelegate;
+    _inputDelegate = nil;
     if (newDelegate) {
-        // Subscribe request from new delegate
         _inputDelegate = newDelegate;
-        
-        [self subscribeInput:YES];
     }
+    [self updateSubscriptionFrom:old
+                              to:newDelegate
+                           block:^BOOL(BOOL flag) { return [self subscribeInput:flag]; }];
 }
 
 // public DLABStatusChangeDelegate
 - (void) setStatusDelegate:(id<DLABStatusChangeDelegate>)newDelegate
 {
     if (_statusDelegate == newDelegate) return;
-    if (_statusDelegate) {
-        // Unsubscribe request from current delegate
-        _statusDelegate = nil;
-        
-        [self subscribeStatusChangeNotification:NO];
-    }
+    id old = _statusDelegate;
+    _statusDelegate = nil;
     if (newDelegate) {
-        // Subscribe request from new delegate
         _statusDelegate = newDelegate;
-        
-        [self subscribeStatusChangeNotification:YES];
     }
+    [self updateSubscriptionFrom:old
+                              to:newDelegate
+                           block:^BOOL(BOOL flag) { return [self subscribeStatusChangeNotification:flag]; }];
 }
 
 // public DLABPrefsChangeDelegate
 - (void) setPrefsDelegate:(id<DLABPrefsChangeDelegate>)newDelegate
 {
     if (_prefsDelegate == newDelegate) return;
-    if (_prefsDelegate) {
-        // Unsubscribe request from current delegate
-        _prefsDelegate = nil;
-        
-        [self subscribePrefsChangeNotification:NO];
-    }
+    id old = _prefsDelegate;
+    _prefsDelegate = nil;
     if (newDelegate) {
-        // Subscribe request from new delegate
         _prefsDelegate = newDelegate;
-        
-        [self subscribePrefsChangeNotification:YES];
     }
+    [self updateSubscriptionFrom:old
+                              to:newDelegate
+                           block:^BOOL(BOOL flag) { return [self subscribePrefsChangeNotification:flag]; }];
 }
 
 // public DLABProfileChangeDelegate
 - (void) setProfileDelegate:(id<DLABProfileChangeDelegate>)newDelegate
 {
     if (_profileDelegate == newDelegate) return;
-    if (_profileDelegate) {
-        // Unsubscribe request from current delegate
-        _profileDelegate = nil;
-        
-        [self subscribeProfileChange:NO];
-    }
+    id old = _profileDelegate;
+    _profileDelegate = nil;
     if (newDelegate) {
-        // Subscribe request from new delegate
         _profileDelegate = newDelegate;
-        
-        [self subscribeProfileChange:YES];
     }
+    [self updateSubscriptionFrom:old
+                              to:newDelegate
+                           block:^BOOL(BOOL flag) { return [self subscribeProfileChange:flag]; }];
 }
 
 /* =================================================================================== */
@@ -880,74 +983,41 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (DLABInputCallback *)inputCallback
 {
-    if (!_inputCallback) {
-        _inputCallback = new DLABInputCallback((id)self);
-    }
     return _inputCallback;
 }
 
 - (DLABOutputCallback *)outputCallback
 {
-    if (!_outputCallback) {
-        _outputCallback = new DLABOutputCallback((id)self);
-    }
     return _outputCallback;
 }
 
 - (DLABNotificationCallback*)statusChangeCallback
 {
-    if (!_statusChangeCallback) {
-        _statusChangeCallback = new DLABNotificationCallback((id)self);
-    }
     return _statusChangeCallback;
 }
 
 - (DLABNotificationCallback*)prefsChangeCallback
 {
-    if (!_prefsChangeCallback) {
-        _prefsChangeCallback = new DLABNotificationCallback((id)self);
-    }
     return _prefsChangeCallback;
 }
 
 - (DLABProfileCallback*)profileCallback
 {
-    if (!_profileCallback) {
-        _profileCallback = new DLABProfileCallback((id)self);
-    }
     return _profileCallback;
 }
 
 - (dispatch_queue_t) captureQueue
 {
-    if (!_captureQueue) {
-        _captureQueue = dispatch_queue_create(kCaptureQueue, DISPATCH_QUEUE_SERIAL);
-        captureQueueKey = &captureQueueKey;
-        void *unused = (__bridge void*)self;
-        dispatch_queue_set_specific(_captureQueue, captureQueueKey, unused, NULL);
-    }
     return _captureQueue;
 }
 
 - (dispatch_queue_t) playbackQueue
 {
-    if (!_playbackQueue) {
-        _playbackQueue = dispatch_queue_create(kPlaybackQueue, DISPATCH_QUEUE_SERIAL);
-        playbackQueueKey = &playbackQueueKey;
-        void *unused = (__bridge void*)self;
-        dispatch_queue_set_specific(_playbackQueue, playbackQueueKey, unused, NULL);
-    }
     return _playbackQueue;
 }
 
 - (dispatch_queue_t) delegateQueue
 {
-    if (!_delegateQueue) {
-        _delegateQueue = dispatch_queue_create(kDelegateQueue, DISPATCH_QUEUE_SERIAL);
-        delegateQueueKey = &delegateQueueKey;
-        void *unused = (__bridge void*)self;
-        dispatch_queue_set_specific(_delegateQueue, delegateQueueKey, unused, NULL);
-    }
     return _delegateQueue;
 }
 
