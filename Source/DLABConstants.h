@@ -317,7 +317,7 @@ typedef NS_ENUM(uint32_t, DLABColorspace)
     DLABColorspaceRec2020                                         = /* '2020' */ 0x32303230,
     DLABColorspaceDolbyVisionNative                               = /* 'DoVi' */ 0x446F5669,    // For bmdDeckLinkConfigVideoOutputConversionColorspaceDestination with 12-bit RGB
     DLABColorspaceP3D65                                           = /* 'P3D6' */ 0x50334436,    // For bmdDeckLinkConfigVideoOutputConversionColorspaceSource only
-    DLABColorspaceUnknown                                         = /* 'Ncol' */ 0x4E636F6C    // For disabling bmdDeckLinkConfigVideoOutputConversionColorspaceDestination
+    DLABColorspaceUnknown                                         = /* 'Ncol' */ 0x4E636F6C     // For disabling bmdDeckLinkConfigVideoOutputConversionColorspaceDestination
 };
 
 /* Enum BMDDynamicRange - SDR or HDR */
