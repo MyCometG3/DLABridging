@@ -323,13 +323,9 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
     // Release c++ Callback objects
     if (_outputPreviewCallback) {
         [self setOutputScreenPreviewToView:nil error:nil];
-        _outputPreviewCallback->Release();
-        _outputPreviewCallback = NULL;
     }
     if (_inputPreviewCallback) {
         [self setInputScreenPreviewToView:nil error:nil];
-        _inputPreviewCallback->Release();
-        _inputPreviewCallback = NULL;
     }
     if (_profileCallback) {
         BOOL canReleaseProfileCallback = YES;

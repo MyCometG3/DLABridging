@@ -1180,10 +1180,6 @@ static DLABFrameMetadata * processCallbacks(DLABDevice *self, IDeckLinkMutableVi
     if (!result) {
         return YES;
     } else {
-        if (outFrame) {
-            [self.outputVideoFramePool releaseFrame:outFrame];
-        }
-        
         [self post:[NSString stringWithFormat:@"%s (%d)", __PRETTY_FUNCTION__, __LINE__]
             reason:@"IDeckLinkOutput::DisplayVideoFrameSync failed."
               code:result

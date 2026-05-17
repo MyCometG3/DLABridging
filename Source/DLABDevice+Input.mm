@@ -359,8 +359,8 @@ NS_INLINE BOOL copyPlaneDLtoCV(DLABDevice* self, IDeckLinkVideoInputFrame* video
             } else { // line copy with different stride
                 size_t length = MIN(pbRowByte, ifRowByte);
                 for (size_t line = 0; line < ifHeight; line++) {
-                    char* srcAddr = (char*)src + pbRowByte * line;
-                    char* dstAddr = (char*)dst + ifRowByte * line;
+                    char* srcAddr = (char*)src + ifRowByte * line;
+                    char* dstAddr = (char*)dst + pbRowByte * line;
                     memcpy(dstAddr, srcAddr, length);
                 }
             }
