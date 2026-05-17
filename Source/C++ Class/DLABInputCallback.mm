@@ -35,6 +35,7 @@ HRESULT DLABInputCallback::VideoInputFrameArrived(IDeckLinkVideoInputFrame* vide
 
 HRESULT DLABInputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
 {
+    if (!ppv) return E_POINTER;
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {

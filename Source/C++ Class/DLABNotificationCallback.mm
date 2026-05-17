@@ -21,6 +21,7 @@ HRESULT DLABNotificationCallback::Notify(BMDNotifications topic, uint64_t param1
 
 HRESULT DLABNotificationCallback::QueryInterface(REFIID iid, LPVOID *ppv)
 {
+    if (!ppv) return E_POINTER;
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
