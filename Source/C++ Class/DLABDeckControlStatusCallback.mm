@@ -47,6 +47,7 @@ HRESULT DLABDeckControlStatusCallback::DeckControlStatusChanged(BMDDeckControlSt
 // IUnknown
 HRESULT DLABDeckControlStatusCallback::QueryInterface(REFIID iid, LPVOID *ppv)
 {
+    if (!ppv) return E_POINTER;
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
