@@ -485,13 +485,15 @@ NS_INLINE BOOL getTwoIDs(IDeckLink* deckLink, int64_t *topologicalIDRef, int64_t
 
 - (dispatch_queue_t) browserQueue
 {
-    if (!_browserQueue) {
-        browserQueueKey = &browserQueueKey;
-        void *unused = (__bridge void*)self;
-        _browserQueue = dispatch_queue_create(kBrowserQueue, DISPATCH_QUEUE_SERIAL);
-        dispatch_queue_set_specific(_browserQueue, browserQueueKey, unused, NULL);
+    @synchronized (self) {
+        if (!_browserQueue) {
+            browserQueueKey = &browserQueueKey;
+            void *unused = (__bridge void*)self;
+            _browserQueue = dispatch_queue_create(kBrowserQueue, DISPATCH_QUEUE_SERIAL);
+            dispatch_queue_set_specific(_browserQueue, browserQueueKey, unused, NULL);
+        }
+        return _browserQueue;
     }
-    return _browserQueue;
 }
 
 - (IDeckLinkAPIInformation*) apiInformation
