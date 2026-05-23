@@ -9,6 +9,7 @@
 #pragma once
 
 #import <Foundation/Foundation.h>
+#import <CoreFoundation/CFPlugInCOM.h>
 #import <cstdint>
 #import <atomic>
 
