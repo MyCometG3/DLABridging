@@ -819,30 +819,32 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (NSArray*) outputVideoSettingArray
 {
-    if (!_outputVideoSettingArray) {
-        IDeckLinkOutput* output = self.deckLinkOutput;
-        if (output) {
-            // Get DisplayModeIterator
-            HRESULT result = E_FAIL;
-            IDeckLinkDisplayModeIterator* iterator = NULL;
-            result = output->GetDisplayModeIterator(&iterator);
-            if (!result) {
-                // Iterate DisplayModeObj(s) and create dictionaries of them
-                NSMutableArray *array = [[NSMutableArray alloc] init];
-                IDeckLinkDisplayMode* displayModeObj = NULL;
-                
-                while (iterator->Next(&displayModeObj) == S_OK) {
-                    DLABVideoSetting* setting = [[DLABVideoSetting alloc]
-                                                 initWithDisplayModeObj:displayModeObj];
-                    if (setting)
-                        [array addObject:setting];
+    @synchronized (self) {
+        if (!_outputVideoSettingArray) {
+            IDeckLinkOutput* output = self.deckLinkOutput;
+            if (output) {
+                // Get DisplayModeIterator
+                HRESULT result = E_FAIL;
+                IDeckLinkDisplayModeIterator* iterator = NULL;
+                result = output->GetDisplayModeIterator(&iterator);
+                if (!result) {
+                    // Iterate DisplayModeObj(s) and create dictionaries of them
+                    NSMutableArray *array = [[NSMutableArray alloc] init];
+                    IDeckLinkDisplayMode* displayModeObj = NULL;
                     
-                    displayModeObj->Release();
+                    while (iterator->Next(&displayModeObj) == S_OK) {
+                        DLABVideoSetting* setting = [[DLABVideoSetting alloc]
+                                                     initWithDisplayModeObj:displayModeObj];
+                        if (setting)
+                            [array addObject:setting];
+                        
+                        displayModeObj->Release();
+                    }
+                    
+                    iterator->Release();
+                    
+                    _outputVideoSettingArray = [NSArray arrayWithArray:array];
                 }
-                
-                iterator->Release();
-                
-                _outputVideoSettingArray = [NSArray arrayWithArray:array];
             }
         }
     }
@@ -851,30 +853,32 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (NSArray*) inputVideoSettingArray
 {
-    if (!_inputVideoSettingArray) {
-        IDeckLinkInput* input = self.deckLinkInput;
-        if (input) {
-            // Get DisplayModeIterator
-            HRESULT result = E_FAIL;
-            IDeckLinkDisplayModeIterator* iterator = NULL;
-            result = input->GetDisplayModeIterator(&iterator);
-            if (!result) {
-                // Iterate DisplayModeObj(s) and create dictionaries of them
-                NSMutableArray *array = [[NSMutableArray alloc] init];
-                IDeckLinkDisplayMode* displayModeObj = NULL;
-                
-                while (iterator->Next(&displayModeObj) == S_OK) {
-                    DLABVideoSetting* setting = [[DLABVideoSetting alloc]
-                                                 initWithDisplayModeObj:displayModeObj];
-                    if (setting)
-                        [array addObject:setting];
+    @synchronized (self) {
+        if (!_inputVideoSettingArray) {
+            IDeckLinkInput* input = self.deckLinkInput;
+            if (input) {
+                // Get DisplayModeIterator
+                HRESULT result = E_FAIL;
+                IDeckLinkDisplayModeIterator* iterator = NULL;
+                result = input->GetDisplayModeIterator(&iterator);
+                if (!result) {
+                    // Iterate DisplayModeObj(s) and create dictionaries of them
+                    NSMutableArray *array = [[NSMutableArray alloc] init];
+                    IDeckLinkDisplayMode* displayModeObj = NULL;
                     
-                    displayModeObj->Release();
+                    while (iterator->Next(&displayModeObj) == S_OK) {
+                        DLABVideoSetting* setting = [[DLABVideoSetting alloc]
+                                                     initWithDisplayModeObj:displayModeObj];
+                        if (setting)
+                            [array addObject:setting];
+                        
+                        displayModeObj->Release();
+                    }
+                    
+                    iterator->Release();
+                    
+                    _inputVideoSettingArray = [NSArray arrayWithArray:array];
                 }
-                
-                iterator->Release();
-                
-                _inputVideoSettingArray = [NSArray arrayWithArray:array];
             }
         }
     }
@@ -883,8 +887,10 @@ const char* kDelegateQueue = "DLABDevice.delegateQueue";
 
 - (DLABDeckControl*) deckControl
 {
-    if (!_deckControl) {
-        _deckControl = [[DLABDeckControl alloc] initWithDeckLink:self.deckLink];
+    @synchronized (self) {
+        if (!_deckControl) {
+            _deckControl = [[DLABDeckControl alloc] initWithDeckLink:self.deckLink];
+        }
     }
     return _deckControl;
 }

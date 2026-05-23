@@ -399,6 +399,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  General DeckLink Device object, wrapper of multiple original DeckLink API C++ objects.
+ 
+ ### Property Access
+ - Public property access is generally serialized by the caller. The following lazy getters provide internal synchronization via @synchronized(self): outputVideoSettingArray, inputVideoSettingArray, deckControl.
+ - Delegate callbacks and block handlers are executed on the dedicated serial delegate queue; they do not require additional synchronization for internal state transitions.
+ 
+ ### Internal Concurrency
+ - Internal DeckLink I/O callbacks are dispatched to three dedicated serial queues: captureQueue, playbackQueue, and delegateQueue.
  */
 @interface DLABDevice : NSObject
 
