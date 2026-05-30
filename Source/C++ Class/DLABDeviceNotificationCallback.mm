@@ -32,7 +32,7 @@ HRESULT DLABDeviceNotificationCallback::QueryInterface(REFIID iid, LPVOID *ppv)
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
-        *ppv = this;
+        *ppv = static_cast<IDeckLinkDeviceNotificationCallback *>(this);
         AddRef();
         return S_OK;
     }

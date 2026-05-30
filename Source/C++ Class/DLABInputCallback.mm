@@ -39,7 +39,7 @@ HRESULT DLABInputCallback::QueryInterface(REFIID iid, LPVOID *ppv)
     *ppv = NULL;
     CFUUIDBytes iunknown = CFUUIDGetUUIDBytes(IUnknownUUID);
     if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0) {
-        *ppv = this;
+        *ppv = static_cast<IDeckLinkInputCallback *>(this);
         AddRef();
         return S_OK;
     }
