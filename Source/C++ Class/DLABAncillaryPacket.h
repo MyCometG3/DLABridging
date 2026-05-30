@@ -39,8 +39,15 @@ public:
     
     // IUnknown
     HRESULT QueryInterface(REFIID iid, LPVOID *ppv) override;
-    ULONG AddRef() override;
-    ULONG Release() override;
+    ULONG AddRef() override { return ++refCount; }
+    ULONG Release() override {
+        ULONG newRefValue = --refCount;
+        if (newRefValue == 0) {
+            delete this;
+            return 0;
+        }
+        return newRefValue;
+    }
     
 private:
     uint8_t _did;

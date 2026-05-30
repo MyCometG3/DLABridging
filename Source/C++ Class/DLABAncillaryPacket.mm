@@ -111,19 +111,3 @@ HRESULT DLABAncillaryPacket::QueryInterface(REFIID iid, LPVOID *ppv)
     }
     return E_NOINTERFACE;
 }
-
-ULONG DLABAncillaryPacket::AddRef()
-{
-    ULONG newRefValue = ++refCount;
-    return newRefValue;
-}
-
-ULONG DLABAncillaryPacket::Release()
-{
-    ULONG newRefValue = --refCount;
-    if (newRefValue == 0) {
-        delete this;
-        return 0;
-    }
-    return newRefValue;
-}
