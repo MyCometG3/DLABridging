@@ -30,6 +30,7 @@ public:
     HRESULT Update(uint8_t did, uint8_t sdid, uint32_t line, uint8_t dataStreamIndex, BMDAncillaryDataSpace dataSpace, NSData* data); // Added in v15_3 or later
     
     // IDeckLinkAncillaryPacket
+    // The returned byte pointer references internal storage and becomes invalid after Update().
     HRESULT GetBytes(BMDAncillaryPacketFormat format, const void** data, uint32_t* size) override;
     uint8_t GetDID (void) override;
     uint8_t GetSDID(void) override;
