@@ -12,6 +12,7 @@
 #import <DeckLinkAPI.h>
 #import <DeckLinkAPI_v15_2.h>
 #import <atomic>
+#import <mutex>
 #import <vector>
 
 /*
@@ -57,5 +58,6 @@ private:
     uint8_t _dataStreamIndex;
     BMDAncillaryDataSpace _dataSpace = bmdAncillaryDataSpaceVANC; // Added in v15_3 or later
     std::vector<char> vbuf;
+    std::mutex stateMutex;
     std::atomic<ULONG> refCount;
 };

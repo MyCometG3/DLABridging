@@ -28,6 +28,8 @@ HRESULT DLABAncillaryPacket::Update(uint8_t did, uint8_t sdid, uint32_t line, ui
         return E_INVALIDARG;
     }
     
+    std::lock_guard<std::mutex> lock(stateMutex);
+    
     const uint8_t* ptr = (const uint8_t*)data.bytes;
     const size_t length = (size_t)data.length;
     if (length == 0) {
@@ -52,6 +54,8 @@ HRESULT DLABAncillaryPacket::GetBytes(BMDAncillaryPacketFormat format, const voi
     if (format != bmdAncillaryPacketFormatUInt8) {
         return E_NOTIMPL;
     }
+    
+    std::lock_guard<std::mutex> lock(stateMutex);
     if (size) {
         *size = (uint32_t)vbuf.size();
     }
@@ -63,25 +67,30 @@ HRESULT DLABAncillaryPacket::GetBytes(BMDAncillaryPacketFormat format, const voi
 
 uint8_t DLABAncillaryPacket::GetDID (void)
 {
+    std::lock_guard<std::mutex> lock(stateMutex);
     return _did;
 }
 
 uint8_t DLABAncillaryPacket::GetSDID(void){
+    std::lock_guard<std::mutex> lock(stateMutex);
     return _sdid;
 }
 
 uint32_t DLABAncillaryPacket::GetLineNumber(void)
 {
+    std::lock_guard<std::mutex> lock(stateMutex);
     return _line;
 }
 
 uint8_t DLABAncillaryPacket::GetDataStreamIndex(void)
 {
+    std::lock_guard<std::mutex> lock(stateMutex);
     return _dataStreamIndex;
 }
 
 BMDAncillaryDataSpace DLABAncillaryPacket::GetDataSpace (void)
 {
+    std::lock_guard<std::mutex> lock(stateMutex);
     return _dataSpace;
 }
 
