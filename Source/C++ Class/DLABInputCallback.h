@@ -31,10 +31,14 @@
 
 /* =================================================================================== */
 
-class DLABInputCallback : public IDeckLinkInputCallback,
-                           public DLABCallbackBase<DLABInputCallback, id<DLABInputCallbackDelegate>>
+class DLABInputCallback;
+using DLABInputCallbackBase = DLABCallbackBase<DLABInputCallback, id<DLABInputCallbackDelegate>>;
+
+class DLABInputCallback
+    : public IDeckLinkInputCallback
+    , public DLABInputCallbackBase
 {
-    using Base = DLABCallbackBase<DLABInputCallback, id<DLABInputCallbackDelegate>>;
+    using Base = DLABInputCallbackBase;
 public:
     using Base::Base;
     

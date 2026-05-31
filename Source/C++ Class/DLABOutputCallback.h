@@ -32,11 +32,15 @@
 
 /* =================================================================================== */
 
-class DLABOutputCallback : public IDeckLinkVideoOutputCallback,
-                            public IDeckLinkAudioOutputCallback,
-                            public DLABCallbackBase<DLABOutputCallback, id<DLABOutputCallbackDelegate>>
+class DLABOutputCallback;
+using DLABOutputCallbackBase = DLABCallbackBase<DLABOutputCallback, id<DLABOutputCallbackDelegate>>;
+
+class DLABOutputCallback
+    : public IDeckLinkVideoOutputCallback
+    , public IDeckLinkAudioOutputCallback
+    , public DLABOutputCallbackBase
 {
-    using Base = DLABCallbackBase<DLABOutputCallback, id<DLABOutputCallbackDelegate>>;
+    using Base = DLABOutputCallbackBase;
 public:
     using Base::Base;
     

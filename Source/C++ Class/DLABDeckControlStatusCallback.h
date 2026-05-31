@@ -31,10 +31,14 @@
 
 /* =================================================================================== */
 
-class DLABDeckControlStatusCallback : public IDeckLinkDeckControlStatusCallback,
-                                       public DLABCallbackBase<DLABDeckControlStatusCallback, id<DLABDeckControlStatusCallbackPrivateDelegate>>
+class DLABDeckControlStatusCallback;
+using DLABDeckControlStatusCallbackBase = DLABCallbackBase<DLABDeckControlStatusCallback, id<DLABDeckControlStatusCallbackPrivateDelegate>>;
+
+class DLABDeckControlStatusCallback
+    : public IDeckLinkDeckControlStatusCallback
+    , public DLABDeckControlStatusCallbackBase
 {
-    using Base = DLABCallbackBase<DLABDeckControlStatusCallback, id<DLABDeckControlStatusCallbackPrivateDelegate>>;
+    using Base = DLABDeckControlStatusCallbackBase;
 public:
     using Base::Base;
     

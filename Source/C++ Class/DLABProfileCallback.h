@@ -29,10 +29,14 @@
 
 /* =================================================================================== */
 
-class DLABProfileCallback : public IDeckLinkProfileCallback,
-                              public DLABCallbackBase<DLABProfileCallback, id<DLABProfileCallbackPrivateDelegate>>
+class DLABProfileCallback;
+using DLABProfileCallbackBase = DLABCallbackBase<DLABProfileCallback, id<DLABProfileCallbackPrivateDelegate>>;
+
+class DLABProfileCallback
+    : public IDeckLinkProfileCallback
+    , public DLABProfileCallbackBase
 {
-    using Base = DLABCallbackBase<DLABProfileCallback, id<DLABProfileCallbackPrivateDelegate>>;
+    using Base = DLABProfileCallbackBase;
 public:
     using Base::Base;
     

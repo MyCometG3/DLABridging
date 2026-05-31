@@ -28,10 +28,14 @@
 
 /* =================================================================================== */
 
-class DLABNotificationCallback : public IDeckLinkNotificationCallback,
-                                   public DLABCallbackBase<DLABNotificationCallback, id<DLABNotificationCallbackDelegate>>
+class DLABNotificationCallback;
+using DLABNotificationCallbackBase = DLABCallbackBase<DLABNotificationCallback, id<DLABNotificationCallbackDelegate>>;
+
+class DLABNotificationCallback
+    : public IDeckLinkNotificationCallback
+    , public DLABNotificationCallbackBase
 {
-    using Base = DLABCallbackBase<DLABNotificationCallback, id<DLABNotificationCallbackDelegate>>;
+    using Base = DLABNotificationCallbackBase;
 public:
     using Base::Base;
     
