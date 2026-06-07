@@ -153,7 +153,7 @@ NOTE: This framework is under development.
 - Ref: "Documentation/Bundle Resources/Entitlements/Hardened Runtime/Disable Library Validation Entitlement" from Apple Developer Documentation.
 
 #### Development environment
-- macOS 26.5 Tahoe
+- macOS 26.5.1 Tahoe
 - Xcode 26.5
 - Swift 6.3.2
 
