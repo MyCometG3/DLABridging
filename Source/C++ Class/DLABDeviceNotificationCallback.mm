@@ -12,16 +12,18 @@
 
 HRESULT DLABDeviceNotificationCallback::DeckLinkDeviceArrived(IDeckLink *deckLink)
 {
-    if ([delegate respondsToSelector:@selector(didAddDevice:)]) {
-        [delegate didAddDevice:deckLink];
+    if (delegate && [delegate respondsToSelector:@selector(didAddDevice:)]) {
+        id<DLABDeviceNotificationCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate didAddDevice:deckLink];
     }
     return S_OK;
 }
 
 HRESULT DLABDeviceNotificationCallback::DeckLinkDeviceRemoved(IDeckLink *deckLink)
 {
-    if ([delegate respondsToSelector:@selector(didRemoveDevice:)]) {
-        [delegate didRemoveDevice:deckLink];
+    if (delegate && [delegate respondsToSelector:@selector(didRemoveDevice:)]) {
+        id<DLABDeviceNotificationCallbackDelegate> strongDelegate = delegate;
+        [strongDelegate didRemoveDevice:deckLink];
     }
     return S_OK;
 }

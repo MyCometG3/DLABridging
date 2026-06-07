@@ -14,32 +14,36 @@
 
 HRESULT DLABDeckControlStatusCallback::TimecodeUpdate(BMDTimecodeBCD currentTimecode)
 {
-    if ([delegate respondsToSelector:@selector(deckControlTimecodeUpdate:)]) {
-        [delegate deckControlTimecodeUpdate:currentTimecode];
+    if (delegate && [delegate respondsToSelector:@selector(deckControlTimecodeUpdate:)]) {
+        id<DLABDeckControlStatusCallbackPrivateDelegate> strongDelegate = delegate;
+        [strongDelegate deckControlTimecodeUpdate:currentTimecode];
     }
     return S_OK;
 }
 
 HRESULT DLABDeckControlStatusCallback::VTRControlStateChanged(BMDDeckControlVTRControlState newState, BMDDeckControlError error)
 {
-    if ([delegate respondsToSelector:@selector(deckControlVTRControlStateChanged:controlError:)]) {
-        [delegate deckControlVTRControlStateChanged:newState controlError:error];
+    if (delegate && [delegate respondsToSelector:@selector(deckControlVTRControlStateChanged:controlError:)]) {
+        id<DLABDeckControlStatusCallbackPrivateDelegate> strongDelegate = delegate;
+        [strongDelegate deckControlVTRControlStateChanged:newState controlError:error];
     }
     return S_OK;
 }
 
 HRESULT DLABDeckControlStatusCallback::DeckControlEventReceived(BMDDeckControlEvent event, BMDDeckControlError error)
 {
-    if ([delegate respondsToSelector:@selector(deckControlEventReceived:controlError:)]) {
-        [delegate deckControlEventReceived:event controlError:error];
+    if (delegate && [delegate respondsToSelector:@selector(deckControlEventReceived:controlError:)]) {
+        id<DLABDeckControlStatusCallbackPrivateDelegate> strongDelegate = delegate;
+        [strongDelegate deckControlEventReceived:event controlError:error];
     }
     return S_OK;
 }
 
 HRESULT DLABDeckControlStatusCallback::DeckControlStatusChanged(BMDDeckControlStatusFlags flags, uint32_t mask)
 {
-    if ([delegate respondsToSelector:@selector(deckControlStatusChanged:mask:)]) {
-        [delegate deckControlStatusChanged:flags mask:mask];
+    if (delegate && [delegate respondsToSelector:@selector(deckControlStatusChanged:mask:)]) {
+        id<DLABDeckControlStatusCallbackPrivateDelegate> strongDelegate = delegate;
+        [strongDelegate deckControlStatusChanged:flags mask:mask];
     }
     return S_OK;
 }

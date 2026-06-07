@@ -12,16 +12,18 @@
 
 HRESULT DLABProfileCallback::ProfileChanging(IDeckLinkProfile* profileToBeActivated, bool streamsWillBeForcedToStop)
 {
-    if ([delegate respondsToSelector:@selector(willApplyProfile:stopping:)]) {
-        [delegate willApplyProfile:profileToBeActivated stopping:streamsWillBeForcedToStop];
+    if (delegate && [delegate respondsToSelector:@selector(willApplyProfile:stopping:)]) {
+        id<DLABProfileCallbackPrivateDelegate> strongDelegate = delegate;
+        [strongDelegate willApplyProfile:profileToBeActivated stopping:streamsWillBeForcedToStop];
     }
     return S_OK;
 }
 
 HRESULT DLABProfileCallback::ProfileActivated(IDeckLinkProfile* activatedProfile)
 {
-    if ([delegate respondsToSelector:@selector(didApplyProfile:)]) {
-        [delegate didApplyProfile:activatedProfile];
+    if (delegate && [delegate respondsToSelector:@selector(didApplyProfile:)]) {
+        id<DLABProfileCallbackPrivateDelegate> strongDelegate = delegate;
+        [strongDelegate didApplyProfile:activatedProfile];
     }
     return S_OK;
 }
